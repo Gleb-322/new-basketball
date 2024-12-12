@@ -1,56 +1,79 @@
 import styled from 'styled-components'
-import { Link } from 'react-router'
 import { ReactComponent as SignUpSVG } from '../../assets/images/signup.svg'
-import { ReactComponent as OpenEyeSVG } from '../../assets/icons/eye.svg'
-import { ReactComponent as CloseEyeSVG } from '../../assets/icons/close-eye.svg'
 import { FC, useState } from 'react'
+import { InputComponent } from '../../ui/Input'
+import { CheckboxComponent } from '../../ui/Checkbox'
+import { LinkComponent } from '../../ui/Link'
+import { ButtonComponent } from '../../ui/Button'
 
 export const SignUp: FC = () => {
+	const [checked, setChecked] = useState<boolean>(false)
+
+	const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setChecked(e.target?.checked)
+		console.log(checked)
+	}
+
+	const handlerSubmit = () => {
+		console.log('Sign up')
+	}
+
 	return (
 		<Conatiner>
 			<Left>
 				<Form>
 					<Title>Sign Up</Title>
-					<div>
-						<Label htmlFor="name">Name</Label>
-						<Input
-							autoComplete="off"
-							type="text"
-							name="name"
-							id="name"
-							autoFocus={true}
-						/>
-					</div>
-					<div>
-						<Label htmlFor="login">Login</Label>
-						<Input autoComplete="off" type="text" name="login" id="login" />
-					</div>
-					<div>
-						<Label htmlFor="password">Password</Label>
-						<Input
-							autoComplete="off"
-							type="password"
-							name="password"
-							id="password"
-						/>
-					</div>
-					<div>
-						<Label htmlFor="passwordAgain"> Enter your password again</Label>
-						<Input
-							autoComplete="off"
-							type="password"
-							name="passwordAgain"
-							id="passwordAgain"
-						/>
-					</div>
-					<div>
-						<CheckBox type="checkbox" id="checkbox" name="checkbox" />
-						<Label htmlFor="checkbox">I accept the agreement</Label>
-					</div>
-					<Button>Sign Up</Button>
+
+					<InputComponent
+						type={'text'}
+						name={'name'}
+						id={'signupName'}
+						focus={true}
+						label={'Name'}
+					/>
+
+					<InputComponent
+						type={'text'}
+						name={'login'}
+						id={'signupLogin'}
+						focus={false}
+						label={'Login'}
+					/>
+
+					<InputComponent
+						type={'password'}
+						name={'password'}
+						id={'signupPassword'}
+						focus={false}
+						label={'Password'}
+					/>
+
+					<InputComponent
+						type={'password'}
+						name={'passwordAgain'}
+						id={'signupPasswordAgain'}
+						focus={false}
+						label={'Enter your password again'}
+					/>
+
+					<CheckboxComponent
+						isChecked={checked}
+						handleChange={handleCheckbox}
+						label={'Text'}
+					/>
+					<ButtonComponent
+						type={'submit'}
+						text={'Sign Up'}
+						add={false}
+						save={false}
+						cancel={false}
+						signup={true}
+						signUpHandler={handlerSubmit}
+					/>
+
 					<Links>
 						Already a member?
-						<StyledLink to="/signin">Sign in</StyledLink>
+						<LinkComponent route={'/signin'} text={'Sign in'} />
 					</Links>
 				</Form>
 			</Left>
@@ -83,58 +106,6 @@ const Title = styled.div`
 	color: ${({ theme }) => theme.colors.blue};
 	margin-bottom: 32px;
 `
-const Label = styled.label`
-	font-family: 'Avenir Medium';
-	font-weight: 500;
-	font-size: 14px;
-	line-height: 24px;
-	color: ${({ theme }) => theme.colors.grey};
-`
-const Input = styled.input`
-	margin-bottom: 24px;
-	width: 100%;
-	height: 40px;
-	margin-top: 8px;
-	border-radius: 4px;
-	background-color: ${({ theme }) => theme.colors.mostLightGrey};
-	color: ${({ theme }) => theme.colors.darkGrey};
-	padding: 8px 12px;
-	font-family: 'Avenir Medium';
-	font-size: 14px;
-	font-weight: 500;
-	line-height: 24px;
-	border: solid 1px ${({ theme }) => theme.colors.mostLightGrey};
-	outline: none;
-	&:hover {
-		background-color: ${({ theme }) => theme.colors.lightestGrey};
-		border: solid 1px ${({ theme }) => theme.colors.lightestGrey};
-	}
-	&:focus {
-		box-shadow: 0 0 5px 0 ${({ theme }) => theme.colors.focusInput};
-	}
-	&:disabled {
-		color: ${({ theme }) => theme.colors.lightestGrey};
-		&:hover {
-			background-color: ${({ theme }) => theme.colors.mostLightGrey};
-			border: solid 1px ${({ theme }) => theme.colors.mostLightGrey};
-		}
-	}
-	&:invalid {
-		border: solid 1px ${({ theme }) => theme.colors.lightestRed};
-	}
-`
-
-const CheckBox = styled.input`
-	-webkit-appearance: none;
-	appearance: none;
-	outline: none;
-	cursor: pointer;
-	width: 1.6em;
-	height: 1.6em;
-	border-radius: 0.15em;
-	margin-right: 0.5em;
-	border: 0.15em solid #007a7e;
-`
 
 const Right = styled.div`
 	width: 60%;
@@ -150,36 +121,4 @@ const Links = styled.div`
 	line-height: 24px;
 	font-weight: 500;
 	color: ${({ theme }) => theme.colors.grey};
-`
-const StyledLink = styled(Link)`
-	color: ${({ theme }) => theme.colors.red};
-	margin-left: 4px;
-`
-
-const Button = styled.button`
-	margin-bottom: 24px;
-	width: 100%;
-	height: 40px;
-	background-color: ${({ theme }) => theme.colors.red};
-	color: ${({ theme }) => theme.colors.white};
-	font-family: 'Avenir Medium';
-	font-size: 15px;
-	line-height: 24px;
-	font-weight: 500;
-	padding: 8px auto;
-	border: none;
-	border-radius: 4px;
-	&:hover {
-		background-color: ${({ theme }) => theme.colors.lightRed};
-	}
-	&:active {
-		background-color: ${({ theme }) => theme.colors.darkRed};
-	}
-	&:disabled {
-		background-color: ${({ theme }) => theme.colors.mostLightGrey};
-		color: ${({ theme }) => theme.colors.lightestGrey};
-		&:hover {
-			background-color: ${({ theme }) => theme.colors.mostLightGrey};
-		}
-	}
 `

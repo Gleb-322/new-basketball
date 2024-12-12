@@ -9,3 +9,7 @@ export interface ITeams {
 	teamImg: string
 	players: IPlayers[]
 }
+
+export interface ITeamList {
+	teams: ITeams[]
+}

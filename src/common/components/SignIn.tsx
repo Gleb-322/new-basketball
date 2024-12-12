@@ -1,38 +1,45 @@
-import { Link } from 'react-router'
 import styled from 'styled-components'
 import { ReactComponent as SignInSVG } from '../../assets/images/signin.svg'
-import { ReactComponent as OpenEyeSVG } from '../../assets/icons/eye.svg'
-import { ReactComponent as CloseEyeSVG } from '../../assets/icons/close-eye.svg'
+import { InputComponent } from '../../ui/Input'
+import { FC } from 'react'
+import { ButtonComponent } from '../../ui/Button'
+import { LinkComponent } from '../../ui/Link'
 
-export const SignIn = () => {
+export const SignIn: FC = () => {
+	const handlerSubmit = () => {
+		console.log('Sign in')
+	}
 	return (
 		<Conatiner>
 			<Left>
 				<Form>
 					<Title>Sign In</Title>
-					<div>
-						<Label htmlFor="login">Login</Label>
-						<Input
-							autoComplete="off"
-							type="text"
-							name="login"
-							id="login"
-							autoFocus={true}
-						/>
-					</div>
-					<div>
-						<Label htmlFor="password">Password</Label>
-						<Input
-							autoComplete="off"
-							type="password"
-							name="password"
-							id="password"
-						/>
-					</div>
-					<Button>Sign In</Button>
+					<InputComponent
+						type={'text'}
+						id={'signinLogin'}
+						name={'login'}
+						focus={true}
+						label={'Login'}
+					/>
+					<InputComponent
+						type={'password'}
+						id={'signinPassword'}
+						name={'password'}
+						focus={false}
+						label={'Password'}
+					/>
+					<ButtonComponent
+						type={'submit'}
+						text={'Sign in'}
+						add={false}
+						save={false}
+						cancel={false}
+						signin={true}
+						signInHandler={handlerSubmit}
+					/>
 					<Links>
 						Not a member yet?
-						<StyledLink to="/signup">Sign up</StyledLink>
+						<LinkComponent route={'/signup'} text={'Sign up'} />
 					</Links>
 				</Form>
 			</Left>
@@ -65,46 +72,7 @@ const Title = styled.div`
 	color: ${({ theme }) => theme.colors.blue};
 	margin-bottom: 32px;
 `
-const Label = styled.label`
-	font-family: 'Avenir Medium';
-	font-weight: 500;
-	font-size: 14px;
-	line-height: 24px;
-	color: ${({ theme }) => theme.colors.grey};
-`
-const Input = styled.input`
-	margin-bottom: 24px;
-	width: 100%;
-	height: 40px;
-	margin-top: 8px;
-	border-radius: 4px;
-	background-color: ${({ theme }) => theme.colors.mostLightGrey};
-	color: ${({ theme }) => theme.colors.darkGrey};
-	padding: 8px 12px;
-	font-family: 'Avenir Medium';
-	font-size: 14px;
-	font-weight: 500;
-	line-height: 24px;
-	border: solid 1px ${({ theme }) => theme.colors.mostLightGrey};
-	outline: none;
-	&:hover {
-		background-color: ${({ theme }) => theme.colors.lightestGrey};
-		border: solid 1px ${({ theme }) => theme.colors.lightestGrey};
-	}
-	&:focus {
-		box-shadow: 0 0 5px 0 ${({ theme }) => theme.colors.focusInput};
-	}
-	&:disabled {
-		color: ${({ theme }) => theme.colors.lightestGrey};
-		&:hover {
-			background-color: ${({ theme }) => theme.colors.mostLightGrey};
-			border: solid 1px ${({ theme }) => theme.colors.mostLightGrey};
-		}
-	}
-	&:invalid {
-		border: solid 1px ${({ theme }) => theme.colors.lightestRed};
-	}
-`
+
 const Right = styled.div`
 	width: 60%;
 	background-color: ${({ theme }) => theme.colors.whiteBlue};
@@ -119,36 +87,4 @@ const Links = styled.div`
 	line-height: 24px;
 	font-weight: 500;
 	color: ${({ theme }) => theme.colors.grey};
-`
-const StyledLink = styled(Link)`
-	color: ${({ theme }) => theme.colors.red};
-	margin-left: 4px;
-`
-
-const Button = styled.button`
-	margin-bottom: 24px;
-	width: 100%;
-	height: 40px;
-	background-color: ${({ theme }) => theme.colors.red};
-	color: ${({ theme }) => theme.colors.white};
-	font-family: 'Avenir Medium';
-	font-size: 15px;
-	line-height: 24px;
-	font-weight: 500;
-	padding: 8px auto;
-	border: none;
-	border-radius: 4px;
-	&:hover {
-		background-color: ${({ theme }) => theme.colors.lightRed};
-	}
-	&:active {
-		background-color: ${({ theme }) => theme.colors.darkRed};
-	}
-	&:disabled {
-		background-color: ${({ theme }) => theme.colors.mostLightGrey};
-		color: ${({ theme }) => theme.colors.lightestGrey};
-		&:hover {
-			background-color: ${({ theme }) => theme.colors.mostLightGrey};
-		}
-	}
 `

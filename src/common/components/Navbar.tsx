@@ -12,7 +12,7 @@ export const Navbar = () => {
 	return (
 		<Container>
 			<List>
-				<StyledLink to="/teams">
+				<StyledNavLink to="/teams">
 					{location.pathname === '/teams' ||
 					location.pathname === '/teams/add' ||
 					location.pathname === '/teams/detail' ? (
@@ -21,8 +21,8 @@ export const Navbar = () => {
 						<TeamsSVG />
 					)}
 					Teams
-				</StyledLink>
-				<StyledLink to="/players">
+				</StyledNavLink>
+				<StyledNavLink to="/players">
 					{location.pathname === '/players' ||
 					location.pathname === '/players/add' ||
 					location.pathname === '/players/detail' ? (
@@ -31,7 +31,7 @@ export const Navbar = () => {
 						<PlayersSVG />
 					)}
 					Players
-				</StyledLink>
+				</StyledNavLink>
 			</List>
 			<SignOut type="button">
 				<SignOutSVGRed /> <br />
@@ -62,7 +62,7 @@ const List = styled.div`
 	align-items: center;
 `
 
-const StyledLink = styled(NavLink)`
+const StyledNavLink = styled(NavLink)`
 	color: ${({ theme }) => theme.colors.lightGrey};
 	font-size: 12px;
 	font-family: 'Avenir Medium';
