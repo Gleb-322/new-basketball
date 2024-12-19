@@ -15,8 +15,6 @@ export const TeamHeader = () => {
 				type={'button'}
 				text={'Add +'}
 				add={true}
-				save={false}
-				cancel={false}
 				addTeamHandler={navigateToAddTeam}
 			/>
 		</Header>

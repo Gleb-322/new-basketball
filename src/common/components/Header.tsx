@@ -2,13 +2,16 @@ import styled from 'styled-components'
 import { ReactComponent as AppLogoSVG } from '../../assets/images/logo.svg'
 import { ReactComponent as UserIconSVG } from '../../assets/icons/profile.svg'
 import { FC } from 'react'
+import Cookies from 'js-cookie'
 
 export const Header: FC = () => {
 	return (
 		<Container>
 			<AppLogoSVG />
 			<User>
-				<UserName>John Smith</UserName>
+				<UserName>
+					{Cookies.get('name') !== undefined ? Cookies.get('name') : null}
+				</UserName>
 				<UserIconStyled />
 			</User>
 		</Container>

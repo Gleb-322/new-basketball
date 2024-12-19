@@ -3,9 +3,53 @@ import styled from 'styled-components'
 import { ReactComponent as AddPhotoSVG } from '../../../assets/icons/add-photo.svg'
 import { InputComponent } from '../../../ui/Input'
 import { ButtonComponent } from '../../../ui/Button'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import * as yup from 'yup'
+import { IAddTeamFormFields } from '../../../common/interfaces/types'
+import { FC, useEffect, useState } from 'react'
+import { yupResolver } from '@hookform/resolvers/yup'
 
-export const TeamAdd = () => {
+const schemaAddTeam = yup.object().shape({
+	teamName: yup.string().required('Required'),
+	teamDivision: yup.string().required('Required'),
+	teamConference: yup.string().required('Required'),
+	teamYear: yup.number().required('Required'),
+})
+
+export const TeamAdd: FC = () => {
 	const navigate = useNavigate()
+	const [formData, setFormData] = useState<IAddTeamFormFields | null>(null)
+	const [sendData, allowSendData] = useState<boolean>(false)
+	const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+	const {
+		register,
+		handleSubmit,
+		trigger,
+		formState: { errors },
+	} = useForm<IAddTeamFormFields>({
+		resolver: yupResolver<IAddTeamFormFields>(schemaAddTeam),
+	})
+
+	useEffect(() => {
+		if (sendData) {
+			console.log(formData)
+		}
+
+		return () => {
+			allowSendData(false)
+		}
+	}, [formData, sendData])
+
+	const onSubmit: SubmitHandler<IAddTeamFormFields> = (
+		data: IAddTeamFormFields
+	): void => {
+		console.log('add team', data)
+		setFormData(data)
+		allowSendData(true)
+	}
+
+	const submitTrigger = () => trigger()
 
 	const navigateToTeamDashboard = () => navigate('/teams')
 	return (
@@ -20,51 +64,55 @@ export const TeamAdd = () => {
 					</ImgBlock>
 				</Left>
 				<Right>
-					<Form>
+					<Form onSubmit={handleSubmit(onSubmit)}>
 						<InputComponent
+							register={register}
 							type={'text'}
-							name={'teamText'}
-							id={'teamText'}
+							name={'teamName'}
+							id={'teamName'}
 							label={'Name'}
 							focus={true}
+							error={errors.teamName?.message}
 						/>
 						<InputComponent
+							register={register}
 							type={'text'}
-							name={'teamDiv'}
-							id={'teamDiv'}
+							name={'teamDivision'}
+							id={'teamDivision'}
 							label={'Division'}
 							focus={false}
+							error={errors.teamDivision?.message}
 						/>
 						<InputComponent
+							register={register}
 							type={'text'}
-							name={'teamCon'}
-							id={'teamCon'}
+							name={'teamConference'}
+							id={'teamConference'}
 							label={'Conference'}
 							focus={false}
+							error={errors.teamConference?.message}
 						/>
 						<InputComponent
+							register={register}
 							type={'number'}
 							name={'teamYear'}
 							id={'teamYear'}
 							label={'Year of foundation'}
 							focus={false}
+							error={errors.teamYear?.message}
 						/>
 						<Buttons>
 							<ButtonComponent
 								type={'button'}
 								text={'Cancel'}
-								add={false}
 								cancel={true}
-								save={false}
 								cancelTeamHandler={navigateToTeamDashboard}
 							/>
 							<ButtonComponent
 								type={'submit'}
 								text={'Save'}
-								add={false}
-								cancel={false}
 								save={true}
-								createTeamHandler={navigateToTeamDashboard}
+								createTeamHandler={submitTrigger}
 							/>
 						</Buttons>
 					</Form>

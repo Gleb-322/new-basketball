@@ -12,6 +12,7 @@ import { PlayerDashboard } from '../../modules/players/components/PlayerDashboar
 import { PlayerDetail } from '../../modules/players/components/PlayerDetail'
 import { TeamAdd } from '../../modules/teams/components/TeamAdd'
 import { PlayerAdd } from '../../modules/players/components/PlayersAdd'
+import { ProtectedRoutes } from '../helpers/ProtectedRoutes'
 
 const theme = {
 	colors: {
@@ -37,18 +38,20 @@ export const App = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<Routes>
-				<Route path="/" element={<MainLayout />}>
-					<Route path="/" element={<Navigate to="/teams" />} />
-					<Route path="teams" element={<TeamLayout />}>
-						<Route index element={<TeamDashboard />} />
-						<Route path="add" element={<TeamAdd />} />
-						<Route path=":id" element={<TeamDetail />} />
-					</Route>
+				<Route element={<ProtectedRoutes />}>
+					<Route path="/" element={<MainLayout />}>
+						<Route path="/" element={<Navigate to="/teams" />} />
+						<Route path="teams" element={<TeamLayout />}>
+							<Route index element={<TeamDashboard />} />
+							<Route path="add" element={<TeamAdd />} />
+							<Route path=":id" element={<TeamDetail />} />
+						</Route>
 
-					<Route path="players" element={<PlayerLayout />}>
-						<Route index element={<PlayerDashboard />} />
-						<Route path="add" element={<PlayerAdd />} />
-						<Route path=":id" element={<PlayerDetail />} />
+						<Route path="players" element={<PlayerLayout />}>
+							<Route index element={<PlayerDashboard />} />
+							<Route path="add" element={<PlayerAdd />} />
+							<Route path=":id" element={<PlayerDetail />} />
+						</Route>
 					</Route>
 				</Route>
 

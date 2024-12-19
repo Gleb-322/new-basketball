@@ -10,8 +10,8 @@ export const ButtonComponent: FC<IButton> = ({
 	save,
 	signin,
 	signup,
-	signInHandler,
 	signUpHandler,
+	signInHandler,
 	addTeamHandler,
 	createTeamHandler,
 	cancelTeamHandler,
@@ -51,12 +51,12 @@ export const ButtonComponent: FC<IButton> = ({
 }
 
 const Button = styled.button<{
-	$add: boolean
-	$cancel: boolean
-	$save: boolean
+	$add: boolean | undefined
+	$cancel: boolean | undefined
+	$save: boolean | undefined
 }>`
 	cursor: pointer;
-	margin-bottom: 24px;
+	margin-bottom: ${({ $add }) => ($add ? '0px' : '24px')};
 	width: ${({ $add, $cancel, $save }) =>
 		$add ? '105px' : $cancel || $save ? '45%' : '100%'};
 	height: 40px;

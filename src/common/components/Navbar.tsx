@@ -1,13 +1,23 @@
-import { NavLink, useLocation } from 'react-router'
+import { NavLink, useLocation, useNavigate } from 'react-router'
 import styled from 'styled-components'
 import { ReactComponent as TeamsSVG } from '../../assets/icons/group-person.svg'
 import { ReactComponent as TeamsSVGRed } from '../../assets/icons/group-person-red.svg'
 import { ReactComponent as PlayersSVG } from '../../assets/icons/person.svg'
 import { ReactComponent as PlayersSVGRed } from '../../assets/icons/person-red.svg'
 import { ReactComponent as SignOutSVGRed } from '../../assets/icons/input.svg'
+import Cookies from 'js-cookie'
 
 export const Navbar = () => {
 	const location = useLocation()
+	const navigate = useNavigate()
+
+	const handlerSignOut = () => {
+		if (Cookies.get('token') !== undefined) {
+			Cookies.remove('token')
+			Cookies.remove('name')
+			navigate('/signin')
+		}
+	}
 
 	return (
 		<Container>
@@ -33,7 +43,7 @@ export const Navbar = () => {
 					Players
 				</StyledNavLink>
 			</List>
-			<SignOut type="button">
+			<SignOut type="button" onClick={handlerSignOut}>
 				<SignOutSVGRed /> <br />
 				Sign out
 			</SignOut>

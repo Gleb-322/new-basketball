@@ -2,32 +2,38 @@ import { FC, useState } from 'react'
 import styled from 'styled-components'
 import { ReactComponent as OpenEyeSVG } from '../assets/icons/eye.svg'
 import { ReactComponent as CloseEyeSVG } from '../assets/icons/close-eye.svg'
-import { IInput } from '../common/interfaces/types'
+import { IInputProps } from '../common/interfaces/types'
 
-export const InputComponent: FC<IInput> = ({
+export const InputComponent: FC<IInputProps<any>> = <
+	FormInputs extends Record<string, any>
+>({
 	type,
 	name,
 	id,
 	focus,
 	label,
-}) => {
+	register,
+	error,
+}: IInputProps<FormInputs>) => {
 	const [isOpen, setOpen] = useState<boolean>(false)
 	return (
 		<Container>
 			<Label htmlFor={id}>{label}</Label>
 			<Input
 				$typeinput={type}
+				$errormessage={error}
 				autoComplete="off"
 				type={isOpen ? 'text' : type}
-				name={name}
 				id={id}
 				autoFocus={focus}
+				{...register(name)}
 			/>
 			{type === 'password' ? (
 				<PasswordIcon type="button" onClick={() => setOpen(perv => !perv)}>
 					{isOpen ? <OpenEyeSVG /> : <CloseEyeSVG />}
 				</PasswordIcon>
 			) : null}
+			{error && <InputError>{error}</InputError>}
 		</Container>
 	)
 }
@@ -45,8 +51,9 @@ const Label = styled.label`
 `
 const Input = styled.input<{
 	$typeinput: string
+	$errormessage: string | undefined
 }>`
-	margin-bottom: 24px;
+	margin-bottom: ${({ $errormessage }) => ($errormessage ? '0px' : '24px')};
 	width: 100%;
 	height: 40px;
 	margin-top: 8px;
@@ -59,11 +66,17 @@ const Input = styled.input<{
 	font-size: 14px;
 	font-weight: 500;
 	line-height: 24px;
-	border: solid 1px ${({ theme }) => theme.colors.mostLightGrey};
+	border: ${({ $errormessage, theme }) =>
+		$errormessage
+			? `solid 1px ${theme.colors.lightestRed}`
+			: `solid 1px ${theme.colors.mostLightGrey}`};
 	outline: none;
 	&:hover {
 		background-color: ${({ theme }) => theme.colors.lightestGrey};
-		border: solid 1px ${({ theme }) => theme.colors.lightestGrey};
+		border: ${({ $errormessage, theme }) =>
+			$errormessage
+				? `solid 1px ${theme.colors.lightestRed}`
+				: `solid 1px ${theme.colors.lightestGrey}`};
 	}
 	&:focus {
 		box-shadow: 0 0 5px 0 ${({ theme }) => theme.colors.focusInput};
@@ -72,11 +85,11 @@ const Input = styled.input<{
 		color: ${({ theme }) => theme.colors.lightestGrey};
 		&:hover {
 			background-color: ${({ theme }) => theme.colors.mostLightGrey};
-			border: solid 1px ${({ theme }) => theme.colors.mostLightGrey};
+			border: ${({ $errormessage, theme }) =>
+				$errormessage
+					? `solid 1px ${theme.colors.lightestRed}`
+					: `solid 1px ${theme.colors.mostLightGrey}`};
 		}
-	}
-	&:invalid {
-		border: solid 1px ${({ theme }) => theme.colors.lightestRed};
 	}
 `
 
@@ -90,4 +103,14 @@ const PasswordIcon = styled.button`
 	position: absolute;
 	top: 44px;
 	right: 12px;
+`
+
+const InputError = styled.div`
+	margin-top: 2px;
+	margin-bottom: 4px;
+	font-family: 'Avenir Medium';
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 18px;
+	color: ${({ theme }) => theme.colors.lightestRed};
 `

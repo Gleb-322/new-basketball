@@ -1,59 +1,139 @@
 import styled from 'styled-components'
 import { ReactComponent as SignUpSVG } from '../../assets/images/signup.svg'
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { InputComponent } from '../../ui/Input'
 import { CheckboxComponent } from '../../ui/Checkbox'
 import { LinkComponent } from '../../ui/Link'
 import { ButtonComponent } from '../../ui/Button'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import { ISignupFormFields } from '../interfaces/types'
+import { post } from '../../api/baseRequest'
+import Cookies from 'js-cookie'
+import { useNavigate } from 'react-router'
+import { NotificationComponent } from '../../ui/Notification'
+
+const schemaSignUp = yup.object().shape({
+	nameSignup: yup.string().required('Required'),
+	loginSignup: yup.string().required('Required'),
+	passwordSignup: yup.string().required('Required'),
+	passwordAgainSignup: yup
+		.string()
+		.oneOf([yup.ref('passwordSignup')], 'Passwords must match')
+		.required('Confirm password is required'),
+})
 
 export const SignUp: FC = () => {
+	const navigate = useNavigate()
+	const [errorMessage, setErrorMessage] = useState<string | null>(null)
+	const [formData, setFormData] = useState<ISignupFormFields | null>(null)
+	const [sendData, allowSendData] = useState<boolean>(false)
 	const [checked, setChecked] = useState<boolean>(false)
+
+	const {
+		register,
+		handleSubmit,
+		trigger,
+		formState: { errors },
+	} = useForm<ISignupFormFields>({
+		resolver: yupResolver<ISignupFormFields>(schemaSignUp),
+	})
+
+	useEffect(() => {
+		if (sendData) {
+			post('/users/create', undefined, JSON.stringify(formData))
+				.then(result => {
+					if (result.success) {
+						Cookies.set('token', result.message.token, {
+							expires: 1,
+							secure: true,
+						})
+						Cookies.set('name', result.message.user.name, {
+							expires: 1,
+						})
+						if (Cookies.get('token') !== undefined) {
+							navigate('/teams')
+						}
+					}
+
+					if (!result.success) {
+						setErrorMessage(`${result.message}`)
+					}
+				})
+				.catch(error => {
+					setErrorMessage(
+						`Something going wrong... Error status: ${error.status}`
+					)
+				})
+		}
+
+		return () => {
+			allowSendData(false)
+		}
+	}, [formData, sendData])
 
 	const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setChecked(e.target?.checked)
 		console.log(checked)
 	}
 
-	const handlerSubmit = () => {
-		console.log('Sign up')
+	const onSubmit: SubmitHandler<ISignupFormFields> = (
+		data: ISignupFormFields
+	) => {
+		console.log('Sign up', data)
+		setFormData(data)
+		allowSendData(true)
 	}
+
+	const submitTrigger = () => trigger()
+
+	const closeErrorMessage = (close: boolean) => setErrorMessage(null)
 
 	return (
 		<Conatiner>
 			<Left>
-				<Form>
+				<Form onSubmit={handleSubmit(onSubmit)}>
 					<Title>Sign Up</Title>
 
 					<InputComponent
+						register={register}
 						type={'text'}
-						name={'name'}
-						id={'signupName'}
+						name={'nameSignup'}
+						id={'nameSignup'}
 						focus={true}
 						label={'Name'}
+						error={errors.nameSignup?.message}
 					/>
 
 					<InputComponent
+						register={register}
 						type={'text'}
-						name={'login'}
-						id={'signupLogin'}
+						name={'loginSignup'}
+						id={'loginSignup'}
 						focus={false}
 						label={'Login'}
+						error={errors.loginSignup?.message}
 					/>
 
 					<InputComponent
+						register={register}
 						type={'password'}
-						name={'password'}
-						id={'signupPassword'}
+						name={'passwordSignup'}
+						id={'passwordSignup'}
 						focus={false}
 						label={'Password'}
+						error={errors.passwordSignup?.message}
 					/>
 
 					<InputComponent
+						register={register}
 						type={'password'}
-						name={'passwordAgain'}
-						id={'signupPasswordAgain'}
+						name={'passwordAgainSignup'}
+						id={'passwordAgainSignup'}
 						focus={false}
 						label={'Enter your password again'}
+						error={errors.passwordAgainSignup?.message}
 					/>
 
 					<CheckboxComponent
@@ -64,11 +144,8 @@ export const SignUp: FC = () => {
 					<ButtonComponent
 						type={'submit'}
 						text={'Sign Up'}
-						add={false}
-						save={false}
-						cancel={false}
 						signup={true}
-						signUpHandler={handlerSubmit}
+						signUpHandler={submitTrigger}
 					/>
 
 					<Links>
@@ -80,11 +157,19 @@ export const SignUp: FC = () => {
 			<Right>
 				<SignUpSVG />
 			</Right>
+			{errorMessage ? (
+				<NotificationComponent
+					message={errorMessage}
+					close={closeErrorMessage}
+				/>
+			) : null}
 		</Conatiner>
 	)
 }
 
 const Conatiner = styled.section`
+	position: relative;
+	z-index: 20;
 	width: 100wh;
 	height: 100vh;
 	display: flex;
