@@ -8,19 +8,35 @@ import * as yup from 'yup'
 import { IAddTeamFormFields } from '../../../common/interfaces/types'
 import { FC, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { post } from '../../../api/baseRequest'
+import Cookies from 'js-cookie'
+import { NotificationComponent } from '../../../ui/Notification'
 
 const schemaAddTeam = yup.object().shape({
 	teamName: yup.string().required('Required'),
 	teamDivision: yup.string().required('Required'),
 	teamConference: yup.string().required('Required'),
 	teamYear: yup.number().required('Required'),
+	teamImage: yup
+		.mixed<FileList>()
+		.required('Profile picture is required')
+		.test('fileSize', 'File size must be less than 2MB', value => {
+			return value && value.length > 0 && value[0].size <= 2 * 1024 * 1024 // Проверка размера файла
+		})
+		.test('fileType', 'Only JPEG or PNG files are allowed', value => {
+			return (
+				value &&
+				value.length > 0 &&
+				['image/jpeg', 'image/png'].includes(value[0].type)
+			) // Проверка типа файла
+		}),
 })
 
 export const TeamAdd: FC = () => {
 	const navigate = useNavigate()
 	const [formData, setFormData] = useState<IAddTeamFormFields | null>(null)
 	const [sendData, allowSendData] = useState<boolean>(false)
-	const [errorMessage, setErrorMessage] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | null>(null)
 
 	const {
 		register,
@@ -33,7 +49,30 @@ export const TeamAdd: FC = () => {
 
 	useEffect(() => {
 		if (sendData) {
-			console.log(formData)
+			const token = Cookies.get('token')
+			const myFormData = new FormData()
+			myFormData.append('teamName', formData!.teamName)
+			myFormData.append('teamDivision', formData!.teamDivision)
+			myFormData.append('teamConference', formData!.teamConference)
+			myFormData.append('teamYear', formData!.teamYear.toString())
+			myFormData.append('teamImage', formData!.teamImage[0])
+			post('/teams/create', token, myFormData)
+				.then(result => {
+					console.log('team create res', result)
+					if (result.success) {
+						navigate('/teams', { state: { name: result.message.team.name } })
+					}
+
+					if (!result.success) {
+						setNotification(`${result.message}`)
+					}
+				})
+				.catch(error => {
+					console.log('team create res error', error)
+					setNotification(
+						`Something going wrong... Error status: ${error.status}`
+					)
+				})
 		}
 
 		return () => {
@@ -45,12 +84,13 @@ export const TeamAdd: FC = () => {
 		data: IAddTeamFormFields
 	): void => {
 		console.log('add team', data)
+
 		setFormData(data)
 		allowSendData(true)
 	}
 
 	const submitTrigger = () => trigger()
-
+	const closeNotification = () => setNotification(null)
 	const navigateToTeamDashboard = () => navigate('/teams')
 	return (
 		<Section>
@@ -64,7 +104,7 @@ export const TeamAdd: FC = () => {
 					</ImgBlock>
 				</Left>
 				<Right>
-					<Form onSubmit={handleSubmit(onSubmit)}>
+					<Form encType="multipart/form-data" onSubmit={handleSubmit(onSubmit)}>
 						<InputComponent
 							register={register}
 							type={'text'}
@@ -101,6 +141,15 @@ export const TeamAdd: FC = () => {
 							focus={false}
 							error={errors.teamYear?.message}
 						/>
+						<InputComponent
+							register={register}
+							type={'file'}
+							name={'teamImage'}
+							id={'teamImage'}
+							label={''}
+							focus={false}
+							error={errors.teamImage?.message}
+						/>
 						<Buttons>
 							<ButtonComponent
 								type={'button'}
@@ -118,6 +167,13 @@ export const TeamAdd: FC = () => {
 					</Form>
 				</Right>
 			</Main>
+			{notification ? (
+				<NotificationComponent
+					error={true}
+					message={notification}
+					close={closeNotification}
+				/>
+			) : null}
 		</Section>
 	)
 }

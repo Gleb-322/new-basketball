@@ -17,6 +17,7 @@ export interface IAddTeamFormFields {
 	teamDivision: string
 	teamConference: string
 	teamYear: number
+	teamImage: FileList
 }
 
 export interface IInputProps<FormInputs extends FieldValues> {
@@ -57,10 +58,11 @@ export interface ISearch {
 
 export interface INotification {
 	message: string | null
-	close: (close: boolean) => void
+	error: boolean
+	close: () => void
 }
 
 export interface IRequestBaseBody {
 	method: string
-	body?: string
+	body?: string | FormData
 }

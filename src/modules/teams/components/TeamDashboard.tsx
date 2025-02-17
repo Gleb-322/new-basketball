@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react'
 import { ITeams } from '../interfaces/types'
-
+import { useLocation } from 'react-router'
 import styled from 'styled-components'
 import { TeamHeader } from './TeamHeader'
 import { TeamList } from './TeamList'
@@ -9,38 +9,77 @@ import { get } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 
 export const TeamDashboard: FC = () => {
-	const [errorMessage, setErrorMessage] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | null>(null)
+	const [loading, setLoading] = useState<boolean>(false)
 	const [teams, setTeams] = useState<ITeams[]>([])
+	const [decodedAvatars, setDecodedAvatars] = useState<{
+		[key: string]: string
+	}>({})
+
+	const location = useLocation()
 
 	useEffect(() => {
+		setLoading(true)
 		get('/teams/get', undefined)
 			.then(result => {
 				console.log('get teams', result)
 				if (result.success) {
+					const teamsCopy = JSON.parse(JSON.stringify(result.message))
+					const avatars: { [key: string]: string } = {}
+					teamsCopy.forEach((team: ITeams) => {
+						if (team.teamImg && team.teamImg.data) {
+							const byteArray = new Uint8Array(team.teamImg.data) // Декодируем Buffer
+							const blob = new Blob([byteArray], { type: 'image/jpeg' }) // Создаём Blob
+							avatars[team._id] = URL.createObjectURL(blob) // Генерируем URL
+						}
+					})
 					setTeams(result.message)
+					setDecodedAvatars(avatars)
+					setLoading(false)
 				}
 				if (!result.success) {
-					setErrorMessage(`${result.message}`)
+					setNotification(`${result.message}`)
+					setLoading(false)
 				}
 			})
 			.catch(error => {
 				console.log('error', error)
-				setErrorMessage(
+				setNotification(
 					`Something going wrong... Error status: ${error.status}`
 				)
+				setLoading(false)
 			})
 	}, [])
 
-	const closeErrorMessage = (close: boolean) => setErrorMessage(null)
+	useEffect(() => {
+		if (location.state?.name) {
+			setNotification(`${location.state?.name} team successful created!`)
+			const timer = setTimeout(() => {
+				closeNotification()
+			}, 6000)
+
+			return () => clearTimeout(timer)
+		}
+	}, [location])
+
+	const closeNotification = () => setNotification(null)
 	return (
 		<>
 			<TeamHeader />
 			<Main>
-				{teams.length ? <TeamList teams={teams} /> : <TeamEmptyList />}
-				{errorMessage ? (
+				{loading ? (
+					<div>Loading...</div>
+				) : teams.length > 0 ? (
+					<TeamList teams={teams} avatars={decodedAvatars} />
+				) : (
+					<TeamEmptyList />
+				)}
+
+				{notification ? (
 					<NotificationComponent
-						message={errorMessage}
-						close={closeErrorMessage}
+						error={location.state?.name ? false : true}
+						message={notification}
+						close={closeNotification}
 					/>
 				) : null}
 			</Main>

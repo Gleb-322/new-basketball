@@ -1,18 +1,23 @@
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
-import teamLogo from '../../../assets/images/teamCardLogo.png'
 import { ITeamList } from '../interfaces/types'
 import { FC } from 'react'
 
-export const TeamList: FC<ITeamList> = ({ teams }) => {
+export const TeamList: FC<ITeamList> = ({ teams, avatars }) => {
 	const navigate = useNavigate()
+
 	return (
 		<Teams>
 			{teams.map(team => (
 				<Card onClick={() => navigate('/teams/detail')} key={team._id}>
 					<Image>
-						<Img src={teamLogo} alt="logo" />
+						{avatars[team._id] ? (
+							<Img src={avatars[team._id]} alt={team.name} />
+						) : (
+							<div>Loading image...</div>
+						)}
 					</Image>
+
 					<TextBlock>
 						<Name>{team.name}</Name>
 						<Year>Year of foundation: {team.year}</Year>

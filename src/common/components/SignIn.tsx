@@ -22,7 +22,7 @@ export const SignIn: FC = () => {
 	const navigate = useNavigate()
 	const [formData, setFormData] = useState<ISigninFormFields | null>(null)
 	const [sendData, allowSendData] = useState<boolean>(false)
-	const [errorMessage, setErrorMessage] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | null>(null)
 
 	const {
 		register,
@@ -37,6 +37,7 @@ export const SignIn: FC = () => {
 		if (sendData) {
 			post('/users/login', undefined, JSON.stringify(formData))
 				.then(result => {
+					console.log(result)
 					if (result.success) {
 						Cookies.set('token', result.message.token, {
 							expires: 1,
@@ -51,12 +52,12 @@ export const SignIn: FC = () => {
 					}
 
 					if (!result.success) {
-						setErrorMessage(`${result.message}`)
+						setNotification(`${result.message}`)
 					}
 				})
 				.catch(error => {
 					console.log('error', error)
-					setErrorMessage(
+					setNotification(
 						`Something going wrong... Error status: ${error.status}`
 					)
 				})
@@ -75,7 +76,7 @@ export const SignIn: FC = () => {
 		allowSendData(true)
 	}
 
-	const closeErrorMessage = (close: boolean) => setErrorMessage(null)
+	const closeNotification = () => setNotification(null)
 
 	const submitTrigger = () => trigger()
 	return (
@@ -116,10 +117,11 @@ export const SignIn: FC = () => {
 			<Right>
 				<SignInSVG />
 			</Right>
-			{errorMessage ? (
+			{notification ? (
 				<NotificationComponent
-					message={errorMessage}
-					close={closeErrorMessage}
+					error={true}
+					message={notification}
+					close={closeNotification}
 				/>
 			) : null}
 		</Conatiner>

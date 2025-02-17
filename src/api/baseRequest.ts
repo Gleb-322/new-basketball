@@ -41,7 +41,7 @@ export const get = (url: string, token?: string) => {
 	return baseRequest(`${baseUrl}${url}`, { method: 'GET' }, token)
 }
 
-export const post = (url: string, token?: string, body?: string) => {
+export const post = (url: string, token?: string, body?: string | FormData) => {
 	return baseRequest(`${baseUrl}${url}`, { method: 'POST', body }, token)
 }
 

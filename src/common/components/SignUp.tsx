@@ -26,7 +26,7 @@ const schemaSignUp = yup.object().shape({
 
 export const SignUp: FC = () => {
 	const navigate = useNavigate()
-	const [errorMessage, setErrorMessage] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | null>(null)
 	const [formData, setFormData] = useState<ISignupFormFields | null>(null)
 	const [sendData, allowSendData] = useState<boolean>(false)
 	const [checked, setChecked] = useState<boolean>(false)
@@ -58,11 +58,11 @@ export const SignUp: FC = () => {
 					}
 
 					if (!result.success) {
-						setErrorMessage(`${result.message}`)
+						setNotification(`${result.message}`)
 					}
 				})
 				.catch(error => {
-					setErrorMessage(
+					setNotification(
 						`Something going wrong... Error status: ${error.status}`
 					)
 				})
@@ -88,7 +88,7 @@ export const SignUp: FC = () => {
 
 	const submitTrigger = () => trigger()
 
-	const closeErrorMessage = (close: boolean) => setErrorMessage(null)
+	const closeNotification = () => setNotification(null)
 
 	return (
 		<Conatiner>
@@ -157,10 +157,11 @@ export const SignUp: FC = () => {
 			<Right>
 				<SignUpSVG />
 			</Right>
-			{errorMessage ? (
+			{notification ? (
 				<NotificationComponent
-					message={errorMessage}
-					close={closeErrorMessage}
+					message={notification}
+					error={true}
+					close={closeNotification}
 				/>
 			) : null}
 		</Conatiner>

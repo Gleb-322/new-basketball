@@ -13,6 +13,7 @@ import { PlayerDetail } from '../../modules/players/components/PlayerDetail'
 import { TeamAdd } from '../../modules/teams/components/TeamAdd'
 import { PlayerAdd } from '../../modules/players/components/PlayersAdd'
 import { ProtectedRoutes } from '../helpers/ProtectedRoutes'
+import { useEffect, useState } from 'react'
 
 const theme = {
 	colors: {
@@ -31,6 +32,8 @@ const theme = {
 		blue: '#344472',
 		whiteBlue: '#f5fbff',
 		white: '#ffffff',
+		green: '#008000',
+		ligthGreen: '#228B22',
 	},
 }
 
