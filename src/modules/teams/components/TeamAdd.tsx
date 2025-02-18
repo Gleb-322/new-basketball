@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router'
 import styled from 'styled-components'
-import { ReactComponent as AddPhotoSVG } from '../../../assets/icons/add-photo.svg'
 import { InputComponent } from '../../../ui/Input'
 import { ButtonComponent } from '../../../ui/Button'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -11,6 +10,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { post } from '../../../api/baseRequest'
 import Cookies from 'js-cookie'
 import { NotificationComponent } from '../../../ui/Notification'
+import { ImgUpload } from '../../../ui/ImageUpload'
 
 const schemaAddTeam = yup.object().shape({
 	teamName: yup.string().required('Required'),
@@ -19,16 +19,18 @@ const schemaAddTeam = yup.object().shape({
 	teamYear: yup.number().required('Required'),
 	teamImage: yup
 		.mixed<FileList>()
-		.required('Profile picture is required')
-		.test('fileSize', 'File size must be less than 2MB', value => {
-			return value && value.length > 0 && value[0].size <= 2 * 1024 * 1024 // Проверка размера файла
+		.test('required', 'Team logo is required!', value => {
+			return value instanceof FileList && value.length > 0 // Если файла нет — ошибка
 		})
-		.test('fileType', 'Only JPEG or PNG files are allowed', value => {
-			return (
-				value &&
-				value.length > 0 &&
-				['image/jpeg', 'image/png'].includes(value[0].type)
-			) // Проверка типа файла
+		.test('fileSize', 'The file is too big (max. 2MB)', value => {
+			if (!value || !(value instanceof FileList) || value.length === 0)
+				return true // Пропускаем, если файла нет
+			return value[0].size <= 2 * 1024 * 1024 // Ограничение 2MB
+		})
+		.test('fileType', 'Incorrect file format (JPG, PNG only)', value => {
+			if (!value || !(value instanceof FileList) || value.length === 0)
+				return true // Пропускаем, если файла нет
+			return ['image/jpeg', 'image/png'].includes(value[0].type) // Разрешаем только JPG и PNG
 		}),
 })
 
@@ -45,6 +47,7 @@ export const TeamAdd: FC = () => {
 		formState: { errors },
 	} = useForm<IAddTeamFormFields>({
 		resolver: yupResolver<IAddTeamFormFields>(schemaAddTeam),
+		mode: 'onTouched',
 	})
 
 	useEffect(() => {
@@ -55,7 +58,9 @@ export const TeamAdd: FC = () => {
 			myFormData.append('teamDivision', formData!.teamDivision)
 			myFormData.append('teamConference', formData!.teamConference)
 			myFormData.append('teamYear', formData!.teamYear.toString())
-			myFormData.append('teamImage', formData!.teamImage[0])
+			if (formData?.teamImage) {
+				myFormData.append('teamImage', formData!.teamImage[0])
+			}
 			post('/teams/create', token, myFormData)
 				.then(result => {
 					console.log('team create res', result)
@@ -86,6 +91,7 @@ export const TeamAdd: FC = () => {
 		console.log('add team', data)
 
 		setFormData(data)
+
 		allowSendData(true)
 	}
 
@@ -97,14 +103,21 @@ export const TeamAdd: FC = () => {
 			<Header>
 				Teams <Slash>/</Slash> Add new team
 			</Header>
-			<Main>
+			<MainForm
+				encType="multipart/form-data"
+				onSubmit={handleSubmit(onSubmit, error => console.log(error))}
+			>
 				<Left>
-					<ImgBlock>
-						<AddPhotoSVG />
-					</ImgBlock>
+					<ImgUpload
+						register={register}
+						type={'file'}
+						name={'teamImage'}
+						id={'teamImage'}
+						error={errors.teamImage?.message}
+					/>
 				</Left>
 				<Right>
-					<Form encType="multipart/form-data" onSubmit={handleSubmit(onSubmit)}>
+					<FormBlock>
 						<InputComponent
 							register={register}
 							type={'text'}
@@ -141,15 +154,7 @@ export const TeamAdd: FC = () => {
 							focus={false}
 							error={errors.teamYear?.message}
 						/>
-						<InputComponent
-							register={register}
-							type={'file'}
-							name={'teamImage'}
-							id={'teamImage'}
-							label={''}
-							focus={false}
-							error={errors.teamImage?.message}
-						/>
+
 						<Buttons>
 							<ButtonComponent
 								type={'button'}
@@ -164,9 +169,9 @@ export const TeamAdd: FC = () => {
 								createTeamHandler={submitTrigger}
 							/>
 						</Buttons>
-					</Form>
+					</FormBlock>
 				</Right>
-			</Main>
+			</MainForm>
 			{notification ? (
 				<NotificationComponent
 					error={true}
@@ -195,33 +200,21 @@ const Slash = styled.span`
 	color: ${({ theme }) => theme.colors.lightGrey};
 `
 
-const Main = styled.div`
+const MainForm = styled.form`
 	display: flex;
 	margin: 48px 0;
 `
 const Left = styled.div`
 	width: 50%;
 	display: flex;
-	justify-content: start;
-	align-items: start;
-`
-
-const ImgBlock = styled.div`
-	margin-left: 60px;
-	width: 365px;
-	height: 280px;
-	background-color: ${({ theme }) => theme.colors.lightGrey};
-	opacity: 0.5;
-	border-radius: 10px;
-	display: flex;
 	justify-content: center;
-	align-items: center;
+	align-items: start;
 `
 
 const Right = styled.div`
 	width: 50%;
 `
-const Form = styled.form`
+const FormBlock = styled.div`
 	width: 365px;
 `
 

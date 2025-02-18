@@ -38,6 +38,7 @@ export const SignUp: FC = () => {
 		formState: { errors },
 	} = useForm<ISignupFormFields>({
 		resolver: yupResolver<ISignupFormFields>(schemaSignUp),
+		mode: 'all',
 	})
 
 	useEffect(() => {

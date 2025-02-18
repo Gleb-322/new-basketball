@@ -31,6 +31,7 @@ export const SignIn: FC = () => {
 		formState: { errors },
 	} = useForm<ISigninFormFields>({
 		resolver: yupResolver<ISigninFormFields>(schemaSignIn),
+		mode: 'all',
 	})
 
 	useEffect(() => {
@@ -79,6 +80,7 @@ export const SignIn: FC = () => {
 	const closeNotification = () => setNotification(null)
 
 	const submitTrigger = () => trigger()
+
 	return (
 		<Conatiner>
 			<Left>

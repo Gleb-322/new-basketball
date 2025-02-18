@@ -13,7 +13,6 @@ import { PlayerDetail } from '../../modules/players/components/PlayerDetail'
 import { TeamAdd } from '../../modules/teams/components/TeamAdd'
 import { PlayerAdd } from '../../modules/players/components/PlayersAdd'
 import { ProtectedRoutes } from '../helpers/ProtectedRoutes'
-import { useEffect, useState } from 'react'
 
 const theme = {
 	colors: {

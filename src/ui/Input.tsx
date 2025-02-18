@@ -20,13 +20,13 @@ export const InputComponent: FC<IInputProps<any>> = <
 		<Container>
 			<Label htmlFor={id}>{label}</Label>
 			<Input
-				$typeinput={type}
-				$errormessage={error}
+				{...register(name)}
 				autoComplete="off"
 				type={isOpen ? 'text' : type}
 				id={id}
 				autoFocus={focus}
-				{...register(name)}
+				$typeinput={type}
+				$errormessage={error}
 			/>
 			{type === 'password' ? (
 				<PasswordIcon type="button" onClick={() => setOpen(perv => !perv)}>

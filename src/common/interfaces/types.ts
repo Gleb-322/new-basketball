@@ -17,15 +17,15 @@ export interface IAddTeamFormFields {
 	teamDivision: string
 	teamConference: string
 	teamYear: number
-	teamImage: FileList
+	teamImage?: FileList
 }
 
 export interface IInputProps<FormInputs extends FieldValues> {
 	type: string
 	id: string
 	name: Path<FormInputs>
-	focus: boolean
-	label: string
+	focus?: boolean
+	label?: string
 	register: UseFormRegister<FormInputs>
 	error?: string
 }

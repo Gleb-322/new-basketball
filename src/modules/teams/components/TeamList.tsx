@@ -32,7 +32,7 @@ const Teams = styled.div`
 	width: 100%;
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(365px, 1fr));
-	grid-template-rows: repeat(2, minmax(380px, 0.5fr));
+	grid-template-rows: repeat(auto-fill, minmax(380px, 0.5fr));
 	grid-auto-rows: minmax(380px, 0.5fr);
 	gap: 24px;
 `

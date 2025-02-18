@@ -17,7 +17,7 @@ export const NotificationComponent: FC<INotification> = ({
 const Container = styled.div<{
 	$error: boolean
 }>`
-	position: absolute;
+	position: fixed;
 	cursor: pointer;
 	z-index: 40;
 	top: 36px;
