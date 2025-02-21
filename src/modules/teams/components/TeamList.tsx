@@ -3,11 +3,11 @@ import styled from 'styled-components'
 import { ITeamList } from '../interfaces/types'
 import { FC } from 'react'
 
-export const TeamList: FC<ITeamList> = ({ teams, avatars }) => {
+export const TeamList: FC<ITeamList> = ({ teams, avatars, teamsLimit }) => {
 	const navigate = useNavigate()
 
 	return (
-		<Teams>
+		<Teams $limit={teamsLimit}>
 			{teams.map(team => (
 				<Card onClick={() => navigate('/teams/detail')} key={team._id}>
 					<Image>
@@ -28,11 +28,25 @@ export const TeamList: FC<ITeamList> = ({ teams, avatars }) => {
 	)
 }
 
-const Teams = styled.div`
+const Teams = styled.div<{
+	$limit: number
+}>`
 	width: 100%;
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(365px, 1fr));
-	grid-template-rows: repeat(auto-fill, minmax(380px, 0.5fr));
+	grid-template-columns: ${({ $limit }) =>
+		$limit === 6
+			? `repeat(auto-fill, minmax(365px, 1fr))`
+			: $limit === 12
+			? `repeat(auto-fill, minmax(200px, 1fr))`
+			: `repeat(auto-fill, minmax(50px, 1fr))`};
+	/* grid-template-columns: repeat(auto-fill, minmax(365px, 1fr)); */
+	grid-template-rows: ${({ $limit }) =>
+		$limit === 6
+			? 'repeat(auto-fill, minmax(380px, 0.5fr))'
+			: $limit
+			? 'repeat(auto-fill, minmax(200px, 0.5fr))'
+			: 'repeat(auto-fill, minmax(50px, 0.5fr))'};
+	/* grid-template-rows: repeat(auto-fill, minmax(380px, 0.5fr)); */
 	grid-auto-rows: minmax(380px, 0.5fr);
 	gap: 24px;
 `

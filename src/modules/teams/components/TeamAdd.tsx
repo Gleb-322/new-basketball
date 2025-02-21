@@ -4,7 +4,7 @@ import { InputComponent } from '../../../ui/Input'
 import { ButtonComponent } from '../../../ui/Button'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import * as yup from 'yup'
-import { IAddTeamFormFields } from '../../../common/interfaces/types'
+import { IAddTeamFormFields } from '../interfaces/types'
 import { FC, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { post } from '../../../api/baseRequest'
@@ -13,21 +13,24 @@ import { NotificationComponent } from '../../../ui/Notification'
 import { ImgUpload } from '../../../ui/ImageUpload'
 
 const schemaAddTeam = yup.object().shape({
-	teamName: yup.string().required('Required'),
-	teamDivision: yup.string().required('Required'),
-	teamConference: yup.string().required('Required'),
-	teamYear: yup.number().required('Required'),
+	teamName: yup.string().required('Team Name is required!'),
+	teamDivision: yup.string().required('Team Division id required!'),
+	teamConference: yup.string().required('Team Conference is required!'),
+	teamYear: yup
+		.string()
+		.required('Team Year of foundation is required!')
+		.matches(/^\d{4}$/, 'Four digits required!'),
 	teamImage: yup
 		.mixed<FileList>()
-		.test('required', 'Team logo is required!', value => {
+		.test('required', 'Team Logo is required!', value => {
 			return value instanceof FileList && value.length > 0 // Если файла нет — ошибка
 		})
-		.test('fileSize', 'The file is too big (max. 2MB)', value => {
+		.test('fileSize', 'The file is too big (max. 2MB)!', value => {
 			if (!value || !(value instanceof FileList) || value.length === 0)
 				return true // Пропускаем, если файла нет
 			return value[0].size <= 2 * 1024 * 1024 // Ограничение 2MB
 		})
-		.test('fileType', 'Incorrect file format (JPG, PNG only)', value => {
+		.test('fileType', 'Incorrect file format (JPG, PNG only)!', value => {
 			if (!value || !(value instanceof FileList) || value.length === 0)
 				return true // Пропускаем, если файла нет
 			return ['image/jpeg', 'image/png'].includes(value[0].type) // Разрешаем только JPG и PNG
@@ -58,9 +61,8 @@ export const TeamAdd: FC = () => {
 			myFormData.append('teamDivision', formData!.teamDivision)
 			myFormData.append('teamConference', formData!.teamConference)
 			myFormData.append('teamYear', formData!.teamYear.toString())
-			if (formData?.teamImage) {
-				myFormData.append('teamImage', formData!.teamImage[0])
-			}
+			myFormData.append('teamImage', formData!.teamImage![0])
+
 			post('/teams/create', token, myFormData)
 				.then(result => {
 					console.log('team create res', result)
@@ -147,7 +149,7 @@ export const TeamAdd: FC = () => {
 						/>
 						<InputComponent
 							register={register}
-							type={'number'}
+							type={'string'}
 							name={'teamYear'}
 							id={'teamYear'}
 							label={'Year of foundation'}

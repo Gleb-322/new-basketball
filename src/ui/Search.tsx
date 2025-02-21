@@ -1,17 +1,32 @@
-import { FC } from 'react'
+import { ChangeEvent, FC } from 'react'
 import styled from 'styled-components'
 import { ReactComponent as SearchSVG } from '../assets/icons/search.svg'
 import { ISearch } from '../common/interfaces/types'
 
-export const SearchComponent: FC<ISearch> = ({ type, name, id }) => {
+export const SearchComponent: FC<ISearch> = ({
+	type,
+	name,
+	id,
+	onSearch,
+	search,
+}) => {
+	const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
+		if (e.target.value) {
+			onSearch(e.target.value)
+		} else {
+			onSearch('')
+		}
+	}
 	return (
 		<SearchBar>
 			<Search
 				type={type}
 				id={id}
 				name={name}
+				value={search}
 				placeholder="Search..."
 				autoComplete="off"
+				onChange={handleOnChange}
 			/>
 			<StyledSearchSVG />
 		</SearchBar>

@@ -1,5 +1,5 @@
-import { FC, useEffect, useState } from 'react'
-import { ITeams } from '../interfaces/types'
+import { FC, SetStateAction, useEffect, useState } from 'react'
+import { IOption, ITeams } from '../interfaces/types'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
 import { TeamHeader } from './TeamHeader'
@@ -7,6 +7,14 @@ import { TeamList } from './TeamList'
 import { TeamEmptyList } from './TeamEmptyList'
 import { get } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
+import { PaginationComponent } from '../../../ui/Pagination'
+import { SelectComponent } from '../../../ui/Select'
+
+const paginateOptions: IOption[] = [
+	{ value: 6, label: '6' },
+	{ value: 12, label: '12' },
+	{ value: 24, label: '24' },
+]
 
 export const TeamDashboard: FC = () => {
 	const [notification, setNotification] = useState<string | null>(null)
@@ -15,16 +23,28 @@ export const TeamDashboard: FC = () => {
 	const [decodedAvatars, setDecodedAvatars] = useState<{
 		[key: string]: string
 	}>({})
+	const [selectedOption, setSelectedOption] = useState<IOption>(
+		paginateOptions[0]
+	)
+	const [currentPage, setCurrentPage] = useState<number>(0)
+	const [pageCount, setPageCount] = useState<number>(0)
+	const [keyword, setKeyword] = useState<string>('')
 
 	const location = useLocation()
 
 	useEffect(() => {
 		setLoading(true)
-		get('/teams/get', undefined)
+		console.log('keyword', keyword)
+		get(
+			`/teams/get?page=${currentPage + 1}&limit=${
+				selectedOption.value
+			}&keyword=${keyword}`,
+			undefined
+		)
 			.then(result => {
 				console.log('get teams', result)
 				if (result.success) {
-					const teamsCopy = JSON.parse(JSON.stringify(result.message))
+					const teamsCopy = JSON.parse(JSON.stringify(result.message.teams))
 					const avatars: { [key: string]: string } = {}
 					teamsCopy.forEach((team: ITeams) => {
 						if (team.teamImg && team.teamImg.data) {
@@ -33,7 +53,10 @@ export const TeamDashboard: FC = () => {
 							avatars[team._id] = URL.createObjectURL(blob) // Генерируем URL
 						}
 					})
-					setTeams(result.message)
+					setPageCount(
+						Math.ceil(result.message.countTeams / selectedOption.value)
+					)
+					setTeams(result.message.teams)
 					setDecodedAvatars(avatars)
 					setLoading(false)
 				}
@@ -49,7 +72,7 @@ export const TeamDashboard: FC = () => {
 				)
 				setLoading(false)
 			})
-	}, [])
+	}, [currentPage, selectedOption, keyword])
 
 	useEffect(() => {
 		if (location.state?.name) {
@@ -62,15 +85,24 @@ export const TeamDashboard: FC = () => {
 		}
 	}, [location])
 
+	const handlePageClick = (data: { selected: SetStateAction<number> }) => {
+		console.log('pagination data', data)
+		setCurrentPage(data.selected)
+	}
+
 	const closeNotification = () => setNotification(null)
 	return (
 		<>
-			<TeamHeader />
+			<TeamHeader search={keyword} onSearch={setKeyword} />
 			<Main>
 				{loading ? (
 					<div>Loading...</div>
 				) : teams.length > 0 ? (
-					<TeamList teams={teams} avatars={decodedAvatars} />
+					<TeamList
+						teams={teams}
+						avatars={decodedAvatars}
+						teamsLimit={selectedOption.value}
+					/>
 				) : (
 					<TeamEmptyList />
 				)}
@@ -83,7 +115,17 @@ export const TeamDashboard: FC = () => {
 					/>
 				) : null}
 			</Main>
-			<Footer>Pagination select pag</Footer>
+			<Footer>
+				<PaginationComponent
+					pageClick={handlePageClick}
+					countPage={pageCount}
+				/>
+				<SelectComponent
+					options={paginateOptions}
+					selected={selectedOption}
+					onSelect={setSelectedOption}
+				/>
+			</Footer>
 		</>
 	)
 }
@@ -96,9 +138,13 @@ const Main = styled.div`
 
 const Footer = styled.footer`
 	width: 100%;
-	height: 40px;
+	height: 44px;
+	padding: 2px 0;
 	position: sticky;
 	bottom: 0;
-	background-color: black;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background-color: inherit;
 	color: white;
 `

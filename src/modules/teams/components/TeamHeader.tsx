@@ -2,14 +2,22 @@ import styled from 'styled-components'
 import { useNavigate } from 'react-router'
 import { SearchComponent } from '../../../ui/Search'
 import { ButtonComponent } from '../../../ui/Button'
+import { FC } from 'react'
+import { ITeamHeader } from '../interfaces/types'
 
-export const TeamHeader = () => {
+export const TeamHeader: FC<ITeamHeader> = ({ search, onSearch }) => {
 	const navigate = useNavigate()
 
 	const navigateToAddTeam = () => navigate('/teams/add')
 	return (
 		<Header>
-			<SearchComponent type={'text'} id={'searchTeam'} name={'searchTeam'} />
+			<SearchComponent
+				type={'text'}
+				id={'searchTeam'}
+				name={'searchTeam'}
+				onSearch={onSearch}
+				search={search}
+			/>
 
 			<ButtonComponent
 				type={'button'}

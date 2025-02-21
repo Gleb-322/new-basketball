@@ -1,3 +1,4 @@
+import { SetStateAction } from 'react'
 import { FieldValues, Path, UseFormRegister } from 'react-hook-form'
 
 export interface ISigninFormFields {
@@ -10,14 +11,6 @@ export interface ISignupFormFields {
 	loginSignup: string
 	passwordSignup: string
 	passwordAgainSignup: string
-}
-
-export interface IAddTeamFormFields {
-	teamName: string
-	teamDivision: string
-	teamConference: string
-	teamYear: number
-	teamImage?: FileList
 }
 
 export interface IInputProps<FormInputs extends FieldValues> {
@@ -54,6 +47,8 @@ export interface ISearch {
 	type: string
 	id: string
 	name: string
+	search: string
+	onSearch: (value: string) => void
 }
 
 export interface INotification {
@@ -65,4 +60,9 @@ export interface INotification {
 export interface IRequestBaseBody {
 	method: string
 	body?: string | FormData
+}
+
+export interface IPagination {
+	pageClick: (data: { selected: SetStateAction<number> }) => void
+	countPage: number
 }

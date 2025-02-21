@@ -20,6 +20,7 @@ export const baseRequest = async (
 			: {}
 
 	console.log('baseData', data)
+	console.log('token', token)
 
 	const response = await fetch(url, {
 		...data,
