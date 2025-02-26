@@ -5,18 +5,18 @@ import { ReactComponent as TeamsSVGRed } from '../../assets/icons/group-person-r
 import { ReactComponent as PlayersSVG } from '../../assets/icons/person.svg'
 import { ReactComponent as PlayersSVGRed } from '../../assets/icons/person-red.svg'
 import { ReactComponent as SignOutSVGRed } from '../../assets/icons/input.svg'
-import Cookies from 'js-cookie'
+import { setAuthCookie } from '../helpers/setAuthToken'
+import { useAuth } from '../hooks/useAuth'
 
 export const Navbar = () => {
+	const { setToken } = useAuth()
 	const location = useLocation()
 	const navigate = useNavigate()
 
 	const handlerSignOut = () => {
-		if (Cookies.get('token') !== undefined) {
-			Cookies.remove('token')
-			Cookies.remove('name')
-			navigate('/signin')
-		}
+		setAuthCookie(undefined)
+		setToken(undefined)
+		navigate('/signin')
 	}
 
 	return (

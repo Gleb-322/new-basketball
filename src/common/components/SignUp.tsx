@@ -2,7 +2,6 @@ import styled from 'styled-components'
 import { ReactComponent as SignUpSVG } from '../../assets/images/signup.svg'
 import { FC, useEffect, useState } from 'react'
 import { InputComponent } from '../../ui/Input'
-import { CheckboxComponent } from '../../ui/Checkbox'
 import { LinkComponent } from '../../ui/Link'
 import { ButtonComponent } from '../../ui/Button'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -10,35 +9,43 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { ISignupFormFields } from '../interfaces/types'
 import { post } from '../../api/baseRequest'
-import Cookies from 'js-cookie'
 import { useNavigate } from 'react-router'
 import { NotificationComponent } from '../../ui/Notification'
+import { setAuthCookie } from '../helpers/setAuthToken'
+import { useAuth } from '../hooks/useAuth'
 
 const schemaSignUp = yup.object().shape({
-	nameSignup: yup.string().required('Required'),
-	loginSignup: yup.string().required('Required'),
-	passwordSignup: yup.string().required('Required'),
+	nameSignup: yup.string().required('Name is required!'),
+	loginSignup: yup.string().required('Login is required!'),
+	passwordSignup: yup.string().required('Password is required!'),
+	// .matches(
+	// 	/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+	// 	'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and one special case Character'
+	// ),
 	passwordAgainSignup: yup
 		.string()
 		.oneOf([yup.ref('passwordSignup')], 'Passwords must match')
-		.required('Confirm password is required'),
+		.required('Confirm password is required!'),
+	checkboxSignUp: yup
+		.boolean()
+		.oneOf([true], 'You must be accept the agreement!'),
 })
 
 export const SignUp: FC = () => {
+	const { setToken } = useAuth()
 	const navigate = useNavigate()
 	const [notification, setNotification] = useState<string | null>(null)
 	const [formData, setFormData] = useState<ISignupFormFields | null>(null)
 	const [sendData, allowSendData] = useState<boolean>(false)
-	const [checked, setChecked] = useState<boolean>(false)
 
 	const {
 		register,
 		handleSubmit,
 		trigger,
-		formState: { errors },
+		formState: { errors, isValid },
 	} = useForm<ISignupFormFields>({
 		resolver: yupResolver<ISignupFormFields>(schemaSignUp),
-		mode: 'all',
+		mode: 'onTouched',
 	})
 
 	useEffect(() => {
@@ -46,16 +53,12 @@ export const SignUp: FC = () => {
 			post('/users/create', undefined, JSON.stringify(formData))
 				.then(result => {
 					if (result.success) {
-						Cookies.set('token', result.message.token, {
-							expires: 1,
-							secure: true,
-						})
-						Cookies.set('name', result.message.user.name, {
-							expires: 1,
-						})
-						if (Cookies.get('token') !== undefined) {
-							navigate('/teams')
-						}
+						setAuthCookie(result.message.token)
+						setToken(result.message.token)
+						// Cookies.set('name', result.message.user.name, {
+						// 	expires: 1,
+						// })
+						navigate('/teams')
 					}
 
 					if (!result.success) {
@@ -73,11 +76,6 @@ export const SignUp: FC = () => {
 			allowSendData(false)
 		}
 	}, [formData, sendData])
-
-	const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setChecked(e.target?.checked)
-		console.log(checked)
-	}
 
 	const onSubmit: SubmitHandler<ISignupFormFields> = (
 		data: ISignupFormFields
@@ -137,14 +135,19 @@ export const SignUp: FC = () => {
 						error={errors.passwordAgainSignup?.message}
 					/>
 
-					<CheckboxComponent
-						isChecked={checked}
-						handleChange={handleCheckbox}
-						label={'Text'}
+					<InputComponent
+						register={register}
+						label={'I accept the agreement'}
+						type={'checkbox'}
+						name={'checkboxSignUp'}
+						id={'checkboxSignUp'}
+						focus={false}
+						error={errors.checkboxSignUp?.message}
 					/>
 					<ButtonComponent
 						type={'submit'}
 						text={'Sign Up'}
+						formValid={isValid}
 						signup={true}
 						signUpHandler={submitTrigger}
 					/>

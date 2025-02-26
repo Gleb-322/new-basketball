@@ -8,6 +8,7 @@ export const ButtonComponent: FC<IButton> = ({
 	add,
 	cancel,
 	save,
+	formValid,
 	signin,
 	signup,
 	signUpHandler,
@@ -16,6 +17,7 @@ export const ButtonComponent: FC<IButton> = ({
 	createTeamHandler,
 	cancelTeamHandler,
 }) => {
+	// console.log(formValid)
 	const handlerClick = () => {
 		if (signin) {
 			signInHandler!()
@@ -43,7 +45,15 @@ export const ButtonComponent: FC<IButton> = ({
 			$add={add}
 			$cancel={cancel}
 			$save={save}
+			$signup={signup}
 			onClick={handlerClick}
+			// disabled={
+			// 	formValid && signup
+			// 		? !formValid
+			// 		: formValid && signin
+			// 		? !formValid
+			// 		: false
+			// }
 		>
 			{text}
 		</Button>
@@ -54,8 +64,10 @@ const Button = styled.button<{
 	$add: boolean | undefined
 	$cancel: boolean | undefined
 	$save: boolean | undefined
+	$signup: boolean | undefined
 }>`
 	cursor: pointer;
+	margin-top: ${({ $signup }) => ($signup ? '0px' : '12px')};
 	margin-bottom: ${({ $add }) => ($add ? '0px' : '24px')};
 	width: ${({ $add, $cancel, $save }) =>
 		$add ? '105px' : $cancel || $save ? '45%' : '100%'};

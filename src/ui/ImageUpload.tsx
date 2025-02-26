@@ -48,7 +48,11 @@ export const ImgUpload: FC<IInputProps<any>> = <
 					</>
 				)}
 			</Label>
-
+			{image ? (
+				<ResetButton type="button" onClick={() => setImage('')}>
+					X
+				</ResetButton>
+			) : null}
 			{error && <InputError>{error}</InputError>}
 		</Conatiner>
 	)
@@ -56,7 +60,6 @@ export const ImgUpload: FC<IInputProps<any>> = <
 
 const Conatiner = styled.div`
 	position: relative;
-	z-index: 10;
 `
 
 const Label = styled.label<{
@@ -77,10 +80,6 @@ const Label = styled.label<{
 const Input = styled.input`
 	width: 0px;
 	height: 0px;
-	position: absolute;
-	top: 0px;
-	left: -5000px;
-	z-index: -1000;
 `
 
 const InputError = styled.div`
@@ -101,10 +100,20 @@ const Img = styled.img`
 
 const ResetButton = styled.button`
 	position: absolute;
-	top: -20px;
-	left: -20px;
-	width: 0px;
-	height: 0px;
+	top: -10px;
+	right: -30px;
+	width: 25px;
+	height: 25px;
+	border: none;
+	border-radius: 100%;
+	font-family: 'Avenir Medium';
+	font-size: 12px;
+	font-weight: 500;
+	color: ${({ theme }) => theme.colors.grey};
+	background-color: ${({ theme }) => theme.colors.lightestGrey};
 	cursor: pointer;
-	z-index: 100;
+	&:hover {
+		background-color: ${({ theme }) => theme.colors.lightGrey};
+		color: ${({ theme }) => theme.colors.white};
+	}
 `

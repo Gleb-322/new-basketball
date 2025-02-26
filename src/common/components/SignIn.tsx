@@ -10,15 +10,17 @@ import * as yup from 'yup'
 import { ISigninFormFields } from '../interfaces/types'
 import { NotificationComponent } from '../../ui/Notification'
 import { post } from '../../api/baseRequest'
-import Cookies from 'js-cookie'
 import { useNavigate } from 'react-router'
+import { setAuthCookie } from '../helpers/setAuthToken'
+import { useAuth } from '../hooks/useAuth'
 
 const schemaSignIn = yup.object().shape({
-	loginSignin: yup.string().required('Required'),
-	passwordSignin: yup.string().required('Required'),
+	loginSignin: yup.string().required('Login is required!'),
+	passwordSignin: yup.string().required('Password is required!'),
 })
 
 export const SignIn: FC = () => {
+	const { setToken } = useAuth()
 	const navigate = useNavigate()
 	const [formData, setFormData] = useState<ISigninFormFields | null>(null)
 	const [sendData, allowSendData] = useState<boolean>(false)
@@ -28,10 +30,10 @@ export const SignIn: FC = () => {
 		register,
 		handleSubmit,
 		trigger,
-		formState: { errors },
+		formState: { errors, isValid },
 	} = useForm<ISigninFormFields>({
 		resolver: yupResolver<ISigninFormFields>(schemaSignIn),
-		mode: 'all',
+		mode: 'onTouched',
 	})
 
 	useEffect(() => {
@@ -40,16 +42,12 @@ export const SignIn: FC = () => {
 				.then(result => {
 					console.log(result)
 					if (result.success) {
-						Cookies.set('token', result.message.token, {
-							expires: 1,
-							secure: true,
-						})
-						Cookies.set('name', result.message.user.name, {
-							expires: 1,
-						})
-						if (Cookies.get('token') !== undefined) {
-							navigate('/teams')
-						}
+						setAuthCookie(result.message.token)
+						setToken(result.message.token)
+						// Cookies.set('name', result.message.user.name, {
+						// 	expires: 1,
+						// })
+						navigate('/teams')
 					}
 
 					if (!result.success) {
@@ -108,6 +106,7 @@ export const SignIn: FC = () => {
 						type={'submit'}
 						text={'Sign in'}
 						signin={true}
+						formValid={isValid}
 						signInHandler={submitTrigger}
 					/>
 					<Links>

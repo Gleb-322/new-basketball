@@ -17,17 +17,38 @@ export const InputComponent: FC<IInputProps<any>> = <
 }: IInputProps<FormInputs>) => {
 	const [isOpen, setOpen] = useState<boolean>(false)
 	return (
-		<Container>
-			<Label htmlFor={id}>{label}</Label>
-			<Input
-				{...register(name)}
-				autoComplete="off"
-				type={isOpen ? 'text' : type}
-				id={id}
-				autoFocus={focus}
-				$typeinput={type}
-				$errormessage={error}
-			/>
+		<Container $typeinput={type}>
+			{type === 'checkbox' ? (
+				<>
+					<Label $typeinput={type} $errormessage={error}>
+						<InputCheckbox
+							{...register(name)}
+							autoComplete="off"
+							id={id}
+							autoFocus={focus}
+							type={type}
+							$errormessage={error}
+						/>
+						<PseudoInputCheckbox $errormessage={error} />
+						{label}
+					</Label>
+				</>
+			) : (
+				<>
+					<Label $typeinput={type} $errormessage={error} htmlFor={id}>
+						{label}
+					</Label>
+					<Input
+						{...register(name)}
+						autoComplete="off"
+						type={isOpen ? 'text' : type}
+						id={id}
+						autoFocus={focus}
+						$typeinput={type}
+						$errormessage={error}
+					/>
+				</>
+			)}
 			{type === 'password' ? (
 				<PasswordIcon type="button" onClick={() => setOpen(perv => !perv)}>
 					{isOpen ? <OpenEyeSVG /> : <CloseEyeSVG />}
@@ -38,22 +59,39 @@ export const InputComponent: FC<IInputProps<any>> = <
 	)
 }
 
-const Container = styled.div`
+const Container = styled.div<{
+	$typeinput: string
+}>`
 	position: relative;
+	height: ${({ $typeinput }) => ($typeinput === 'checkbox' ? '46px' : '92px')};
 `
 
-const Label = styled.label`
+const Label = styled.label<{
+	$typeinput: string
+	$errormessage: string | undefined
+}>`
 	font-family: 'Avenir Medium';
 	font-weight: 500;
 	font-size: 14px;
 	line-height: 24px;
-	color: ${({ theme }) => theme.colors.grey};
+	cursor: pointer;
+	color: ${({ theme, $typeinput, $errormessage }) =>
+		$typeinput === 'checkbox' && $errormessage
+			? theme.colors.lightestRed
+			: theme.colors.grey};
+	display: ${({ $typeinput }) =>
+		$typeinput === 'checkbox' ? 'flex' : 'inline'};
+	align-items: ${({ $typeinput }) =>
+		$typeinput === 'checkbox' ? 'center' : 'none'};
+	/* margin-bottom: ${({ $typeinput, $errormessage }) =>
+		$typeinput === 'checkbox' && $errormessage ? '0px' : '24px'}; */
 `
 const Input = styled.input<{
 	$typeinput: string
 	$errormessage: string | undefined
 }>`
-	margin-bottom: ${({ $errormessage }) => ($errormessage ? '0px' : '24px')};
+	/* margin-bottom: ${({ $errormessage }) =>
+		$errormessage ? '0px' : '24px'}; */
 	width: 100%;
 	height: 40px;
 	margin-top: 8px;
@@ -90,6 +128,49 @@ const Input = styled.input<{
 					? `solid 1px ${theme.colors.lightestRed}`
 					: `solid 1px ${theme.colors.mostLightGrey}`};
 		}
+	}
+`
+
+const PseudoInputCheckbox = styled.div<{
+	$errormessage: string | undefined
+}>`
+	width: 12px;
+	height: 12px;
+	position: relative;
+	background-color: ${({ theme }) => theme.colors.white};
+	border-radius: 2px;
+	margin-right: 10px;
+	border: ${({ theme, $errormessage }) =>
+		$errormessage
+			? `solid 1px ${theme.colors.lightestRed}`
+			: `solid 1px ${theme.colors.lightGrey}`};
+	&::after {
+		content: '';
+		position: absolute;
+		left: 3.7px;
+		top: 1.2px;
+		width: 2.3px;
+		height: 5.5px;
+		border: ${({ theme }) => `solid ${theme.colors.white}`};
+		border-width: 0 1.5px 1.5px 0;
+		-webkit-transform: rotate(45deg);
+		-ms-transform: rotate(45deg);
+		transform: rotate(45deg);
+	}
+`
+
+const InputCheckbox = styled.input<{
+	$errormessage: string | undefined
+}>`
+	width: 0px;
+	height: 0px;
+
+	&:hover + ${PseudoInputCheckbox} {
+		border: ${({ theme }) => `solid 1px ${theme.colors.red}`};
+	}
+	&:checked + ${PseudoInputCheckbox} {
+		background-color: ${({ theme }) => theme.colors.red};
+		border: ${({ theme }) => `solid 1px ${theme.colors.red}`};
 	}
 `
 

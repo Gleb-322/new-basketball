@@ -8,13 +8,13 @@ import { IAddTeamFormFields } from '../interfaces/types'
 import { FC, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { post } from '../../../api/baseRequest'
-import Cookies from 'js-cookie'
 import { NotificationComponent } from '../../../ui/Notification'
 import { ImgUpload } from '../../../ui/ImageUpload'
+import { useAuth } from '../../../common/hooks/useAuth'
 
 const schemaAddTeam = yup.object().shape({
 	teamName: yup.string().required('Team Name is required!'),
-	teamDivision: yup.string().required('Team Division id required!'),
+	teamDivision: yup.string().required('Team Division is required!'),
 	teamConference: yup.string().required('Team Conference is required!'),
 	teamYear: yup
 		.string()
@@ -38,6 +38,7 @@ const schemaAddTeam = yup.object().shape({
 })
 
 export const TeamAdd: FC = () => {
+	const { token } = useAuth()
 	const navigate = useNavigate()
 	const [formData, setFormData] = useState<IAddTeamFormFields | null>(null)
 	const [sendData, allowSendData] = useState<boolean>(false)
@@ -55,7 +56,6 @@ export const TeamAdd: FC = () => {
 
 	useEffect(() => {
 		if (sendData) {
-			const token = Cookies.get('token')
 			const myFormData = new FormData()
 			myFormData.append('teamName', formData!.teamName)
 			myFormData.append('teamDivision', formData!.teamDivision)

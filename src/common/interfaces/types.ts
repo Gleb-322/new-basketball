@@ -11,6 +11,7 @@ export interface ISignupFormFields {
 	loginSignup: string
 	passwordSignup: string
 	passwordAgainSignup: string
+	checkboxSignUp?: boolean
 }
 
 export interface IInputProps<FormInputs extends FieldValues> {
@@ -31,6 +32,7 @@ export interface IButton {
 	signup?: boolean
 	save?: boolean
 	cancel?: boolean
+	formValid?: boolean
 	signUpHandler?: () => void
 	signInHandler?: () => void
 	addTeamHandler?: () => void
@@ -65,4 +67,9 @@ export interface IRequestBaseBody {
 export interface IPagination {
 	pageClick: (data: { selected: SetStateAction<number> }) => void
 	countPage: number
+}
+
+export interface IAuthContext {
+	token: string | undefined
+	setToken: (token: string | undefined) => void
 }

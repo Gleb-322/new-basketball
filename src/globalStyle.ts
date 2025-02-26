@@ -21,6 +21,7 @@ const GlobalStyle = createGlobalStyle`
 		url(${AvenirBlackEOT}) format('opentype'),
 		url(${AvenirBlackWOFF}) format('woff'),
 		url(${AvenirBlackWOOF2}) format('woff2');
+		font-display: swap;
 	}
 
 	@font-face {
@@ -30,6 +31,7 @@ const GlobalStyle = createGlobalStyle`
 			url(${AvenirBookEOT}) format('opentype'),
 			url(${AvenirBookWOOF}) format('woof'),
 			url(${AvenirBookWOOF2}) format('woof2');
+		font-display: swap;
 	}
 
 	@font-face {
@@ -39,6 +41,7 @@ const GlobalStyle = createGlobalStyle`
 			url(${AvenirMediumEOT}) format('opentype'),
 			url(${AvenirMediumWOOF}) format('woof'),
 			url(${AvenirMediumWOOF2}) format('woof2');
+			font-display: swap;
 	}
 
 	#root {

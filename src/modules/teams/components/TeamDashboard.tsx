@@ -94,9 +94,9 @@ export const TeamDashboard: FC = () => {
 	return (
 		<>
 			<TeamHeader search={keyword} onSearch={setKeyword} />
-			<Main>
+			<Main $loading={loading}>
 				{loading ? (
-					<div>Loading...</div>
+					<Loading>Loading...</Loading>
 				) : teams.length > 0 ? (
 					<TeamList
 						teams={teams}
@@ -130,9 +130,13 @@ export const TeamDashboard: FC = () => {
 	)
 }
 
-const Main = styled.div`
+const Main = styled.div<{
+	$loading: boolean
+}>`
 	width: 100%;
-	display: grid;
+	display: ${({ $loading }) => ($loading ? 'flex' : 'grid')};
+	justify-content: ${({ $loading }) => ($loading ? 'center' : 'none')};
+	align-items: ${({ $loading }) => ($loading ? 'center' : 'none')};
 	margin: 32px 0;
 `
 
@@ -147,4 +151,10 @@ const Footer = styled.footer`
 	align-items: center;
 	background-color: inherit;
 	color: white;
+`
+const Loading = styled.div`
+	font-family: 'Avenir Book';
+	font-size: 36px;
+	font-weight: 500;
+	color: ${({ theme }) => theme.colors.blue};
 `
