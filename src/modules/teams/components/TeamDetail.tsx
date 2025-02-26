@@ -1,13 +1,92 @@
 import styled from 'styled-components'
-import teamLogo from '../../../assets/images/Team.png'
-// import { useParams } from 'react-router'
+import { useLocation, useNavigate, useParams } from 'react-router'
 import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
 import playerLogo from '../../../assets/images/Player.png'
+import { FC, useEffect, useState } from 'react'
+import { get, remove } from '../../../api/baseRequest'
+import { ITeams } from '../interfaces/types'
+import { NotificationComponent } from '../../../ui/Notification'
+import { LoadingComponent } from '../../../ui/Loading'
+import { LinkComponent } from '../../../ui/Link'
+import { useAuth } from '../../../common/hooks/useAuth'
 
-export const TeamDetail = () => {
-	// const params = useParams()
-	// console.log(params)
+export const TeamDetail: FC = () => {
+	const { token } = useAuth()
+	const [team, setTeam] = useState<ITeams>()
+	const [deleteTeam, setDeleteTeam] = useState<boolean>(false)
+	const [decodedTeamAvatar, setDecodedTeamAvatar] = useState<string>()
+	const [notification, setNotification] = useState<string | null>(null)
+	const [loading, setLoading] = useState<boolean>(false)
+	const params = useParams()
+	const location = useLocation()
+	const navigate = useNavigate()
+
+	// get team by id
+	useEffect(() => {
+		setLoading(true)
+		if (params._id) {
+			get(`/teams/get/${params._id}`, undefined)
+				.then(result => {
+					console.log('get team by id', result)
+					if (result.success) {
+						const teamCopy = JSON.parse(
+							JSON.stringify(result.message)
+						) as ITeams
+
+						if (teamCopy.teamImg && teamCopy.teamImg.data) {
+							const byteArray = new Uint8Array(teamCopy.teamImg.data) // Декодируем Buffer
+							const blob = new Blob([byteArray], { type: 'image/jpeg' }) // Создаём Blob
+							setDecodedTeamAvatar(URL.createObjectURL(blob)) // Генерируем URL
+						}
+						setTeam(result.message)
+						setLoading(false)
+					}
+					if (!result.success) {
+						setNotification(`${result.message}`)
+						setLoading(false)
+					}
+				})
+				.catch(error => {
+					console.log('error', error)
+					setNotification(
+						`Something going wrong... Error status: ${error.status}`
+					)
+					setLoading(false)
+				})
+		}
+	}, [params])
+
+	// update team by id
+
+	// delete team by id
+	useEffect(() => {
+		setLoading(true)
+		if (deleteTeam) {
+			remove(`/teams/delete/${team?._id}`, token)
+				.then(result => {
+					console.log('delete team by id', result)
+					if (result.success) {
+						navigate('/teams', { state: { successDelete: result.message } })
+						setLoading(false)
+					}
+					if (!result.success) {
+						setNotification(`${result.message}`)
+						setLoading(false)
+					}
+				})
+				.catch(error => {
+					console.log('error', error)
+					setNotification(
+						`Something going wrong... Error status: ${error.status}`
+					)
+					setLoading(false)
+				})
+		}
+		return () => {
+			setDeleteTeam(false)
+		}
+	}, [deleteTeam])
 
 	const players: any[] = [
 		{
@@ -70,98 +149,127 @@ export const TeamDetail = () => {
 			playerImg: 'img',
 		},
 	]
+
+	const closeNotification = () => setNotification(null)
 	return (
-		<section>
-			<DetailBlock>
-				<HeaderDetail>
-					<HeaderText>
-						Teams <Slash>/</Slash> Denver Nuggets
-					</HeaderText>
+		<Container $loading={loading}>
+			{loading ? (
+				<LoadingComponent />
+			) : (
+				<>
+					<DetailBlock>
+						<HeaderDetail>
+							<HeaderText>
+								<LinkComponent route={'/teams'} text={'Teams'} />{' '}
+								<Slash>/</Slash> {team?.name}
+							</HeaderText>
 
-					<div>
-						<ButtonEdit>
-							<EditSVG />
-						</ButtonEdit>
-						<ButtonDelete>
-							<DeleteSVG />
-						</ButtonDelete>
-					</div>
-				</HeaderDetail>
+							<div>
+								<ButtonEdit
+									type="button"
+									onClick={() => navigate('/teams/add', { state: { team } })}
+								>
+									<EditSVG />
+								</ButtonEdit>
+								<ButtonDelete type="button" onClick={() => setDeleteTeam(true)}>
+									<DeleteSVG />
+								</ButtonDelete>
+							</div>
+						</HeaderDetail>
 
-				<MainDetail>
-					<Left>
-						<Img src={teamLogo} alt="logo" />
-					</Left>
-					<Right>
-						<Name>Denver Nuggets</Name>
-						<TextBlock>
-							<TextColumn>
-								<Key>Year of foundation</Key>
-								<Value>1976</Value>
-							</TextColumn>
-							<TextColumn>
-								<Key>Division</Key>
-								<Value>Northwestern</Value>
-							</TextColumn>
-							<TextColumn>
-								<Key>Conference</Key>
-								<Value>Western</Value>
-							</TextColumn>
-						</TextBlock>
-					</Right>
-				</MainDetail>
-			</DetailBlock>
+						<MainDetail>
+							<Left>
+								{decodedTeamAvatar ? (
+									<Img src={decodedTeamAvatar} alt={team?.name} />
+								) : (
+									<div>Loading image...</div>
+								)}
+							</Left>
+							<Right>
+								<Name>{team?.name}</Name>
+								<TextBlock>
+									<TextColumn>
+										<Key>Year of foundation</Key>
+										<Value>{team?.year}</Value>
+									</TextColumn>
+									<TextColumn>
+										<Key>Division</Key>
+										<Value>{team?.division}</Value>
+									</TextColumn>
+									<TextColumn>
+										<Key>Conference</Key>
+										<Value>{team?.conference}</Value>
+									</TextColumn>
+								</TextBlock>
+							</Right>
+						</MainDetail>
+					</DetailBlock>
 
-			<RosterBlock>
-				<RoosterTitle>Roster</RoosterTitle>
-				<RosterTable>
-					<PlayerHeader>
-						<PlayerHeaderLeft>
-							<MarginRight>
-								<PlayerNumber>#</PlayerNumber>
-							</MarginRight>
-							<div>Player</div>
-						</PlayerHeaderLeft>
-						<PlayerHeaderRight>
-							<div>Height</div> <div>Weight</div> <div>Age</div>
-						</PlayerHeaderRight>
-					</PlayerHeader>
+					<RosterBlock>
+						<RoosterTitle>Roster</RoosterTitle>
+						<RosterTable>
+							<PlayerHeader>
+								<PlayerHeaderLeft>
+									<MarginRight>
+										<PlayerNumber>#</PlayerNumber>
+									</MarginRight>
+									<div>Player</div>
+								</PlayerHeaderLeft>
+								<PlayerHeaderRight>
+									<div>Height</div> <div>Weight</div> <div>Age</div>
+								</PlayerHeaderRight>
+							</PlayerHeader>
 
-					{players.length ? (
-						<>
-							{players.map(player => (
-								<Player key={player._id}>
-									<PlayerLeft>
-										<MarginRight>
-											<PlayerNumber>
-												{player.number ? player.number : '-'}
-											</PlayerNumber>
-										</MarginRight>
+							{players.length ? (
+								<>
+									{players.map(player => (
+										<Player key={player._id}>
+											<PlayerLeft>
+												<MarginRight>
+													<PlayerNumber>
+														{player.number ? player.number : '-'}
+													</PlayerNumber>
+												</MarginRight>
 
-										<PlayerInfo>
-											<PlayerImg src={playerLogo} alt="player" />
-											<PlayerNameAndPosition>
-												<div>{player.name}</div>
-												<PlayerPosition>{player.position}</PlayerPosition>
-											</PlayerNameAndPosition>
-										</PlayerInfo>
-									</PlayerLeft>
-									<PlayerRight>
-										<div>{player.height} cm</div>
-										<div>{player.weight} kg</div>
-										<div>{player.birthday}</div>
-									</PlayerRight>
-								</Player>
-							))}
-						</>
-					) : (
-						<EmptyPlayers>Team doesn't have any players...</EmptyPlayers>
-					)}
-				</RosterTable>
-			</RosterBlock>
-		</section>
+												<PlayerInfo>
+													<PlayerImg src={playerLogo} alt="player" />
+													<PlayerNameAndPosition>
+														<div>{player.name}</div>
+														<PlayerPosition>{player.position}</PlayerPosition>
+													</PlayerNameAndPosition>
+												</PlayerInfo>
+											</PlayerLeft>
+											<PlayerRight>
+												<div>{player.height} cm</div>
+												<div>{player.weight} kg</div>
+												<div>{player.birthday}</div>
+											</PlayerRight>
+										</Player>
+									))}
+								</>
+							) : (
+								<EmptyPlayers>Team doesn't have any players...</EmptyPlayers>
+							)}
+						</RosterTable>
+					</RosterBlock>
+				</>
+			)}
+			{notification ? (
+				<NotificationComponent
+					error={location.state?.name ? false : true}
+					message={notification}
+					close={closeNotification}
+				/>
+			) : null}
+		</Container>
 	)
 }
+
+const Container = styled.div<{
+	$loading: boolean
+}>`
+	position: relative;
+`
 
 const DetailBlock = styled.div`
 	border-radius: 10px;

@@ -23,9 +23,7 @@ export const Navbar = () => {
 		<Container>
 			<List>
 				<StyledNavLink to="/teams">
-					{location.pathname === '/teams' ||
-					location.pathname === '/teams/add' ||
-					location.pathname === '/teams/detail' ? (
+					{location.pathname.includes('/teams') ? (
 						<TeamsSVGRed />
 					) : (
 						<TeamsSVG />
@@ -33,9 +31,7 @@ export const Navbar = () => {
 					Teams
 				</StyledNavLink>
 				<StyledNavLink to="/players">
-					{location.pathname === '/players' ||
-					location.pathname === '/players/add' ||
-					location.pathname === '/players/detail' ? (
+					{location.pathname.includes('/players') ? (
 						<PlayersSVGRed />
 					) : (
 						<PlayersSVG />

@@ -40,3 +40,9 @@ export interface ITeamHeader {
 	search: string
 	onSearch: (value: string) => void
 }
+
+export const paginateOptions: IOption[] = [
+	{ value: 6, label: '6' },
+	{ value: 12, label: '12' },
+	{ value: 24, label: '24' },
+]

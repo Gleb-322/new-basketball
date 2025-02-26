@@ -1,5 +1,5 @@
 import { FC, SetStateAction, useEffect, useState } from 'react'
-import { IOption, ITeams } from '../interfaces/types'
+import { IOption, ITeams, paginateOptions } from '../interfaces/types'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
 import { TeamHeader } from './TeamHeader'
@@ -9,12 +9,7 @@ import { get } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 import { PaginationComponent } from '../../../ui/Pagination'
 import { SelectComponent } from '../../../ui/Select'
-
-const paginateOptions: IOption[] = [
-	{ value: 6, label: '6' },
-	{ value: 12, label: '12' },
-	{ value: 24, label: '24' },
-]
+import { LoadingComponent } from '../../../ui/Loading'
 
 export const TeamDashboard: FC = () => {
 	const [notification, setNotification] = useState<string | null>(null)
@@ -44,7 +39,9 @@ export const TeamDashboard: FC = () => {
 			.then(result => {
 				console.log('get teams', result)
 				if (result.success) {
-					const teamsCopy = JSON.parse(JSON.stringify(result.message.teams))
+					const teamsCopy = JSON.parse(
+						JSON.stringify(result.message.teams)
+					) as ITeams[]
 					const avatars: { [key: string]: string } = {}
 					teamsCopy.forEach((team: ITeams) => {
 						if (team.teamImg && team.teamImg.data) {
@@ -83,6 +80,15 @@ export const TeamDashboard: FC = () => {
 
 			return () => clearTimeout(timer)
 		}
+
+		if (location.state?.successDelete) {
+			setNotification(`${location.state?.successDelete}`)
+			const timer = setTimeout(() => {
+				closeNotification()
+			}, 6000)
+
+			return () => clearTimeout(timer)
+		}
 	}, [location])
 
 	const handlePageClick = (data: { selected: SetStateAction<number> }) => {
@@ -96,7 +102,7 @@ export const TeamDashboard: FC = () => {
 			<TeamHeader search={keyword} onSearch={setKeyword} />
 			<Main $loading={loading}>
 				{loading ? (
-					<Loading>Loading...</Loading>
+					<LoadingComponent />
 				) : teams.length > 0 ? (
 					<TeamList
 						teams={teams}
@@ -151,10 +157,4 @@ const Footer = styled.footer`
 	align-items: center;
 	background-color: inherit;
 	color: white;
-`
-const Loading = styled.div`
-	font-family: 'Avenir Book';
-	font-size: 36px;
-	font-weight: 500;
-	color: ${({ theme }) => theme.colors.blue};
 `

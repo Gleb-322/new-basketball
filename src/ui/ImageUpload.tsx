@@ -1,9 +1,9 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { ReactComponent as AddPhotoSVG } from '../assets/icons/add-photo.svg'
 import styled from 'styled-components'
 import { IInputProps } from '../common/interfaces/types'
 
-export const ImgUpload: FC<IInputProps<any>> = <
+export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	FormInputs extends Record<string, any>
 >({
 	type,
@@ -11,8 +11,13 @@ export const ImgUpload: FC<IInputProps<any>> = <
 	id,
 	register,
 	error,
-}: IInputProps<FormInputs>) => {
-	const [image, setImage] = useState<string | undefined>('')
+	defaultImage,
+}: IInputProps<FormInputs> & { defaultImage?: string }) => {
+	const [image, setImage] = useState<string | undefined>(defaultImage)
+
+	useEffect(() => {
+		setImage(defaultImage) // Обновляем изображение, если передали defaultImage
+	}, [defaultImage])
 
 	return (
 		<Conatiner>

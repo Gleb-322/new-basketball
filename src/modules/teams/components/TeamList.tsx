@@ -9,7 +9,7 @@ export const TeamList: FC<ITeamList> = ({ teams, avatars, teamsLimit }) => {
 	return (
 		<Teams $limit={teamsLimit}>
 			{teams.map(team => (
-				<Card onClick={() => navigate('/teams/detail')} key={team._id}>
+				<Card onClick={() => navigate(`/teams/${team._id}`)} key={team._id}>
 					<Image>
 						{avatars[team._id] ? (
 							<Img src={avatars[team._id]} alt={team.name} />

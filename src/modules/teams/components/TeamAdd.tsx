@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import styled from 'styled-components'
 import { InputComponent } from '../../../ui/Input'
 import { ButtonComponent } from '../../../ui/Button'
@@ -12,7 +12,7 @@ import { NotificationComponent } from '../../../ui/Notification'
 import { ImgUpload } from '../../../ui/ImageUpload'
 import { useAuth } from '../../../common/hooks/useAuth'
 
-const schemaAddTeam = yup.object().shape({
+const schemaCreateAndUpdateTeam = yup.object().shape({
 	teamName: yup.string().required('Team Name is required!'),
 	teamDivision: yup.string().required('Team Division is required!'),
 	teamConference: yup.string().required('Team Conference is required!'),
@@ -40,7 +40,15 @@ const schemaAddTeam = yup.object().shape({
 export const TeamAdd: FC = () => {
 	const { token } = useAuth()
 	const navigate = useNavigate()
-	const [formData, setFormData] = useState<IAddTeamFormFields | null>(null)
+	const location = useLocation()
+	const [formData, setFormData] = useState<IAddTeamFormFields | undefined>(
+		undefined
+	)
+	const [updateData, setUpdateData] = useState<IAddTeamFormFields | undefined>(
+		undefined
+	)
+	const [previewImage, setPreviewImage] = useState<string | undefined>()
+
 	const [sendData, allowSendData] = useState<boolean>(false)
 	const [notification, setNotification] = useState<string | null>(null)
 
@@ -48,10 +56,12 @@ export const TeamAdd: FC = () => {
 		register,
 		handleSubmit,
 		trigger,
+		reset,
 		formState: { errors },
 	} = useForm<IAddTeamFormFields>({
-		resolver: yupResolver<IAddTeamFormFields>(schemaAddTeam),
+		resolver: yupResolver<IAddTeamFormFields>(schemaCreateAndUpdateTeam),
 		mode: 'onTouched',
+		defaultValues: updateData,
 	})
 
 	useEffect(() => {
@@ -87,6 +97,45 @@ export const TeamAdd: FC = () => {
 		}
 	}, [formData, sendData])
 
+	useEffect(() => {
+		if (location.state.team) {
+			console.log('location.state.team', location.state.team)
+			const locationState = location.state.team
+
+			let file: File | undefined
+
+			if (locationState.teamImg && locationState.teamImg.data) {
+				// Декодируем Buffer
+				const byteArray = new Uint8Array(locationState.teamImg.data)
+				// Создаём Blob
+				const blob = new Blob([byteArray], { type: 'image/jpeg' })
+				// Создаём File
+				file = new File([blob], `${locationState.name}`, { type: blob.type })
+				// Конвертируем в base64 для отображения в ImgUpload
+				const reader = new FileReader()
+				reader.readAsDataURL(blob)
+				reader.onloadend = () => {
+					setPreviewImage(reader.result as string)
+				}
+			}
+			const data = {
+				teamName: locationState.name,
+				teamDivision: locationState.division,
+				teamConference: locationState.conference,
+				teamYear: locationState.year,
+				teamImage: file ? ([file] as unknown as FileList) : undefined, // Преобразуем в FileList
+			}
+			console.log(data)
+			setUpdateData(data)
+		}
+	}, [location])
+
+	useEffect(() => {
+		if (updateData) {
+			reset(updateData) // Сбрасываем форму с новыми значениями
+		}
+	}, [updateData, reset])
+
 	const onSubmit: SubmitHandler<IAddTeamFormFields> = (
 		data: IAddTeamFormFields
 	): void => {
@@ -115,6 +164,7 @@ export const TeamAdd: FC = () => {
 						type={'file'}
 						name={'teamImage'}
 						id={'teamImage'}
+						defaultImage={previewImage} // Передаём картинку
 						error={errors.teamImage?.message}
 					/>
 				</Left>

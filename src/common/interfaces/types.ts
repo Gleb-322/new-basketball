@@ -20,6 +20,7 @@ export interface IInputProps<FormInputs extends FieldValues> {
 	name: Path<FormInputs>
 	focus?: boolean
 	label?: string
+	defaultImage?: string
 	register: UseFormRegister<FormInputs>
 	error?: string
 }
