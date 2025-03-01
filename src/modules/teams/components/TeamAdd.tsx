@@ -4,10 +4,10 @@ import { InputComponent } from '../../../ui/Input'
 import { ButtonComponent } from '../../../ui/Button'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import * as yup from 'yup'
-import { IAddTeamFormFields } from '../interfaces/types'
+import { IAddAndUpdateTeamFormFields, ITeams } from '../interfaces/types'
 import { FC, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { post } from '../../../api/baseRequest'
+import { patch, post } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 import { ImgUpload } from '../../../ui/ImageUpload'
 import { useAuth } from '../../../common/hooks/useAuth'
@@ -41,39 +41,45 @@ export const TeamAdd: FC = () => {
 	const { token } = useAuth()
 	const navigate = useNavigate()
 	const location = useLocation()
-	const [formData, setFormData] = useState<IAddTeamFormFields | undefined>(
-		undefined
-	)
-	const [updateData, setUpdateData] = useState<IAddTeamFormFields | undefined>(
-		undefined
-	)
+	const [createData, setCreateData] = useState<
+		IAddAndUpdateTeamFormFields | undefined
+	>(undefined)
+	const [updateData, setUpdateData] = useState<
+		IAddAndUpdateTeamFormFields | undefined
+	>(undefined)
 	const [previewImage, setPreviewImage] = useState<string | undefined>()
-
-	const [sendData, allowSendData] = useState<boolean>(false)
+	const [createTeam, setCreateTeam] = useState<boolean>(false)
+	const [updateTeam, setUpdateTeam] = useState<boolean>(false)
 	const [notification, setNotification] = useState<string | null>(null)
 
 	const {
 		register,
 		handleSubmit,
-		trigger,
 		reset,
 		formState: { errors },
-	} = useForm<IAddTeamFormFields>({
-		resolver: yupResolver<IAddTeamFormFields>(schemaCreateAndUpdateTeam),
+	} = useForm<IAddAndUpdateTeamFormFields>({
+		resolver: yupResolver<IAddAndUpdateTeamFormFields>(
+			schemaCreateAndUpdateTeam
+		),
 		mode: 'onTouched',
-		defaultValues: updateData,
+		// defaultValues: updateData,
 	})
 
+	// create new team
 	useEffect(() => {
-		if (sendData) {
-			const myFormData = new FormData()
-			myFormData.append('teamName', formData!.teamName)
-			myFormData.append('teamDivision', formData!.teamDivision)
-			myFormData.append('teamConference', formData!.teamConference)
-			myFormData.append('teamYear', formData!.teamYear.toString())
-			myFormData.append('teamImage', formData!.teamImage![0])
+		if (createTeam && createData) {
+			const createTeamFormData = new FormData()
+			createTeamFormData.append('teamName', createData.teamName)
+			createTeamFormData.append('teamDivision', createData.teamDivision)
+			createTeamFormData.append('teamConference', createData.teamConference)
+			createTeamFormData.append('teamYear', createData.teamYear)
+			createTeamFormData.append('teamImage', createData.teamImage![0])
 
-			post('/teams/create', token, myFormData)
+			if (createData.teamImage && createData.teamImage.length > 0) {
+				createTeamFormData.append('teamImage', createData.teamImage![0])
+			}
+
+			post('/teams/create', token, createTeamFormData)
 				.then(result => {
 					console.log('team create res', result)
 					if (result.success) {
@@ -93,14 +99,14 @@ export const TeamAdd: FC = () => {
 		}
 
 		return () => {
-			allowSendData(false)
+			setCreateTeam(false)
 		}
-	}, [formData, sendData])
+	}, [createData, createTeam])
 
+	// catch one team data for update team
 	useEffect(() => {
-		if (location.state.team) {
-			console.log('location.state.team', location.state.team)
-			const locationState = location.state.team
+		if (location.state?.team) {
+			const locationState = location.state?.team
 
 			let file: File | undefined
 
@@ -118,7 +124,7 @@ export const TeamAdd: FC = () => {
 					setPreviewImage(reader.result as string)
 				}
 			}
-			const data = {
+			const data: IAddAndUpdateTeamFormFields = {
 				teamName: locationState.name,
 				teamDivision: locationState.division,
 				teamConference: locationState.conference,
@@ -127,26 +133,55 @@ export const TeamAdd: FC = () => {
 			}
 			console.log(data)
 			setUpdateData(data)
+			setUpdateTeam(true)
 		}
 	}, [location])
 
+	// set update data in form values
 	useEffect(() => {
 		if (updateData) {
 			reset(updateData) // Сбрасываем форму с новыми значениями
 		}
 	}, [updateData, reset])
 
-	const onSubmit: SubmitHandler<IAddTeamFormFields> = (
-		data: IAddTeamFormFields
+	// update team by updateData
+	useEffect(() => {
+		if (updateTeam && updateData) {
+			console.log('updateData', updateData)
+			const updateTeamFormData = new FormData()
+			updateTeamFormData.append('teamName', updateData.teamName)
+			updateTeamFormData.append('teamDivision', updateData.teamDivision)
+			updateTeamFormData.append('teamConference', updateData.teamConference)
+			updateTeamFormData.append('teamYear', updateData.teamYear)
+
+			if (
+				typeof updateData === 'object' &&
+				updateData.teamImage &&
+				Array.isArray(updateData.teamImage) &&
+				updateData.teamImage.length > 0
+			) {
+				updateTeamFormData.append('teamImage', updateData.teamImage[0])
+			}
+
+			patch('/teams/update', token, updateTeamFormData).then(result => {
+				console.log('res update team', result)
+			})
+		}
+	}, [updateTeam, updateData])
+
+	const onSubmit: SubmitHandler<IAddAndUpdateTeamFormFields> = (
+		data: IAddAndUpdateTeamFormFields
 	): void => {
-		console.log('add team', data)
-
-		setFormData(data)
-
-		allowSendData(true)
+		console.log('add team or update', data)
+		if (location.state?.team) {
+			setUpdateData(data)
+			setUpdateTeam(true)
+		} else {
+			setCreateData(data)
+			setCreateTeam(true)
+		}
 	}
 
-	const submitTrigger = () => trigger()
 	const closeNotification = () => setNotification(null)
 	const navigateToTeamDashboard = () => navigate('/teams')
 	return (
@@ -154,10 +189,7 @@ export const TeamAdd: FC = () => {
 			<Header>
 				Teams <Slash>/</Slash> Add new team
 			</Header>
-			<MainForm
-				encType="multipart/form-data"
-				onSubmit={handleSubmit(onSubmit, error => console.log(error))}
-			>
+			<MainForm encType="multipart/form-data" onSubmit={handleSubmit(onSubmit)}>
 				<Left>
 					<ImgUpload
 						register={register}
@@ -211,15 +243,10 @@ export const TeamAdd: FC = () => {
 							<ButtonComponent
 								type={'button'}
 								text={'Cancel'}
-								cancel={true}
-								cancelTeamHandler={navigateToTeamDashboard}
+								variant={'cancel'}
+								onClick={navigateToTeamDashboard}
 							/>
-							<ButtonComponent
-								type={'submit'}
-								text={'Save'}
-								save={true}
-								createTeamHandler={submitTrigger}
-							/>
+							<ButtonComponent type={'submit'} text={'Save'} variant={'save'} />
 						</Buttons>
 					</FormBlock>
 				</Right>

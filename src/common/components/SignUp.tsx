@@ -41,7 +41,6 @@ export const SignUp: FC = () => {
 	const {
 		register,
 		handleSubmit,
-		trigger,
 		formState: { errors, isValid },
 	} = useForm<ISignupFormFields>({
 		resolver: yupResolver<ISignupFormFields>(schemaSignUp),
@@ -84,8 +83,6 @@ export const SignUp: FC = () => {
 		setFormData(data)
 		allowSendData(true)
 	}
-
-	const submitTrigger = () => trigger()
 
 	const closeNotification = () => setNotification(null)
 
@@ -147,9 +144,8 @@ export const SignUp: FC = () => {
 					<ButtonComponent
 						type={'submit'}
 						text={'Sign Up'}
-						formValid={isValid}
-						signup={true}
-						signUpHandler={submitTrigger}
+						disabled={isValid}
+						variant={'signup'}
 					/>
 
 					<Links>

@@ -1,5 +1,5 @@
 import { FC, SetStateAction, useEffect, useState } from 'react'
-import { IOption, ITeams, paginateOptions } from '../interfaces/types'
+import { ITeams } from '../interfaces/types'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
 import { TeamHeader } from './TeamHeader'
@@ -10,6 +10,7 @@ import { NotificationComponent } from '../../../ui/Notification'
 import { PaginationComponent } from '../../../ui/Pagination'
 import { SelectComponent } from '../../../ui/Select'
 import { LoadingComponent } from '../../../ui/Loading'
+import { IOption, paginateOptions } from '../../../common/interfaces/types'
 
 export const TeamDashboard: FC = () => {
 	const [notification, setNotification] = useState<string | null>(null)
@@ -45,9 +46,12 @@ export const TeamDashboard: FC = () => {
 					const avatars: { [key: string]: string } = {}
 					teamsCopy.forEach((team: ITeams) => {
 						if (team.teamImg && team.teamImg.data) {
-							const byteArray = new Uint8Array(team.teamImg.data) // Декодируем Buffer
-							const blob = new Blob([byteArray], { type: 'image/jpeg' }) // Создаём Blob
-							avatars[team._id] = URL.createObjectURL(blob) // Генерируем URL
+							// Декодируем Buffer
+							const byteArray = new Uint8Array(team.teamImg.data)
+							// Создаём Blob
+							const blob = new Blob([byteArray], { type: 'image/jpeg' })
+							// Генерируем URL
+							avatars[team._id] = URL.createObjectURL(blob)
 						}
 					})
 					setPageCount(
@@ -69,7 +73,7 @@ export const TeamDashboard: FC = () => {
 				)
 				setLoading(false)
 			})
-	}, [currentPage, selectedOption, keyword])
+	}, [currentPage, selectedOption.value, keyword])
 
 	useEffect(() => {
 		if (location.state?.name) {
@@ -104,11 +108,7 @@ export const TeamDashboard: FC = () => {
 				{loading ? (
 					<LoadingComponent />
 				) : teams.length > 0 ? (
-					<TeamList
-						teams={teams}
-						avatars={decodedAvatars}
-						teamsLimit={selectedOption.value}
-					/>
+					<TeamList teams={teams} avatars={decodedAvatars} />
 				) : (
 					<TeamEmptyList />
 				)}
@@ -122,15 +122,19 @@ export const TeamDashboard: FC = () => {
 				) : null}
 			</Main>
 			<Footer>
-				<PaginationComponent
-					pageClick={handlePageClick}
-					countPage={pageCount}
-				/>
-				<SelectComponent
-					options={paginateOptions}
-					selected={selectedOption}
-					onSelect={setSelectedOption}
-				/>
+				{teams.length > 0 ? (
+					<>
+						<PaginationComponent
+							pageClick={handlePageClick}
+							countPage={pageCount}
+						/>
+						<SelectComponent
+							options={paginateOptions}
+							selected={selectedOption}
+							onSelect={setSelectedOption}
+						/>
+					</>
+				) : null}
 			</Footer>
 		</>
 	)

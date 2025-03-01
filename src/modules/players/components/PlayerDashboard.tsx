@@ -1,325 +1,163 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { FC, SetStateAction, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { ReactComponent as EmptySearchPlayerSVG } from '../../../assets/images/emptySearchPlayer.svg'
-import playerLogo from '../../../assets/images/playerCardLogo.png'
 import { IPlayers } from '../interfaces/types'
 import { PlayerHeader } from './PlayerHeader'
+import { PaginationComponent } from '../../../ui/Pagination'
+import { SelectComponent } from '../../../ui/Select'
+import { IOption, paginateOptions } from '../../../common/interfaces/types'
+import { useLocation } from 'react-router'
+import { PlayerList } from './PlayerList'
+import { PlayerEmptyList } from './PlayerEmptyList'
+import { LoadingComponent } from '../../../ui/Loading'
+import { NotificationComponent } from '../../../ui/Notification'
+import { get } from '../../../api/baseRequest'
 
-export const PlayerDashboard = () => {
-	const navigate = useNavigate()
+export const PlayerDashboard: FC = () => {
 	const [players, setPlayers] = useState<IPlayers[] | []>([])
+	const [notification, setNotification] = useState<string | null>(null)
+	const [loading, setLoading] = useState<boolean>(false)
+	const [decodedAvatars, setDecodedAvatars] = useState<{
+		[key: string]: string
+	}>({})
+	const [selectedOption, setSelectedOption] = useState<IOption>(
+		paginateOptions[0]
+	)
+	const [currentPage, setCurrentPage] = useState<number>(0)
+	const [pageCount, setPageCount] = useState<number>(0)
+	const [keyword, setKeyword] = useState<string>('')
+
+	const location = useLocation()
+
 	useEffect(() => {
-		setPlayers([
-			{
-				_id: '1',
-				name: 'Anatoly Melnik',
-				position: 'string',
-				team: 'BC "Tigina" Bendery',
-				height: 175,
-				weight: 75,
-				birthday: 'string',
-				number: 10,
-				playerImg: 'string',
-			},
-			{
-				_id: '2',
-				name: 'DDHWIU ieudhiuhiweu',
-				position: 'string',
-				team: 'IHDIhieuhdi',
-				height: 175,
-				weight: 75,
-				birthday: 'string',
-				number: 10,
-				playerImg: 'string',
-			},
-			{
-				_id: '3',
-				name: 'Sex',
-				position: 'Top',
-				team: 'Pornhub',
-				height: 25,
-				weight: 100,
-				birthday: 'string',
-				number: 69,
-				playerImg: 'string',
-			},
-			// {
-			// 	_id: '4',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '5',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '6',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '7',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '8',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '9',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '23423444',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '2342',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '45',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '45435345',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '4513123',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-			// {
-			// 	_id: '452',
-			// 	name: 'Jaylen Adams',
-			// 	position: 'string',
-			// 	team: 'Portland trail blazers',
-			// 	height: 123,
-			// 	weight: 124,
-			// 	birthday: 'string',
-			// 	number: 10,
-			// 	playerImg: 'string',
-			// },
-		])
-	}, [])
+		setLoading(true)
+		get(
+			`/players/get?page=${currentPage + 1}&limit=${
+				selectedOption.value
+			}&keyword=${keyword}`,
+			undefined
+		)
+			.then(result => {
+				console.log('res get players')
+				if (result.success) {
+					const playersCopy = JSON.parse(
+						JSON.stringify(result.message.players)
+					) as IPlayers[]
+					const avatars: { [key: string]: string } = {}
+					playersCopy.forEach((player: IPlayers) => {
+						if (player.playerImg && player.playerImg.data) {
+							// decode Buffer
+							const arrayBuffer = new Uint8Array(player.playerImg.data)
+							// create Blob
+							const blob = new Blob([arrayBuffer], { type: 'image/jpeg' })
+							// create img Url
+							avatars[player._id] = URL.createObjectURL(blob)
+						}
+					})
+					setPageCount(
+						Math.ceil(result.message.countPlayers / selectedOption.value)
+					)
+					setPlayers(result.message.players)
+					setDecodedAvatars(avatars)
+					setLoading(false)
+				}
+				if (!result.success) {
+					setNotification(`${result.message}`)
+					setLoading(false)
+				}
+			})
+			.catch(error => {
+				console.log('error', error)
+				setNotification(
+					`Something going wrong... Error status: ${error.status}`
+				)
+				setLoading(false)
+			})
+	}, [currentPage, keyword, selectedOption.value])
+
+	useEffect(() => {
+		if (location.state?.name) {
+			setNotification(`${location.state?.name} player successful created!`)
+			const timer = setTimeout(() => {
+				closeNotification()
+			}, 6000)
+
+			return () => clearTimeout(timer)
+		}
+
+		if (location.state?.successDelete) {
+			setNotification(`${location.state?.successDelete}`)
+			const timer = setTimeout(() => {
+				closeNotification()
+			}, 6000)
+
+			return () => clearTimeout(timer)
+		}
+	}, [location])
+
+	const handlePageClick = (data: { selected: SetStateAction<number> }) => {
+		console.log('pagination data', data)
+		setCurrentPage(data.selected)
+	}
+
+	const closeNotification = () => setNotification(null)
 	return (
 		<>
-			<PlayerHeader />
-			<Main>
-				{players.length ? (
-					<Players>
-						{players.map(player => (
-							<Card
-								onClick={() => navigate('/players/detail')}
-								key={player._id}
-							>
-								<Image>
-									<Img src={playerLogo} alt="logo" />
-								</Image>
-								<TextBlock>
-									<Name>
-										{player.name} <Number>#{player.number}</Number>
-									</Name>
-									<Team>{player.team}</Team>
-								</TextBlock>
-							</Card>
-						))}
-					</Players>
+			<PlayerHeader search={keyword} onSearch={setKeyword} />
+			<Main $loading={loading}>
+				{loading ? (
+					<LoadingComponent />
+				) : players.length ? (
+					<PlayerList players={players} avatars={decodedAvatars} />
 				) : (
-					<EmptyPlayers>
-						<EmptyBlock>
-							<StyledEmptySearchPlayerSVG />
-							<EmptyText>Empty Here</EmptyText>
-							<EmptyNote>Add new teams to continue</EmptyNote>
-						</EmptyBlock>
-					</EmptyPlayers>
+					<PlayerEmptyList />
 				)}
+
+				{notification ? (
+					<NotificationComponent
+						error={location.state?.name ? false : true}
+						message={notification}
+						close={closeNotification}
+					/>
+				) : null}
 			</Main>
-			<Footer>Pagination select pag</Footer>
+			<Footer>
+				{players.length > 0 ? (
+					<>
+						<PaginationComponent
+							pageClick={handlePageClick}
+							countPage={pageCount}
+						/>
+						<SelectComponent
+							options={paginateOptions}
+							selected={selectedOption}
+							onSelect={setSelectedOption}
+						/>
+					</>
+				) : null}
+			</Footer>
 		</>
 	)
 }
 
-const Main = styled.div`
+const Main = styled.div<{
+	$loading: boolean
+}>`
 	width: 100%;
-	display: grid;
+	display: ${({ $loading }) => ($loading ? 'flex' : 'grid')};
+	justify-content: ${({ $loading }) => ($loading ? 'center' : 'none')};
+	align-items: ${({ $loading }) => ($loading ? 'center' : 'none')};
 	margin: 32px 0;
-`
-
-const Players = styled.div`
-	width: 100%;
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(365px, 1fr));
-	grid-template-rows: repeat(2, minmax(380px, 0.5fr));
-	grid-auto-rows: minmax(380px, 0.5fr);
-	gap: 24px;
-`
-
-const Card = styled.div`
-	cursor: pointer;
-	background-color: ${({ theme }) => theme.colors.darkGrey};
-	border-radius: 4px;
-`
-const Image = styled.div`
-	width: 100%;
-	height: 70%;
-	display: flex;
-	border-top-right-radius: 4px;
-	border-top-left-radius: 4px;
-	justify-content: center;
-	align-items: flex-end;
-	background: ${({ theme }) => theme.colors.gradientCard};
-`
-const TextBlock = styled.div`
-	width: 100%;
-	height: 30%;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-`
-const Img = styled.img`
-	width: 270px;
-	height: 210px;
-	background-position: center;
-	background-size: cover;
-	background-repeat: no-repeat;
-`
-
-const Name = styled.div`
-	font-family: 'Avenir Medium';
-	font-weight: 500;
-	font-size: 18px;
-	color: ${({ theme }) => theme.colors.white};
-`
-
-const Number = styled.span`
-	color: ${({ theme }) => theme.colors.lightRed};
-`
-
-const Team = styled.div`
-	margin-top: 7.5px;
-	font-family: 'Avenir Medium';
-	font-weight: 500;
-	font-size: 14px;
-	color: ${({ theme }) => theme.colors.lightGrey};
-`
-
-const EmptyPlayers = styled.div`
-	width: 100%;
-	height: 100%;
-	display: grid;
-`
-const EmptyBlock = styled.div`
-	align-self: center;
-	justify-self: center;
-	width: 550px;
-	height: 550px;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-around;
-	align-items: center;
-	background-color: ${({ theme }) => theme.colors.white};
-	border-radius: 15px;
-`
-const StyledEmptySearchPlayerSVG = styled(EmptySearchPlayerSVG)`
-	width: 320px;
-	height: 320px;
-`
-const EmptyText = styled.div`
-	font-family: 'Avenir Black';
-	font-weight: 900;
-	font-size: 36px;
-	color: ${({ theme }) => theme.colors.lightestRed};
-`
-const EmptyNote = styled.div`
-	font-family: 'Avenir Book';
-	font-weight: 500;
-	font-size: 24px;
-	color: ${({ theme }) => theme.colors.grey};
 `
 
 const Footer = styled.footer`
 	width: 100%;
-	height: 40px;
+	height: 44px;
+	padding: 2px 0;
 	position: sticky;
 	bottom: 0;
-	background-color: black;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background-color: inherit;
 	color: white;
 `

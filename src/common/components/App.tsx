@@ -11,7 +11,7 @@ import { PlayerLayout } from '../../modules/players/components/PlayerLayout'
 import { PlayerDashboard } from '../../modules/players/components/PlayerDashboard'
 import { PlayerDetail } from '../../modules/players/components/PlayerDetail'
 import { TeamAdd } from '../../modules/teams/components/TeamAdd'
-import { PlayerAdd } from '../../modules/players/components/PlayersAdd'
+import { PlayerAdd } from '../../modules/players/components/PlayerAdd'
 
 const theme = {
 	colors: {

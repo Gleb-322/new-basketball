@@ -29,7 +29,6 @@ export const SignIn: FC = () => {
 	const {
 		register,
 		handleSubmit,
-		trigger,
 		formState: { errors, isValid },
 	} = useForm<ISigninFormFields>({
 		resolver: yupResolver<ISigninFormFields>(schemaSignIn),
@@ -77,8 +76,6 @@ export const SignIn: FC = () => {
 
 	const closeNotification = () => setNotification(null)
 
-	const submitTrigger = () => trigger()
-
 	return (
 		<Conatiner>
 			<Left>
@@ -105,9 +102,8 @@ export const SignIn: FC = () => {
 					<ButtonComponent
 						type={'submit'}
 						text={'Sign in'}
-						signin={true}
-						formValid={isValid}
-						signInHandler={submitTrigger}
+						variant={'signin'}
+						disabled={isValid}
 					/>
 					<Links>
 						Not a member yet?

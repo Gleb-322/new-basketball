@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import Select, { SingleValue } from 'react-select'
-import { ISelect, IOption } from '../modules/teams/interfaces/types'
 import styled from 'styled-components'
+import { IOption, ISelect } from '../common/interfaces/types'
 
 export const SelectComponent: FC<ISelect> = ({
 	options,
@@ -18,8 +18,6 @@ export const SelectComponent: FC<ISelect> = ({
 		<StyledSelect
 			classNamePrefix="react-select"
 			value={selected}
-			// isDisabled={isDisabled}
-			// isLoading={isLoading}
 			isSearchable={false}
 			onChange={handleChangeSelect}
 			menuPlacement="top"

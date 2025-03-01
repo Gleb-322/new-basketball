@@ -1,34 +1,30 @@
-import { useNavigate } from 'react-router'
-import styled from 'styled-components'
-import { ITeamList } from '../interfaces/types'
 import { FC } from 'react'
+import styled from 'styled-components'
+import { IPlayerList } from '../interfaces/types'
+import { useNavigate } from 'react-router'
 
-export const TeamList: FC<ITeamList> = ({ teams, avatars }) => {
+export const PlayerList: FC<IPlayerList> = ({ players, avatars }) => {
 	const navigate = useNavigate()
-
 	return (
-		<Teams>
-			{teams.map(team => (
-				<Card onClick={() => navigate(`/teams/${team._id}`)} key={team._id}>
+		<Players>
+			{players.map(player => (
+				<Card onClick={() => navigate('/players/detail')} key={player._id}>
 					<Image>
-						{avatars[team._id] ? (
-							<Img src={avatars[team._id]} alt={team.name} />
-						) : (
-							<div>Loading image...</div>
-						)}
+						<Img src={'playerLogo'} alt="logo" />
 					</Image>
-
 					<TextBlock>
-						<Name>{team.name}</Name>
-						<Year>Year of foundation: {team.year}</Year>
+						<Name>
+							{player.name} <Number>#{player.number}</Number>
+						</Name>
+						<Team>{player.team}</Team>
 					</TextBlock>
 				</Card>
 			))}
-		</Teams>
+		</Players>
 	)
 }
 
-const Teams = styled.div`
+const Players = styled.div`
 	width: 100%;
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(365px, 1fr));
@@ -49,10 +45,9 @@ const Image = styled.div`
 	border-top-right-radius: 4px;
 	border-top-left-radius: 4px;
 	justify-content: center;
-	align-items: center;
+	align-items: flex-end;
 	background: ${({ theme }) => theme.colors.gradientCard};
 `
-
 const TextBlock = styled.div`
 	width: 100%;
 	height: 30%;
@@ -62,8 +57,11 @@ const TextBlock = styled.div`
 	align-items: center;
 `
 const Img = styled.img`
-	width: 150px;
-	height: 150px;
+	width: 270px;
+	height: 210px;
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
 `
 
 const Name = styled.div`
@@ -73,7 +71,11 @@ const Name = styled.div`
 	color: ${({ theme }) => theme.colors.white};
 `
 
-const Year = styled.div`
+const Number = styled.span`
+	color: ${({ theme }) => theme.colors.lightRed};
+`
+
+const Team = styled.div`
 	margin-top: 7.5px;
 	font-family: 'Avenir Medium';
 	font-weight: 500;

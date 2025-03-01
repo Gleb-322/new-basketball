@@ -26,19 +26,11 @@ export interface IInputProps<FormInputs extends FieldValues> {
 }
 
 export interface IButton {
-	type: 'button' | 'reset' | 'submit' | undefined
+	type?: 'button' | 'reset' | 'submit' | undefined
 	text: string
-	add?: boolean
-	signin?: boolean
-	signup?: boolean
-	save?: boolean
-	cancel?: boolean
-	formValid?: boolean
-	signUpHandler?: () => void
-	signInHandler?: () => void
-	addTeamHandler?: () => void
-	createTeamHandler?: () => void
-	cancelTeamHandler?: () => void
+	variant: 'signin' | 'signup' | 'cancel' | 'add' | 'save'
+	disabled?: boolean
+	onClick?: () => void
 }
 
 export interface ILink {
@@ -74,3 +66,20 @@ export interface IAuthContext {
 	token: string | undefined
 	setToken: (token: string | undefined) => void
 }
+
+export interface IOption {
+	value: number
+	label: string
+}
+
+export interface ISelect {
+	options: IOption[]
+	selected: IOption
+	onSelect: (selected: IOption) => void
+}
+
+export const paginateOptions: IOption[] = [
+	{ value: 6, label: '6' },
+	{ value: 12, label: '12' },
+	{ value: 24, label: '24' },
+]

@@ -46,8 +46,12 @@ export const post = (url: string, token?: string, body?: string | FormData) => {
 	return baseRequest(`${baseUrl}${url}`, { method: 'POST', body }, token)
 }
 
-export const patch = (url: string, token?: string, body?: string) => {
-	return baseRequest(`${baseUrl}${url}`, { method: 'POST', body }, token)
+export const patch = (
+	url: string,
+	token?: string,
+	body?: string | FormData
+) => {
+	return baseRequest(`${baseUrl}${url}`, { method: 'PATCH', body }, token)
 }
 
 export const remove = (url: string, token?: string) => {

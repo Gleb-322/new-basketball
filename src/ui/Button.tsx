@@ -5,55 +5,18 @@ import styled from 'styled-components'
 export const ButtonComponent: FC<IButton> = ({
 	type,
 	text,
-	add,
-	cancel,
-	save,
-	formValid,
-	signin,
-	signup,
-	signUpHandler,
-	signInHandler,
-	addTeamHandler,
-	createTeamHandler,
-	cancelTeamHandler,
+	variant,
+	disabled,
+	onClick,
 }) => {
-	// console.log(formValid)
-	const handlerClick = () => {
-		if (signin) {
-			signInHandler!()
-		}
+	const isAuthButton = variant === 'signup' || variant === 'signin'
 
-		if (signup) {
-			signUpHandler!()
-		}
-
-		if (add) {
-			addTeamHandler!()
-		}
-
-		if (save) {
-			createTeamHandler!()
-		}
-
-		if (cancel) {
-			cancelTeamHandler!()
-		}
-	}
 	return (
 		<Button
 			type={type}
-			$add={add}
-			$cancel={cancel}
-			$save={save}
-			$signup={signup}
-			onClick={handlerClick}
-			// disabled={
-			// 	formValid && signup
-			// 		? !formValid
-			// 		: formValid && signin
-			// 		? !formValid
-			// 		: false
-			// }
+			$variant={variant}
+			onClick={onClick}
+			disabled={isAuthButton ? !disabled : false}
 		>
 			{text}
 		</Button>
@@ -61,47 +24,51 @@ export const ButtonComponent: FC<IButton> = ({
 }
 
 const Button = styled.button<{
-	$add: boolean | undefined
-	$cancel: boolean | undefined
-	$save: boolean | undefined
-	$signup: boolean | undefined
+	$variant: 'signin' | 'signup' | 'cancel' | 'add' | 'save'
 }>`
 	cursor: pointer;
-	margin-top: ${({ $signup }) => ($signup ? '0px' : '12px')};
-	margin-bottom: ${({ $add }) => ($add ? '0px' : '24px')};
-	width: ${({ $add, $cancel, $save }) =>
-		$add ? '105px' : $cancel || $save ? '45%' : '100%'};
+	margin-top: ${({ $variant }) =>
+		$variant === 'add' || $variant === 'signup' ? '0px' : '12px'};
+	margin-bottom: ${({ $variant }) => ($variant === 'add' ? '0px' : '24px')};
+	width: ${({ $variant }) =>
+		$variant === 'add'
+			? '105px'
+			: $variant === 'cancel' || $variant === 'save'
+			? '45%'
+			: '100%'};
 	height: 40px;
-	background-color: ${({ theme, $cancel }) =>
-		$cancel ? theme.colors.white : theme.colors.red};
-	color: ${({ theme, $cancel }) =>
-		$cancel ? theme.colors.lightGrey : theme.colors.white};
+	background-color: ${({ theme, $variant }) =>
+		$variant === 'cancel' ? theme.colors.white : theme.colors.red};
+	color: ${({ theme, $variant }) =>
+		$variant === 'cancel' ? theme.colors.lightGrey : theme.colors.white};
 	font-family: 'Avenir Medium';
 	font-size: 15px;
 	line-height: 24px;
 	font-weight: 500;
 	padding: 8px 0;
-	border: ${({ theme, $cancel }) =>
-		$cancel ? `solid 1px ${theme.colors.lightGrey}` : 'none'};
+	border: ${({ theme, $variant }) =>
+		$variant === 'cancel' ? `solid 1px ${theme.colors.lightGrey}` : 'none'};
 	border-radius: 4px;
 	outline: none;
 	&:hover {
-		background-color: ${({ theme, $cancel }) =>
-			$cancel ? theme.colors.lightestGrey : theme.colors.lightRed};
+		background-color: ${({ theme, $variant }) =>
+			$variant === 'cancel'
+				? theme.colors.lightestGrey
+				: theme.colors.lightRed};
 	}
 	&:active {
-		background-color: ${({ theme, $cancel }) =>
-			$cancel ? theme.colors.lightGrey : theme.colors.darkRed};
-		border: ${({ theme, $cancel }) =>
-			$cancel ? `solid 1px ${theme.colors.grey}` : 'none'};
-		color: ${({ theme, $cancel }) =>
-			$cancel ? theme.colors.grey : theme.colors.white};
+		background-color: ${({ theme, $variant }) =>
+			$variant === 'cancel' ? theme.colors.lightGrey : theme.colors.darkRed};
+		border: ${({ theme, $variant }) =>
+			$variant === 'cancel' ? `solid 1px ${theme.colors.grey}` : 'none'};
+		color: ${({ theme, $variant }) =>
+			$variant === 'cancel' ? theme.colors.grey : theme.colors.white};
 	}
 	&:disabled {
 		background-color: ${({ theme }) => theme.colors.mostLightGrey};
 		color: ${({ theme }) => theme.colors.lightestGrey};
-		border: ${({ theme, $cancel }) =>
-			$cancel ? `solid 1px ${theme.colors.lightGrey}` : 'none'};
+		border: ${({ theme, $variant }) =>
+			$variant === 'cancel' ? `solid 1px ${theme.colors.lightGrey}` : 'none'};
 		&:hover {
 			background-color: ${({ theme }) => theme.colors.mostLightGrey};
 		}
