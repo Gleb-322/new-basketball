@@ -24,6 +24,10 @@ export interface IAddAndUpdateTeamFormFields {
 	teamImage?: FileList
 }
 
+export interface IUpdateTeamData extends IAddAndUpdateTeamFormFields {
+	teamId?: string
+}
+
 export interface ITeamHeader {
 	search: string
 	onSearch: (value: string) => void

@@ -6,11 +6,11 @@ import { MainLayout } from './MainLayout'
 import { NotFound } from './NotFound'
 import { TeamDashboard } from '../../modules/teams/components/TeamDashboard'
 import { TeamLayout } from '../../modules/teams/components/TeamLayout'
+import { TeamCreateAndUpdate } from '../../modules/teams/components/TeamAddAndUpdate'
 import { TeamDetail } from '../../modules/teams/components/TeamDetail'
 import { PlayerLayout } from '../../modules/players/components/PlayerLayout'
 import { PlayerDashboard } from '../../modules/players/components/PlayerDashboard'
 import { PlayerDetail } from '../../modules/players/components/PlayerDetail'
-import { TeamAdd } from '../../modules/teams/components/TeamAdd'
 import { PlayerAdd } from '../../modules/players/components/PlayerAdd'
 
 const theme = {
@@ -43,7 +43,7 @@ export const App = () => {
 					<Route path="/" element={<Navigate to="/teams" />} />
 					<Route path="teams" element={<TeamLayout />}>
 						<Route index element={<TeamDashboard />} />
-						<Route path="add" element={<TeamAdd />} />
+						<Route path="add" element={<TeamCreateAndUpdate />} />
 						<Route path=":_id" element={<TeamDetail />} />
 					</Route>
 

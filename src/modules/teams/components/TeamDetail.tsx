@@ -67,7 +67,7 @@ export const TeamDetail: FC = () => {
 				.then(result => {
 					console.log('delete team by id', result)
 					if (result.success) {
-						navigate('/teams', { state: { successDelete: result.message } })
+						navigate('/teams', { state: { deleteTeam: result.message } })
 						setLoading(false)
 					}
 					if (!result.success) {
@@ -256,7 +256,7 @@ export const TeamDetail: FC = () => {
 			)}
 			{notification ? (
 				<NotificationComponent
-					error={location.state?.name ? false : true}
+					error={true}
 					message={notification}
 					close={closeNotification}
 				/>

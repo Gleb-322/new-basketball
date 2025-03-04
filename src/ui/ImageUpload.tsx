@@ -13,10 +13,11 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	error,
 	defaultImage,
 }: IInputProps<FormInputs> & { defaultImage?: string }) => {
-	const [image, setImage] = useState<string | undefined>(defaultImage)
+	const [image, setImage] = useState<string | undefined>('')
 
 	useEffect(() => {
-		setImage(defaultImage) // Обновляем изображение, если передали defaultImage
+		// Обновляем изображение, если передали defaultImage
+		setImage(defaultImage)
 	}, [defaultImage])
 
 	return (
@@ -39,10 +40,10 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 									console.log(e.target?.files[0])
 									if (e.target?.files[0]) {
 										const reader = new FileReader()
+										reader.readAsDataURL(e.target?.files[0])
 										reader.onloadend = () => {
 											setImage(reader.result?.toString())
 										}
-										reader.readAsDataURL(e.target?.files[0])
 									}
 								},
 							})}

@@ -4,13 +4,17 @@ import { InputComponent } from '../../../ui/Input'
 import { ButtonComponent } from '../../../ui/Button'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import * as yup from 'yup'
-import { IAddAndUpdateTeamFormFields, ITeams } from '../interfaces/types'
+import {
+	IAddAndUpdateTeamFormFields,
+	IUpdateTeamData,
+} from '../interfaces/types'
 import { FC, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { patch, post } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 import { ImgUpload } from '../../../ui/ImageUpload'
 import { useAuth } from '../../../common/hooks/useAuth'
+import { convertToFileList } from '../helpers/converterFileToFileList'
 
 const schemaCreateAndUpdateTeam = yup.object().shape({
 	teamName: yup.string().required('Team Name is required!'),
@@ -23,30 +27,39 @@ const schemaCreateAndUpdateTeam = yup.object().shape({
 	teamImage: yup
 		.mixed<FileList>()
 		.test('required', 'Team Logo is required!', value => {
-			return value instanceof FileList && value.length > 0 // Если файла нет — ошибка
+			// Если файла нет — ошибка
+			return value instanceof FileList && value.length > 0
 		})
 		.test('fileSize', 'The file is too big (max. 2MB)!', value => {
 			if (!value || !(value instanceof FileList) || value.length === 0)
-				return true // Пропускаем, если файла нет
-			return value[0].size <= 2 * 1024 * 1024 // Ограничение 2MB
+				// Пропускаем, если файла нет
+				return true
+			// Ограничение 2MB
+			return value[0].size <= 2 * 1024 * 1024
 		})
 		.test('fileType', 'Incorrect file format (JPG, PNG only)!', value => {
 			if (!value || !(value instanceof FileList) || value.length === 0)
-				return true // Пропускаем, если файла нет
-			return ['image/jpeg', 'image/png'].includes(value[0].type) // Разрешаем только JPG и PNG
+				// Пропускаем, если файла нет
+				return true
+			// Разрешаем только JPG и PNG
+			return ['image/jpeg', 'image/png'].includes(value[0].type)
 		}),
 })
 
-export const TeamAdd: FC = () => {
+export const TeamCreateAndUpdate: FC = () => {
 	const { token } = useAuth()
 	const navigate = useNavigate()
 	const location = useLocation()
 	const [createData, setCreateData] = useState<
 		IAddAndUpdateTeamFormFields | undefined
 	>(undefined)
-	const [updateData, setUpdateData] = useState<
-		IAddAndUpdateTeamFormFields | undefined
+	const [updateData, setUpdateData] = useState<IUpdateTeamData | undefined>(
+		undefined
+	)
+	const [updateFormValues, setUpdateFormValues] = useState<
+		IUpdateTeamData | undefined
 	>(undefined)
+
 	const [previewImage, setPreviewImage] = useState<string | undefined>()
 	const [createTeam, setCreateTeam] = useState<boolean>(false)
 	const [updateTeam, setUpdateTeam] = useState<boolean>(false)
@@ -62,7 +75,6 @@ export const TeamAdd: FC = () => {
 			schemaCreateAndUpdateTeam
 		),
 		mode: 'onTouched',
-		// defaultValues: updateData,
 	})
 
 	// create new team
@@ -73,17 +85,18 @@ export const TeamAdd: FC = () => {
 			createTeamFormData.append('teamDivision', createData.teamDivision)
 			createTeamFormData.append('teamConference', createData.teamConference)
 			createTeamFormData.append('teamYear', createData.teamYear)
-			createTeamFormData.append('teamImage', createData.teamImage![0])
 
 			if (createData.teamImage && createData.teamImage.length > 0) {
-				createTeamFormData.append('teamImage', createData.teamImage![0])
+				createTeamFormData.append('teamImage', createData.teamImage[0])
 			}
 
 			post('/teams/create', token, createTeamFormData)
 				.then(result => {
 					console.log('team create res', result)
 					if (result.success) {
-						navigate('/teams', { state: { name: result.message.team.name } })
+						navigate('/teams', {
+							state: { createTeam: result.message.team.name },
+						})
 					}
 
 					if (!result.success) {
@@ -109,6 +122,7 @@ export const TeamAdd: FC = () => {
 			const locationState = location.state?.team
 
 			let file: File | undefined
+			let fileList: FileList | undefined
 
 			if (locationState.teamImg && locationState.teamImg.data) {
 				// Декодируем Buffer
@@ -116,33 +130,39 @@ export const TeamAdd: FC = () => {
 				// Создаём Blob
 				const blob = new Blob([byteArray], { type: 'image/jpeg' })
 				// Создаём File
-				file = new File([blob], `${locationState.name}`, { type: blob.type })
+				file = new File([blob], `${locationState.name}.jpeg`, {
+					type: blob.type,
+				})
+				// Создаём FileList
+				fileList = convertToFileList([file])
 				// Конвертируем в base64 для отображения в ImgUpload
 				const reader = new FileReader()
 				reader.readAsDataURL(blob)
 				reader.onloadend = () => {
-					setPreviewImage(reader.result as string)
+					setPreviewImage(reader.result?.toString())
 				}
 			}
-			const data: IAddAndUpdateTeamFormFields = {
+
+			const data: IUpdateTeamData = {
 				teamName: locationState.name,
 				teamDivision: locationState.division,
 				teamConference: locationState.conference,
 				teamYear: locationState.year,
-				teamImage: file ? ([file] as unknown as FileList) : undefined, // Преобразуем в FileList
+				teamImage: fileList,
+				teamId: locationState._id,
 			}
-			console.log(data)
-			setUpdateData(data)
-			setUpdateTeam(true)
+
+			setUpdateFormValues(data)
 		}
 	}, [location])
 
 	// set update data in form values
 	useEffect(() => {
-		if (updateData) {
-			reset(updateData) // Сбрасываем форму с новыми значениями
+		if (updateFormValues) {
+			// Сбрасываем форму с новыми значениями
+			reset(updateFormValues)
 		}
-	}, [updateData, reset])
+	}, [updateFormValues, reset])
 
 	// update team by updateData
 	useEffect(() => {
@@ -154,18 +174,32 @@ export const TeamAdd: FC = () => {
 			updateTeamFormData.append('teamConference', updateData.teamConference)
 			updateTeamFormData.append('teamYear', updateData.teamYear)
 
-			if (
-				typeof updateData === 'object' &&
-				updateData.teamImage &&
-				Array.isArray(updateData.teamImage) &&
-				updateData.teamImage.length > 0
-			) {
-				updateTeamFormData.append('teamImage', updateData.teamImage[0])
+			if (updateData.teamId) {
+				updateTeamFormData.append('teamId', updateData.teamId)
 			}
 
-			patch('/teams/update', token, updateTeamFormData).then(result => {
-				console.log('res update team', result)
-			})
+			if (updateFormValues?.teamImage !== updateData.teamImage) {
+				if (updateData.teamImage && updateData.teamImage.length > 0) {
+					updateTeamFormData.append('teamImage', updateData.teamImage[0])
+				}
+			}
+
+			patch('/teams/update', token, updateTeamFormData)
+				.then(result => {
+					console.log('res update team', result)
+					if (result.success) {
+						navigate('/teams', { state: { updateTeam: result.message.name } })
+					}
+					if (!result.success) {
+						setNotification(`${result.message}`)
+					}
+				})
+				.catch(error => {
+					console.log('error update team', error)
+					setNotification(
+						`Something going wrong... Error status: ${error.status}`
+					)
+				})
 		}
 	}, [updateTeam, updateData])
 
@@ -173,6 +207,7 @@ export const TeamAdd: FC = () => {
 		data: IAddAndUpdateTeamFormFields
 	): void => {
 		console.log('add team or update', data)
+
 		if (location.state?.team) {
 			setUpdateData(data)
 			setUpdateTeam(true)
@@ -201,7 +236,7 @@ export const TeamAdd: FC = () => {
 					/>
 				</Left>
 				<Right>
-					<FormBlock>
+					<InputsBlock>
 						<InputComponent
 							register={register}
 							type={'text'}
@@ -248,7 +283,7 @@ export const TeamAdd: FC = () => {
 							/>
 							<ButtonComponent type={'submit'} text={'Save'} variant={'save'} />
 						</Buttons>
-					</FormBlock>
+					</InputsBlock>
 				</Right>
 			</MainForm>
 			{notification ? (
@@ -293,7 +328,7 @@ const Left = styled.div`
 const Right = styled.div`
 	width: 50%;
 `
-const FormBlock = styled.div`
+const InputsBlock = styled.div`
 	width: 365px;
 `
 

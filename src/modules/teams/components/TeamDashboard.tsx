@@ -76,8 +76,8 @@ export const TeamDashboard: FC = () => {
 	}, [currentPage, selectedOption.value, keyword])
 
 	useEffect(() => {
-		if (location.state?.name) {
-			setNotification(`${location.state?.name} team successful created!`)
+		if (location.state?.createTeam) {
+			setNotification(`Team: ${location.state?.name} successful created!`)
 			const timer = setTimeout(() => {
 				closeNotification()
 			}, 6000)
@@ -85,8 +85,17 @@ export const TeamDashboard: FC = () => {
 			return () => clearTimeout(timer)
 		}
 
-		if (location.state?.successDelete) {
-			setNotification(`${location.state?.successDelete}`)
+		if (location.state?.updateTeam) {
+			setNotification(`Team: ${location.state?.updateTeam} successful updated!`)
+			const timer = setTimeout(() => {
+				closeNotification()
+			}, 6000)
+
+			return () => clearTimeout(timer)
+		}
+
+		if (location.state?.deleteTeam) {
+			setNotification(`${location.state?.deleteTeam}`)
 			const timer = setTimeout(() => {
 				closeNotification()
 			}, 6000)
@@ -115,7 +124,13 @@ export const TeamDashboard: FC = () => {
 
 				{notification ? (
 					<NotificationComponent
-						error={location.state?.name ? false : true}
+						error={
+							location.state?.createTeam ||
+							location.state?.updateTeam ||
+							location.state?.deleteTeam
+								? false
+								: true
+						}
 						message={notification}
 						close={closeNotification}
 					/>

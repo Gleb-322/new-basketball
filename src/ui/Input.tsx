@@ -83,15 +83,11 @@ const Label = styled.label<{
 		$typeinput === 'checkbox' ? 'flex' : 'inline'};
 	align-items: ${({ $typeinput }) =>
 		$typeinput === 'checkbox' ? 'center' : 'none'};
-	/* margin-bottom: ${({ $typeinput, $errormessage }) =>
-		$typeinput === 'checkbox' && $errormessage ? '0px' : '24px'}; */
 `
 const Input = styled.input<{
 	$typeinput: string
 	$errormessage: string | undefined
 }>`
-	/* margin-bottom: ${({ $errormessage }) =>
-		$errormessage ? '0px' : '24px'}; */
 	width: 100%;
 	height: 40px;
 	margin-top: 8px;
