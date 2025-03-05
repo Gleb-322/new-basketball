@@ -1,5 +1,10 @@
 import { SetStateAction } from 'react'
-import { FieldValues, Path, UseFormRegister } from 'react-hook-form'
+import {
+	FieldValues,
+	Path,
+	RefCallBack,
+	UseFormRegister,
+} from 'react-hook-form'
 
 export interface ISigninFormFields {
 	loginSignin: string
@@ -68,18 +73,36 @@ export interface IAuthContext {
 }
 
 export interface IOption {
-	value: number
+	value: string
 	label: string
 }
 
-export interface ISelect {
+interface ISelectBase {
 	options: IOption[]
-	selected: IOption
-	onSelect: (selected: IOption) => void
+	name?: string
+	id?: string
+	inputRef?: RefCallBack
+	label?: string
+	error?: string
+	variant: 'pagination' | 'playerPosition'
 }
 
+interface ISelectForPlayers extends ISelectBase {
+	variant: 'playerPosition'
+	selected: IOption | undefined | null
+	onSelect: (option: IOption | null) => void
+}
+
+interface ISelectForPagination extends ISelectBase {
+	variant: 'pagination'
+	selected: IOption
+	onSelect: (option: IOption) => void
+}
+
+export type ISelect = ISelectForPlayers | ISelectForPagination
+
 export const paginateOptions: IOption[] = [
-	{ value: 6, label: '6' },
-	{ value: 12, label: '12' },
-	{ value: 24, label: '24' },
+	{ value: '6', label: '6' },
+	{ value: '12', label: '12' },
+	{ value: '24', label: '24' },
 ]

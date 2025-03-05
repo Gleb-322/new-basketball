@@ -3,13 +3,18 @@ import styled from 'styled-components'
 import { LinkComponent } from '../../../ui/Link'
 import { ButtonComponent } from '../../../ui/Button'
 import { InputComponent } from '../../../ui/Input'
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { ImgUpload } from '../../../ui/ImageUpload'
 import * as yup from 'yup'
-import { SubmitHandler, useForm } from 'react-hook-form'
-import { IAddAndUpdatePlayerFormFields } from '../interfaces/types'
+import { Controller, SubmitHandler, useForm } from 'react-hook-form'
+import {
+	IAddAndUpdatePlayerFormFields,
+	playerPositionOption,
+} from '../interfaces/types'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { DatePickerComponent } from '../../../ui/DatePicker'
+import { SelectComponent } from '../../../ui/Select'
+import { IOption } from '../../../common/interfaces/types'
 
 const schemaCreateAndUpdatePlayer = yup.object().shape({
 	playerName: yup.string().required('Player Name is required!'),
@@ -23,24 +28,30 @@ const schemaCreateAndUpdatePlayer = yup.object().shape({
 		.optional()
 		.test('fileSize', 'The file is too big (max. 2MB)!', value => {
 			if (!value || !(value instanceof FileList) || value.length === 0)
-				return true // Пропускаем, если файла нет
-			return value[0].size <= 2 * 1024 * 1024 // Ограничение 2MB
+				// Пропускаем, если файла нет
+				return true
+			// Ограничение 2MB
+			return value[0].size <= 2 * 1024 * 1024
 		})
 		.test('fileType', 'Incorrect file format (JPG, PNG only)!', value => {
 			if (!value || !(value instanceof FileList) || value.length === 0)
-				return true // Пропускаем, если файла нет
-			return ['image/jpeg', 'image/png'].includes(value[0].type) // Разрешаем только JPG и PNG
+				// Пропускаем, если файла нет
+				return true
+			// Разрешаем только JPG и PNG
+			return ['image/jpeg', 'image/png'].includes(value[0].type)
 		}),
 })
 
 export const PlayerAdd: FC = () => {
 	const navigate = useNavigate()
 	const navigateToPlayerDashboard = () => navigate('/players')
+	const [selectedOption, setSelectedOption] = useState<IOption | undefined>()
 
 	const {
 		register,
 		handleSubmit,
 		reset,
+		control,
 		formState: { errors },
 	} = useForm<IAddAndUpdatePlayerFormFields>({
 		resolver: yupResolver<IAddAndUpdatePlayerFormFields>(
@@ -88,7 +99,25 @@ export const PlayerAdd: FC = () => {
 							focus={true}
 							error={errors.playerName?.message}
 						/>
-						{/*  */}
+						<Controller
+							control={control}
+							name={'playerPosition'}
+							render={({ field: { ref, name, onChange, value } }) => (
+								<SelectComponent
+									inputRef={ref}
+									id={'playerPosition'}
+									name={name}
+									label={'Position'}
+									error={errors.playerPosition?.message}
+									variant={'playerPosition'}
+									options={playerPositionOption}
+									selected={playerPositionOption.find(
+										option => option.value === value
+									)}
+									onSelect={onChange}
+								/>
+							)}
+						/>
 						{/*  */}
 						<InputComponent
 							register={register}

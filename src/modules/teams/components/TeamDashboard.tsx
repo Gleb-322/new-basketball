@@ -55,7 +55,9 @@ export const TeamDashboard: FC = () => {
 						}
 					})
 					setPageCount(
-						Math.ceil(result.message.countTeams / selectedOption.value)
+						Math.ceil(
+							result.message.countTeams / parseInt(selectedOption.value)
+						)
 					)
 					setTeams(result.message.teams)
 					setDecodedAvatars(avatars)
@@ -144,6 +146,7 @@ export const TeamDashboard: FC = () => {
 							countPage={pageCount}
 						/>
 						<SelectComponent
+							variant={'pagination'}
 							options={paginateOptions}
 							selected={selectedOption}
 							onSelect={setSelectedOption}

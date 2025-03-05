@@ -1,3 +1,5 @@
+import { IOption } from '../../../common/interfaces/types'
+
 export interface IPlayers {
 	__v: number
 	_id: string
@@ -30,3 +32,11 @@ export interface IPlayerHeader {
 	search: string
 	onSearch: (value: string) => void
 }
+
+export const playerPositionOption: IOption[] = [
+	{ value: 'Center Forward', label: 'Center Forward' },
+	{ value: 'Guard Forward', label: 'Guard Forward' },
+	{ value: 'Forward', label: 'Forward' },
+	{ value: 'Center', label: 'Center' },
+	{ value: 'Guard', label: 'Guard' },
+]

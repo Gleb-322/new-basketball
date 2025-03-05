@@ -54,7 +54,9 @@ export const PlayerDashboard: FC = () => {
 						}
 					})
 					setPageCount(
-						Math.ceil(result.message.countPlayers / selectedOption.value)
+						Math.ceil(
+							result.message.countPlayers / parseInt(selectedOption.value)
+						)
 					)
 					setPlayers(result.message.players)
 					setDecodedAvatars(avatars)
@@ -128,6 +130,7 @@ export const PlayerDashboard: FC = () => {
 							countPage={pageCount}
 						/>
 						<SelectComponent
+							variant={'pagination'}
 							options={paginateOptions}
 							selected={selectedOption}
 							onSelect={setSelectedOption}

@@ -7,42 +7,95 @@ export const SelectComponent: FC<ISelect> = ({
 	options,
 	onSelect,
 	selected,
+	variant,
+	name,
+	id,
+	label,
+	error,
 }) => {
 	const handleChangeSelect = (newValue: SingleValue<IOption>) => {
-		console.log(newValue)
 		if (newValue) {
 			onSelect(newValue)
 		}
 	}
 	return (
-		<StyledSelect
-			classNamePrefix="react-select"
-			value={selected}
-			isSearchable={false}
-			onChange={handleChangeSelect}
-			menuPlacement="top"
-			name="color"
-			options={options}
-		/>
+		<>
+			{variant === 'playerPosition' ? (
+				<Container>
+					<Label htmlFor={id}>{label}</Label>
+					<StyledSelect
+						name={name}
+						options={options}
+						id={id}
+						isClearable={true}
+						isSearchable={false}
+						value={selected}
+						onChange={handleChangeSelect}
+						menuPlacement={'bottom'}
+						classNamePrefix="react-select"
+						$variant={variant}
+					/>
+					{error && <InputError>{error}</InputError>}
+				</Container>
+			) : (
+				<StyledSelect
+					options={options}
+					value={selected}
+					isSearchable={false}
+					onChange={handleChangeSelect}
+					menuPlacement={'top'}
+					classNamePrefix="react-select"
+					$variant={variant}
+				/>
+			)}
+		</>
 	)
 }
 
-const StyledSelect = styled(Select<IOption>)`
+const Container = styled.div`
+	height: 92px;
+`
+
+const Label = styled.label`
+	font-family: 'Avenir Medium';
+	font-weight: 500;
+	font-size: 14px;
+	line-height: 24px;
+	cursor: pointer;
+	color: ${({ theme }) => theme.colors.grey};
+`
+
+const StyledSelect = styled(Select<IOption>)<{
+	$variant: 'pagination' | 'playerPosition'
+}>`
 	.react-select__control {
-		background-color: ${({ theme }) => theme.colors.white};
-		border: ${({ theme }) => `0.5px solid ${theme.colors.lightestGrey}`};
+		background-color: ${({ theme, $variant }) =>
+			$variant === 'playerPosition'
+				? theme.colors.mostLightGrey
+				: theme.colors.white};
+		border: ${({ theme, $variant }) =>
+			$variant === 'playerPosition'
+				? `0.5px solid ${theme.colors.mostLightGrey}`
+				: `0.5px solid ${theme.colors.lightestGrey}`};
 		color: ${({ theme }) => theme.colors.darkGrey};
 		font-family: 'Avenir Medium';
 		font-weight: 500;
 		font-size: 14px;
 		line-height: 24px;
+		margin-top: ${({ $variant }) =>
+			$variant === 'playerPosition' ? '8px' : '0px'};
 		border-radius: 4px;
-		width: 88px;
+		height: 40px;
+		width: ${({ $variant }) =>
+			$variant === 'playerPosition' ? '100%' : '88px'};
 		cursor: pointer;
 	}
 
 	.react-select__control:hover {
-		border: ${({ theme }) => `0.5px solid ${theme.colors.lightestGrey}`};
+		border: ${({ theme, $variant }) =>
+			$variant === 'playerPosition'
+				? `0.5px solid ${theme.colors.mostLightGrey}`
+				: `0.5px solid ${theme.colors.lightestGrey}`} !important;
 	}
 
 	.react-select__option--is-focused {
@@ -53,6 +106,8 @@ const StyledSelect = styled(Select<IOption>)`
 		background-color: ${({ theme }) => theme.colors.white};
 		box-shadow: none;
 		overflow: hidden;
+		margin-top: 3px;
+		margin-bottom: 6px;
 		border: ${({ theme }) => `0.5px solid ${theme.colors.lightestGrey}`};
 	}
 
@@ -86,7 +141,10 @@ const StyledSelect = styled(Select<IOption>)`
 	}
 
 	.css-hlgwow {
-		justify-content: center !important;
+		justify-content: ${({ $variant }) =>
+			$variant === 'playerPosition' ? 'flex-start' : 'center'} !important;
+		padding-left: ${({ $variant }) =>
+			$variant === 'playerPosition' ? '12px' : '0px'};
 	}
 
 	.css-15lsz6c-indicatorContainer:hover {
@@ -105,6 +163,23 @@ const StyledSelect = styled(Select<IOption>)`
 		box-shadow: none !important;
 	}
 	.css-t3ipsp-control:hover {
-		border-color: ${({ theme }) => theme.colors.lightestGrey};
+		border-color: ${({ theme, $variant }) =>
+			$variant === 'playerPosition'
+				? `0.5px solid ${theme.colors.mostLightGrey}`
+				: `0.5px solid ${theme.colors.lightestGrey}`} !important;
 	}
+
+	.css-qr46ko {
+		padding-top: 0px;
+		padding-bottom: 0px;
+	}
+`
+const InputError = styled.div`
+	margin-top: 2px;
+	margin-bottom: 4px;
+	font-family: 'Avenir Medium';
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 18px;
+	color: ${({ theme }) => theme.colors.lightestRed};
 `
