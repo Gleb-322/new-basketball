@@ -149,7 +149,7 @@ export const TeamDashboard: FC = () => {
 							variant={'pagination'}
 							options={paginateOptions}
 							selected={selectedOption}
-							onSelect={setSelectedOption}
+							onChange={setSelectedOption}
 						/>
 					</>
 				) : null}

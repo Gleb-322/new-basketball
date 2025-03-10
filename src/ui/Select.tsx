@@ -1,29 +1,36 @@
 import { FC } from 'react'
 import Select, { SingleValue } from 'react-select'
+// import Creatable from 'react-select/creatable'
 import styled from 'styled-components'
 import { IOption, ISelect } from '../common/interfaces/types'
 
 export const SelectComponent: FC<ISelect> = ({
 	options,
-	onSelect,
+	onChange,
 	selected,
 	variant,
 	name,
 	id,
 	label,
 	error,
+	inputRef,
+	isLoading,
 }) => {
 	const handleChangeSelect = (newValue: SingleValue<IOption>) => {
-		if (newValue) {
-			onSelect(newValue)
+		if (variant === 'pagination') {
+			if (newValue === null) return
+			onChange(newValue)
+		} else {
+			onChange(newValue)
 		}
 	}
 	return (
 		<>
-			{variant === 'playerPosition' ? (
+			{variant === 'player' ? (
 				<Container>
 					<Label htmlFor={id}>{label}</Label>
 					<StyledSelect
+						ref={inputRef}
 						name={name}
 						options={options}
 						id={id}
@@ -34,6 +41,10 @@ export const SelectComponent: FC<ISelect> = ({
 						menuPlacement={'bottom'}
 						classNamePrefix="react-select"
 						$variant={variant}
+						isLoading={isLoading}
+						noOptionsMessage={() =>
+							isLoading ? 'Loading options...' : 'No positions found'
+						}
 					/>
 					{error && <InputError>{error}</InputError>}
 				</Container>
@@ -66,15 +77,13 @@ const Label = styled.label`
 `
 
 const StyledSelect = styled(Select<IOption>)<{
-	$variant: 'pagination' | 'playerPosition'
+	$variant: 'pagination' | 'player'
 }>`
 	.react-select__control {
 		background-color: ${({ theme, $variant }) =>
-			$variant === 'playerPosition'
-				? theme.colors.mostLightGrey
-				: theme.colors.white};
+			$variant === 'player' ? theme.colors.mostLightGrey : theme.colors.white};
 		border: ${({ theme, $variant }) =>
-			$variant === 'playerPosition'
+			$variant === 'player'
 				? `0.5px solid ${theme.colors.mostLightGrey}`
 				: `0.5px solid ${theme.colors.lightestGrey}`};
 		color: ${({ theme }) => theme.colors.darkGrey};
@@ -82,18 +91,16 @@ const StyledSelect = styled(Select<IOption>)<{
 		font-weight: 500;
 		font-size: 14px;
 		line-height: 24px;
-		margin-top: ${({ $variant }) =>
-			$variant === 'playerPosition' ? '8px' : '0px'};
+		margin-top: ${({ $variant }) => ($variant === 'player' ? '8px' : '0px')};
 		border-radius: 4px;
 		height: 40px;
-		width: ${({ $variant }) =>
-			$variant === 'playerPosition' ? '100%' : '88px'};
+		width: ${({ $variant }) => ($variant === 'player' ? '100%' : '88px')};
 		cursor: pointer;
 	}
 
 	.react-select__control:hover {
 		border: ${({ theme, $variant }) =>
-			$variant === 'playerPosition'
+			$variant === 'player'
 				? `0.5px solid ${theme.colors.mostLightGrey}`
 				: `0.5px solid ${theme.colors.lightestGrey}`} !important;
 	}
@@ -142,9 +149,8 @@ const StyledSelect = styled(Select<IOption>)<{
 
 	.css-hlgwow {
 		justify-content: ${({ $variant }) =>
-			$variant === 'playerPosition' ? 'flex-start' : 'center'} !important;
-		padding-left: ${({ $variant }) =>
-			$variant === 'playerPosition' ? '12px' : '0px'};
+			$variant === 'player' ? 'flex-start' : 'center'} !important;
+		padding-left: ${({ $variant }) => ($variant === 'player' ? '12px' : '0px')};
 	}
 
 	.css-15lsz6c-indicatorContainer:hover {
@@ -164,7 +170,7 @@ const StyledSelect = styled(Select<IOption>)<{
 	}
 	.css-t3ipsp-control:hover {
 		border-color: ${({ theme, $variant }) =>
-			$variant === 'playerPosition'
+			$variant === 'player'
 				? `0.5px solid ${theme.colors.mostLightGrey}`
 				: `0.5px solid ${theme.colors.lightestGrey}`} !important;
 	}

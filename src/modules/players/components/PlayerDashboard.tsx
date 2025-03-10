@@ -133,7 +133,7 @@ export const PlayerDashboard: FC = () => {
 							variant={'pagination'}
 							options={paginateOptions}
 							selected={selectedOption}
-							onSelect={setSelectedOption}
+							onChange={setSelectedOption}
 						/>
 					</>
 				) : null}

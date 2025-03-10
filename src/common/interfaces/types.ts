@@ -1,10 +1,13 @@
+import { Dayjs } from 'dayjs'
 import { SetStateAction } from 'react'
 import {
+	ControllerRenderProps,
 	FieldValues,
 	Path,
 	RefCallBack,
 	UseFormRegister,
 } from 'react-hook-form'
+import { IAddAndUpdatePlayerFormFields } from '../../modules/players/interfaces/types'
 
 export interface ISigninFormFields {
 	loginSignin: string
@@ -84,19 +87,20 @@ interface ISelectBase {
 	inputRef?: RefCallBack
 	label?: string
 	error?: string
-	variant: 'pagination' | 'playerPosition'
+	isLoading?: boolean
+	variant: 'pagination' | 'player'
 }
 
 interface ISelectForPlayers extends ISelectBase {
-	variant: 'playerPosition'
+	variant: 'player'
 	selected: IOption | undefined | null
-	onSelect: (option: IOption | null) => void
+	onChange: (option: IOption | null) => void
 }
 
 interface ISelectForPagination extends ISelectBase {
 	variant: 'pagination'
 	selected: IOption
-	onSelect: (option: IOption) => void
+	onChange: (option: IOption) => void
 }
 
 export type ISelect = ISelectForPlayers | ISelectForPagination
@@ -106,3 +110,13 @@ export const paginateOptions: IOption[] = [
 	{ value: '12', label: '12' },
 	{ value: '24', label: '24' },
 ]
+
+export interface IDatePicker {
+	name: string
+	id: string
+	label: string
+	inputRef?: RefCallBack
+	value: Dayjs | null
+	error?: string
+	onChange: (newValue: Dayjs | null) => void
+}

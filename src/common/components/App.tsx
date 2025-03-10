@@ -11,7 +11,7 @@ import { TeamDetail } from '../../modules/teams/components/TeamDetail'
 import { PlayerLayout } from '../../modules/players/components/PlayerLayout'
 import { PlayerDashboard } from '../../modules/players/components/PlayerDashboard'
 import { PlayerDetail } from '../../modules/players/components/PlayerDetail'
-import { PlayerAdd } from '../../modules/players/components/PlayerAdd'
+import { PlayerCreateAndUpdate } from '../../modules/players/components/PlayerAddAndUpdate'
 
 const theme = {
 	colors: {
@@ -49,7 +49,7 @@ export const App = () => {
 
 					<Route path="players" element={<PlayerLayout />}>
 						<Route index element={<PlayerDashboard />} />
-						<Route path="add" element={<PlayerAdd />} />
+						<Route path="add" element={<PlayerCreateAndUpdate />} />
 						<Route path=":_id" element={<PlayerDetail />} />
 					</Route>
 				</Route>

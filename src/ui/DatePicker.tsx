@@ -1,82 +1,111 @@
-import { FC, useState } from 'react'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
+import { FC } from 'react'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import dayjs from 'dayjs'
+import styled from 'styled-components'
+import { IDatePicker } from '../common/interfaces/types'
 
-export const DatePickerComponent: FC = () => {
-	const [startDate, setStartDate] = useState<Date | null>(new Date())
+export const DatePickerComponent: FC<IDatePicker> = ({
+	name,
+	id,
+	label,
+	value,
+	onChange,
+	error,
+}) => {
 	return (
-		<DatePicker selected={startDate} onChange={date => setStartDate(date)} />
+		<LocalizationProvider dateAdapter={AdapterDayjs}>
+			<Container>
+				<Label htmlFor={id}>{label}</Label>
+				<StyledDatePicker
+					format="DD-MM-YYYY"
+					value={value}
+					onChange={date => onChange(date ? dayjs(date) : null)}
+					slotProps={{
+						textField: {
+							id,
+							name,
+							variant: 'outlined',
+							fullWidth: true,
+							inputProps: {
+								readOnly: true,
+							},
+							placeholder: 'DD-MM-YYYY',
+						},
+					}}
+				/>
+				{error && <InputError>{error}</InputError>}
+			</Container>
+		</LocalizationProvider>
 	)
 }
 
-// .react-datepicker__triangle {
-//   display: none;
-// }
+const Container = styled.div`
+	height: 92px;
+`
 
-// .react-datepicker__day.react-datepicker__day--keyboard-selected {
-//   border: none;
-//   border-radius: 7px;
-//   background-color: var(--dark);
-//   color: var(--white);
-// }
+const Label = styled.label`
+	font-family: 'Avenir Medium';
+	font-weight: 500;
+	font-size: 14px;
+	line-height: 24px;
+	color: ${({ theme }) => theme.colors.grey};
+`
+const StyledDatePicker = styled(DatePicker)`
+	& .MuiOutlinedInput-root {
+		background-color: ${({ theme }) => theme.colors.mostLightGrey};
+		border-radius: 4px;
+		border: none;
+		outline: none;
+		height: 40px;
+		margin-top: 8px;
+		font-family: 'Avenir Medium';
+		font-weight: 500;
+		font-size: 14px;
+		line-height: 24px;
+		color: ${({ theme }) => theme.colors.darkGrey};
+	}
 
-// .react-datepicker__day.react-datepicker__day--keyboard-selected:hover {
-//   border: none;
-//   border-radius: 7px;
-//   background-color: var(--dark);
-//   color: var(--white);
-// }
+	& .MuiOutlinedInput-input {
+		padding: 0px 0px 0px 12px;
+		box-sizing: border-box;
+		font-family: 'Avenir Medium';
+		font-weight: 500;
+		font-size: 14px;
+		line-height: 24px;
+	}
+	& .MuiInputAdornment-root {
+		color: ${({ theme }) => theme.colors.mostLightGrey};
+	}
+	& .MuiSvgIcon-root {
+		width: 16px;
+		height: 16px;
+	}
 
-// .react-datepicker-popper .react-datepicker__navigation {
-//   padding-top: 12px;
-//   color: #000;
-// }
+	& .MuiOutlinedInput-notchedOutline {
+		border: none;
+		outline: none;
+	}
 
-// .react-datepicker {
-//   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.189);
-//   border: none !important;
-//   font-family: "Inter" !important;
-// }
+	.css-1n04w30-MuiInputBase-root-MuiOutlinedInput-root.Mui-focused
+		.MuiOutlinedInput-notchedOutline {
+		border: none;
+		box-shadow: 0 0 5px 0 ${({ theme }) => theme.colors.focusInput};
+	}
 
-// .react-datepicker__header {
-//   border-bottom: solid 5px var(--light) !important;
-//   background: white !important;
-// }
+	.css-1n04w30-MuiInputBase-root-MuiOutlinedInput-root:hover
+		.MuiOutlinedInput-notchedOutline {
+		border: ${({ theme }) => `solid 1px ${theme.colors.mostLightGrey}`};
+	}
+`
 
-// .react-datepicker__current-month {
-//   color: var(--dark) !important;
-// }
-
-// .react-datepicker__day.react-datepicker__day--today {
-//   border-radius: 7px;
-//   border: solid 2px var(--brand) !important;
-//   background-color: white !important;
-//   color: var(--dark) !important;
-//   width: 30px;
-//   height: 30px;
-// }
-
-// .react-datepicker__day.react-datepicker__day--selected {
-//   border: none;
-//   border-radius: 7px;
-//   background-color: black;
-//   color: white;
-// }
-
-// .react-datepicker__day--selected:hover,
-// .react-datepicker__day--in-selecting-range:hover,
-// .react-datepicker__day--in-range:hover,
-// .react-datepicker__month-text--selected:hover,
-// .react-datepicker__month-text--in-selecting-range:hover,
-// .react-datepicker__month-text--in-range:hover,
-// .react-datepicker__quarter-text--selected:hover,
-// .react-datepicker__quarter-text--in-selecting-range:hover,
-// .react-datepicker__quarter-text--in-range:hover,
-// .react-datepicker__year-text--selected:hover,
-// .react-datepicker__year-text--in-selecting-range:hover,
-// .react-datepicker__year-text--in-range:hover {
-//   border: none;
-//   border-radius: 7px !important;
-//   background-color: var(--brand) !important;
-//   color: var(--dark) !important;
-// }
+const InputError = styled.div`
+	margin-top: 2px;
+	margin-bottom: 4px;
+	font-family: 'Avenir Medium';
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 18px;
+	color: ${({ theme }) => theme.colors.lightestRed};
+`

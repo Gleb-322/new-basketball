@@ -1,4 +1,5 @@
 import { IOption } from '../../../common/interfaces/types'
+import * as yup from 'yup'
 
 export interface IPlayers {
 	__v: number
@@ -15,12 +16,13 @@ export interface IPlayers {
 
 export interface IAddAndUpdatePlayerFormFields {
 	playerName: string
-	playerPosition: string
-	playerHeight: number
-	playerWeight: number
+	playerPosition?: IOption | string | undefined | null
+	playerTeam?: IOption | string | undefined | null
+	playerHeight: string
+	playerWeight: string
 	playerBirthday: Date
-	playerNumber?: number
-	playerImage?: FileList
+	playerNumber?: yup.Maybe<string | undefined>
+	playerImage?: yup.Maybe<FileList | undefined>
 }
 
 export interface IPlayerList {
