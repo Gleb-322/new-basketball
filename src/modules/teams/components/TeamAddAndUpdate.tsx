@@ -6,6 +6,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import {
 	IAddAndUpdateTeamFormFields,
+	ITeams,
 	IUpdateTeamData,
 } from '../interfaces/types'
 import { FC, useEffect, useState } from 'react'
@@ -14,7 +15,9 @@ import { patch, post } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 import { ImgUpload } from '../../../ui/ImageUpload'
 import { useAuth } from '../../../common/hooks/useAuth'
-import { convertToFileList } from '../helpers/converterFileToFileList'
+import { convertToFileList } from '../../../common/helpers/converterFileToFileList'
+import { convertBufferToFile } from '../helpers/converterBufferToFile'
+import { convertFileToBase64 } from '../../../common/helpers/converterFileToBase64'
 
 const schemaCreateAndUpdateTeam = yup.object().shape({
 	teamName: yup.string().required('Team Name is required!'),
@@ -50,6 +53,7 @@ export const TeamCreateAndUpdate: FC = () => {
 	const { token } = useAuth()
 	const navigate = useNavigate()
 	const location = useLocation()
+
 	const [createData, setCreateData] = useState<
 		IAddAndUpdateTeamFormFields | undefined
 	>(undefined)
@@ -59,10 +63,11 @@ export const TeamCreateAndUpdate: FC = () => {
 	const [updateFormValues, setUpdateFormValues] = useState<
 		IUpdateTeamData | undefined
 	>(undefined)
-
-	const [previewImage, setPreviewImage] = useState<string | undefined>()
 	const [createTeam, setCreateTeam] = useState<boolean>(false)
 	const [updateTeam, setUpdateTeam] = useState<boolean>(false)
+
+	const [previewImage, setPreviewImage] = useState<string | undefined>()
+
 	const [notification, setNotification] = useState<string | null>(null)
 
 	const {
@@ -119,29 +124,19 @@ export const TeamCreateAndUpdate: FC = () => {
 	// catch one team data for update team
 	useEffect(() => {
 		if (location.state?.team) {
-			const locationState = location.state?.team
+			const locationState = location.state?.team as ITeams
 
-			let file: File | undefined
-			let fileList: FileList | undefined
+			const file = convertBufferToFile(locationState)
 
-			if (locationState.teamImg && locationState.teamImg.data) {
-				// Декодируем Buffer
-				const byteArray = new Uint8Array(locationState.teamImg.data)
-				// Создаём Blob
-				const blob = new Blob([byteArray], { type: 'image/jpeg' })
-				// Создаём File
-				file = new File([blob], `${locationState.name}.jpeg`, {
-					type: blob.type,
+			const fileList = file ? convertToFileList([file]) : undefined
+
+			convertFileToBase64(file)
+				.then(result => {
+					setPreviewImage(result)
 				})
-				// Создаём FileList
-				fileList = convertToFileList([file])
-				// Конвертируем в base64 для отображения в ImgUpload
-				const reader = new FileReader()
-				reader.readAsDataURL(blob)
-				reader.onloadend = () => {
-					setPreviewImage(reader.result?.toString())
-				}
-			}
+				.catch(error => {
+					setNotification(`Something going wrong... Error: ${error.message}`)
+				})
 
 			const data: IUpdateTeamData = {
 				teamName: locationState.name,

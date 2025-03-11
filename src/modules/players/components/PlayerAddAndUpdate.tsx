@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import styled from 'styled-components'
 import { LinkComponent } from '../../../ui/Link'
 import { ButtonComponent } from '../../../ui/Button'
@@ -19,6 +19,7 @@ import { IOption } from '../../../common/interfaces/types'
 import { get } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 import dayjs from 'dayjs'
+import { useAuth } from '../../../common/hooks/useAuth'
 
 const schemaCreateAndUpdatePlayer = yup.object().shape(
 	{
@@ -83,11 +84,18 @@ const schemaCreateAndUpdatePlayer = yup.object().shape(
 )
 
 export const PlayerCreateAndUpdate: FC = () => {
+	const { token } = useAuth()
 	const navigate = useNavigate()
-	const navigateToPlayerDashboard = () => navigate('/players')
+	const location = useLocation()
 
-	const [teamOption, setTeamOption] = useState<IOption[] | undefined | null>()
-	const [isOptionsLoading, setIsOptionsLoading] = useState<boolean>(false)
+	const [createData, setCreateData] = useState<IPlayers>()
+	const [updateData, setUpdateData] = useState()
+	const [createPlayer, setCreatePlayer] = useState<boolean>(false)
+	const [updatePlayer, setUpdatePlayer] = useState<boolean>(false)
+	const [updateFormValues, setUpdateFormValues] = useState(undefined)
+
+	const [previewImage, setPreviewImage] = useState<string | undefined>()
+
 	const [notification, setNotification] = useState<string | null>(null)
 
 	const {
@@ -103,35 +111,6 @@ export const PlayerCreateAndUpdate: FC = () => {
 		),
 	})
 
-	useEffect(() => {
-		setIsOptionsLoading(true)
-		get('/teams/get', undefined)
-			.then(result => {
-				console.log('get all teams', result)
-				if (result.success) {
-					const teamsCopy = JSON.parse(
-						JSON.stringify(result.message.teams)
-					) as IPlayers[]
-					const teamOptions = teamsCopy.map(team => {
-						return { value: team.name, label: team.name }
-					})
-					setTeamOption(teamOptions)
-					setIsOptionsLoading(false)
-				}
-				if (!result.success) {
-					setNotification(`${result.message}`)
-					setIsOptionsLoading(false)
-				}
-			})
-			.catch(error => {
-				console.log('error get teams', error)
-				setNotification(
-					`Something going wrong... Error status: ${error.status}`
-				)
-				setIsOptionsLoading(false)
-			})
-	}, [])
-
 	const onSubmit: SubmitHandler<IAddAndUpdatePlayerFormFields> = (
 		data: IAddAndUpdatePlayerFormFields
 	): void => {
@@ -145,6 +124,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 		// 	setCreateTeam(true)
 		// }
 	}
+	const navigateToPlayerDashboard = () => navigate('/players')
 	const closeNotification = () => setNotification(null)
 	return (
 		<Section>
@@ -211,15 +191,17 @@ export const PlayerCreateAndUpdate: FC = () => {
 									label={'Team'}
 									error={errors.playerTeam?.message}
 									variant={'player'}
-									options={teamOption ?? []}
+									options={location.state?.teamOption ?? []}
 									selected={
-										teamOption?.find(option => option.value === value) ?? null
+										location.state?.teamOption.find(
+											(option: IOption) => option.value === value
+										) ?? null
 									}
 									onChange={(val: IOption | null) => {
 										onChange(val?.value ?? null)
 										trigger('playerTeam')
 									}}
-									isLoading={isOptionsLoading}
+									isLoading={location.state.isOptionsLoading}
 								/>
 							)}
 						/>

@@ -54,9 +54,7 @@ export const SignUp: FC = () => {
 					if (result.success) {
 						setAuthCookie(result.message.token)
 						setToken(result.message.token)
-						// Cookies.set('name', result.message.user.name, {
-						// 	expires: 1,
-						// })
+						localStorage.setItem('name', result.message.user.name)
 						navigate('/teams')
 					}
 

@@ -36,7 +36,7 @@ export interface IInputProps<FormInputs extends FieldValues> {
 export interface IButton {
 	type?: 'button' | 'reset' | 'submit' | undefined
 	text: string
-	variant: 'signin' | 'signup' | 'cancel' | 'add' | 'save'
+	variant: 'signin' | 'signup' | 'cancel' | 'addPlayer' | 'addTeam' | 'save'
 	disabled?: boolean
 	onClick?: () => void
 }

@@ -10,7 +10,7 @@ import * as yup from 'yup'
 import { ISigninFormFields } from '../interfaces/types'
 import { NotificationComponent } from '../../ui/Notification'
 import { post } from '../../api/baseRequest'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
 
@@ -20,6 +20,7 @@ const schemaSignIn = yup.object().shape({
 })
 
 export const SignIn: FC = () => {
+	const location = useLocation()
 	const { setToken } = useAuth()
 	const navigate = useNavigate()
 	const [formData, setFormData] = useState<ISigninFormFields | null>(null)
@@ -43,9 +44,7 @@ export const SignIn: FC = () => {
 					if (result.success) {
 						setAuthCookie(result.message.token)
 						setToken(result.message.token)
-						// Cookies.set('name', result.message.user.name, {
-						// 	expires: 1,
-						// })
+						localStorage.setItem('name', result.message.user.name)
 						navigate('/teams')
 					}
 
@@ -65,6 +64,17 @@ export const SignIn: FC = () => {
 			allowSendData(false)
 		}
 	}, [formData, sendData])
+
+	useEffect(() => {
+		if (location.state?.successLogout) {
+			setNotification(`${location.state?.successLogout}`)
+			const timer = setTimeout(() => {
+				closeNotification()
+			}, 6000)
+
+			return () => clearTimeout(timer)
+		}
+	}, [location])
 
 	const onSubmit: SubmitHandler<ISigninFormFields> = (
 		data: ISigninFormFields
@@ -116,7 +126,7 @@ export const SignIn: FC = () => {
 			</Right>
 			{notification ? (
 				<NotificationComponent
-					error={true}
+					error={location.state?.successLogout ? false : true}
 					message={notification}
 					close={closeNotification}
 				/>

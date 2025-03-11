@@ -5,13 +5,12 @@ import { FC } from 'react'
 
 export const TeamList: FC<ITeamList> = ({ teams, avatars }) => {
 	const navigate = useNavigate()
-
 	return (
 		<Teams>
 			{teams.map(team => (
 				<Card onClick={() => navigate(`/teams/${team._id}`)} key={team._id}>
 					<Image>
-						{avatars[team._id] ? (
+						{avatars instanceof Object && avatars[team._id] ? (
 							<Img src={avatars[team._id]} alt={team.name} />
 						) : (
 							<div>Loading image...</div>

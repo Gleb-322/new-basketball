@@ -31,6 +31,8 @@ export interface IPlayerList {
 }
 
 export interface IPlayerHeader {
+	teamOption: IOption[] | undefined | null
+	isOptionsLoading: boolean
 	search: string
 	onSearch: (value: string) => void
 }

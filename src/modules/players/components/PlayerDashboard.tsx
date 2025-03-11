@@ -26,7 +26,40 @@ export const PlayerDashboard: FC = () => {
 	const [pageCount, setPageCount] = useState<number>(0)
 	const [keyword, setKeyword] = useState<string>('')
 
+	const [teamOption, setTeamOption] = useState<IOption[] | undefined | null>()
+	const [isOptionsLoading, setIsOptionsLoading] = useState<boolean>(false)
+
 	const location = useLocation()
+
+	useEffect(() => {
+		setIsOptionsLoading(true)
+		get('/teams/get', undefined)
+			.then(result => {
+				console.log('get all teams', result)
+				if (result.success) {
+					const teamsCopy = JSON.parse(
+						JSON.stringify(result.message.teams)
+					) as IPlayers[]
+					const teamOptions = teamsCopy.map(team => {
+						return { value: team.name, label: team.name }
+					})
+					setTeamOption(teamOptions)
+
+					setIsOptionsLoading(false)
+				}
+				if (!result.success) {
+					setNotification(`${result.message}`)
+					setIsOptionsLoading(false)
+				}
+			})
+			.catch(error => {
+				console.log('error get teams', error)
+				setNotification(
+					`Something going wrong... Error status: ${error.status}`
+				)
+				setIsOptionsLoading(false)
+			})
+	}, [])
 
 	useEffect(() => {
 		setLoading(true)
@@ -104,7 +137,12 @@ export const PlayerDashboard: FC = () => {
 	const closeNotification = () => setNotification(null)
 	return (
 		<>
-			<PlayerHeader search={keyword} onSearch={setKeyword} />
+			<PlayerHeader
+				search={keyword}
+				isOptionsLoading={isOptionsLoading}
+				teamOption={teamOption}
+				onSearch={setKeyword}
+			/>
 			<Main $loading={loading}>
 				{loading ? (
 					<LoadingComponent />

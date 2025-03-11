@@ -143,7 +143,7 @@ const PseudoInputCheckbox = styled.div<{
 	&::after {
 		content: '';
 		position: absolute;
-		left: 4.7px;
+		left: 3.7px;
 		top: 1.2px;
 		width: 2.3px;
 		height: 5.5px;

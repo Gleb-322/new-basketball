@@ -13,7 +13,7 @@ export interface ITeams {
 
 export interface ITeamList {
 	teams: ITeams[]
-	avatars: { [key: string]: string }
+	avatars: string | { [key: string]: string }
 }
 
 export interface IAddAndUpdateTeamFormFields {

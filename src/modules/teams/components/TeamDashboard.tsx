@@ -11,14 +11,18 @@ import { PaginationComponent } from '../../../ui/Pagination'
 import { SelectComponent } from '../../../ui/Select'
 import { LoadingComponent } from '../../../ui/Loading'
 import { IOption, paginateOptions } from '../../../common/interfaces/types'
+import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 
 export const TeamDashboard: FC = () => {
 	const [notification, setNotification] = useState<string | null>(null)
 	const [loading, setLoading] = useState<boolean>(false)
 	const [teams, setTeams] = useState<ITeams[]>([])
-	const [decodedAvatars, setDecodedAvatars] = useState<{
-		[key: string]: string
-	}>({})
+	const [decodedAvatars, setDecodedAvatars] = useState<
+		| string
+		| {
+				[key: string]: string
+		  }
+	>({})
 	const [selectedOption, setSelectedOption] = useState<IOption>(
 		paginateOptions[0]
 	)
@@ -40,27 +44,16 @@ export const TeamDashboard: FC = () => {
 			.then(result => {
 				console.log('get teams', result)
 				if (result.success) {
-					const teamsCopy = JSON.parse(
-						JSON.stringify(result.message.teams)
-					) as ITeams[]
-					const avatars: { [key: string]: string } = {}
-					teamsCopy.forEach((team: ITeams) => {
-						if (team.teamImg && team.teamImg.data) {
-							// Декодируем Buffer
-							const byteArray = new Uint8Array(team.teamImg.data)
-							// Создаём Blob
-							const blob = new Blob([byteArray], { type: 'image/jpeg' })
-							// Генерируем URL
-							avatars[team._id] = URL.createObjectURL(blob)
-						}
-					})
 					setPageCount(
 						Math.ceil(
 							result.message.countTeams / parseInt(selectedOption.value)
 						)
 					)
 					setTeams(result.message.teams)
-					setDecodedAvatars(avatars)
+					const avatars = convertBufferToUrl(result.message.teams)
+					if (avatars) {
+						setDecodedAvatars(avatars)
+					}
 					setLoading(false)
 				}
 				if (!result.success) {
@@ -79,7 +72,7 @@ export const TeamDashboard: FC = () => {
 
 	useEffect(() => {
 		if (location.state?.createTeam) {
-			setNotification(`Team: ${location.state?.name} successful created!`)
+			setNotification(`Team: ${location.state?.createTeam} successful created!`)
 			const timer = setTimeout(() => {
 				closeNotification()
 			}, 6000)

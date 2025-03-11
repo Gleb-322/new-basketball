@@ -10,12 +10,15 @@ import { NotificationComponent } from '../../../ui/Notification'
 import { LoadingComponent } from '../../../ui/Loading'
 import { LinkComponent } from '../../../ui/Link'
 import { useAuth } from '../../../common/hooks/useAuth'
+import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 
 export const TeamDetail: FC = () => {
 	const { token } = useAuth()
 	const [team, setTeam] = useState<ITeams>()
 	const [deleteTeam, setDeleteTeam] = useState<boolean>(false)
-	const [decodedTeamAvatar, setDecodedTeamAvatar] = useState<string>()
+	const [decodedTeamAvatar, setDecodedTeamAvatar] = useState<
+		string | { [key: string]: string }
+	>()
 	const [notification, setNotification] = useState<string | null>(null)
 	const [loading, setLoading] = useState<boolean>(false)
 	const params = useParams()
@@ -25,19 +28,15 @@ export const TeamDetail: FC = () => {
 	// get team by id
 	useEffect(() => {
 		setLoading(true)
+
 		if (params._id) {
 			get(`/teams/get/${params._id}`, undefined)
 				.then(result => {
 					console.log('get team by id', result)
 					if (result.success) {
-						const teamCopy = JSON.parse(
-							JSON.stringify(result.message)
-						) as ITeams
-
-						if (teamCopy.teamImg && teamCopy.teamImg.data) {
-							const byteArray = new Uint8Array(teamCopy.teamImg.data) // Декодируем Buffer
-							const blob = new Blob([byteArray], { type: 'image/jpeg' }) // Создаём Blob
-							setDecodedTeamAvatar(URL.createObjectURL(blob)) // Генерируем URL
+						const avatar = convertBufferToUrl(result.message)
+						if (avatar) {
+							setDecodedTeamAvatar(avatar)
 						}
 						setTeam(result.message)
 						setLoading(false)
@@ -56,8 +55,6 @@ export const TeamDetail: FC = () => {
 				})
 		}
 	}, [params])
-
-	// update team by id
 
 	// delete team by id
 	useEffect(() => {
@@ -179,7 +176,7 @@ export const TeamDetail: FC = () => {
 
 						<MainDetail>
 							<Left>
-								{decodedTeamAvatar ? (
+								{typeof decodedTeamAvatar === 'string' && decodedTeamAvatar ? (
 									<Img src={decodedTeamAvatar} alt={team?.name} />
 								) : (
 									<div>Loading image...</div>

@@ -9,14 +9,15 @@ export const ButtonComponent: FC<IButton> = ({
 	disabled,
 	onClick,
 }) => {
-	const isAuthButton = variant === 'signup' || variant === 'signin'
+	const isAuthAndIsTeams =
+		variant === 'signup' || variant === 'signin' || variant === 'addPlayer'
 
 	return (
 		<Button
 			type={type}
 			$variant={variant}
 			onClick={onClick}
-			disabled={isAuthButton ? !disabled : false}
+			disabled={isAuthAndIsTeams ? !disabled : false}
 		>
 			{text}
 		</Button>
@@ -24,14 +25,17 @@ export const ButtonComponent: FC<IButton> = ({
 }
 
 const Button = styled.button<{
-	$variant: 'signin' | 'signup' | 'cancel' | 'add' | 'save'
+	$variant: 'signin' | 'signup' | 'cancel' | 'addPlayer' | 'addTeam' | 'save'
 }>`
 	cursor: pointer;
 	margin-top: ${({ $variant }) =>
-		$variant === 'add' || $variant === 'signup' ? '0px' : '12px'};
-	margin-bottom: ${({ $variant }) => ($variant === 'add' ? '0px' : '24px')};
+		$variant === 'addPlayer' || $variant === 'addTeam' || $variant === 'signup'
+			? '0px'
+			: '12px'};
+	margin-bottom: ${({ $variant }) =>
+		$variant === 'addPlayer' || $variant === 'addTeam' ? '0px' : '24px'};
 	width: ${({ $variant }) =>
-		$variant === 'add'
+		$variant === 'addPlayer' || $variant === 'addTeam'
 			? '105px'
 			: $variant === 'cancel' || $variant === 'save'
 			? '45%'

@@ -22,7 +22,7 @@ export const TeamHeader: FC<ITeamHeader> = ({ search, onSearch }) => {
 			<ButtonComponent
 				type={'button'}
 				text={'Add +'}
-				variant={'add'}
+				variant={'addTeam'}
 				onClick={navigateToAddTeam}
 			/>
 		</Header>

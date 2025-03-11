@@ -2,6 +2,8 @@ import { FC, useEffect, useState } from 'react'
 import { ReactComponent as AddPhotoSVG } from '../assets/icons/add-photo.svg'
 import styled from 'styled-components'
 import { IInputProps } from '../common/interfaces/types'
+import { convertFileToBase64 } from '../common/helpers/converterFileToBase64'
+import { NotificationComponent } from './Notification'
 
 export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	FormInputs extends Record<string, any>
@@ -14,53 +16,65 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	defaultImage,
 }: IInputProps<FormInputs> & { defaultImage?: string }) => {
 	const [image, setImage] = useState<string | undefined>('')
+	const [notification, setNotification] = useState<string | null>(null)
 
 	useEffect(() => {
 		// Обновляем изображение, если передали defaultImage
 		setImage(defaultImage)
 	}, [defaultImage])
 
+	const closeNotification = () => setNotification(null)
 	return (
-		<Conatiner>
-			<Label $image={image}>
-				{image ? (
-					<>
-						<Img src={image} alt="try again" />
-						<ResetButton
-							type="button"
-							onClick={() => setImage('')}
-						></ResetButton>
-					</>
-				) : (
-					<>
-						<AddPhotoSVG />
-						<Input
-							{...register(name, {
-								onChange: e => {
-									console.log(e.target?.files[0])
-									if (e.target?.files[0]) {
-										const reader = new FileReader()
-										reader.readAsDataURL(e.target?.files[0])
-										reader.onloadend = () => {
-											setImage(reader.result?.toString())
+		<>
+			<Conatiner>
+				<Label $image={image}>
+					{image ? (
+						<>
+							<Img src={image} alt="try again" />
+							<ResetButton
+								type="button"
+								onClick={() => setImage('')}
+							></ResetButton>
+						</>
+					) : (
+						<>
+							<AddPhotoSVG />
+							<Input
+								{...register(name, {
+									onChange: e => {
+										if (e.target?.files[0]) {
+											convertFileToBase64(e.target?.files[0])
+												.then(result => setImage(result))
+												.catch(error =>
+													setNotification(
+														`Something going wrong... Error: ${error.message}`
+													)
+												)
 										}
-									}
-								},
-							})}
-							id={id}
-							tabIndex={-1}
-							type={type}
-						/>
-					</>
-				)}
-			</Label>
-			{image ? (
-				<ResetButton type="button" onClick={() => setImage('')}>
-					X
-				</ResetButton>
+									},
+								})}
+								id={id}
+								tabIndex={-1}
+								type={type}
+							/>
+						</>
+					)}
+				</Label>
+				{image ? (
+					<ResetButton type="button" onClick={() => setImage('')}>
+						X
+					</ResetButton>
+				) : null}
+				{error && <InputError>{error}</InputError>}
+			</Conatiner>
+			{notification ? (
+				<NotificationComponent
+					error={true}
+					message={notification}
+					close={closeNotification}
+				/>
 			) : null}
-			{error && <InputError>{error}</InputError>}
-		</Conatiner>
+		</>
 	)
 }
 

@@ -7,43 +7,82 @@ import { ReactComponent as PlayersSVGRed } from '../../assets/icons/person-red.s
 import { ReactComponent as SignOutSVGRed } from '../../assets/icons/input.svg'
 import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
+import { FC, useEffect, useState } from 'react'
+import { post } from '../../api/baseRequest'
+import { NotificationComponent } from '../../ui/Notification'
 
-export const Navbar = () => {
-	const { setToken } = useAuth()
+export const Navbar: FC = () => {
+	const { token, setToken } = useAuth()
 	const location = useLocation()
 	const navigate = useNavigate()
 
-	const handlerSignOut = () => {
-		setAuthCookie(undefined)
-		setToken(undefined)
-		navigate('/signin')
-	}
+	const [logout, setLogout] = useState<boolean>(false)
+	const [notification, setNotification] = useState<string | null>(null)
+
+	useEffect(() => {
+		if (logout) {
+			post('/users/logout', token)
+				.then(result => {
+					if (result.success) {
+						setAuthCookie(undefined)
+						setToken(undefined)
+						localStorage.removeItem('name')
+						navigate('/signin', { state: { successLogout: result.message } })
+					}
+
+					if (!result.success) {
+						setNotification(`${result.message}`)
+					}
+				})
+				.catch(error => {
+					console.log('error logout', error)
+					setNotification(
+						`Something going wrong... Error status: ${error.status}`
+					)
+				})
+		}
+
+		return () => {
+			setLogout(false)
+		}
+	}, [logout])
+
+	const closeNotification = () => setNotification(null)
 
 	return (
-		<Container>
-			<List>
-				<StyledNavLink to="/teams">
-					{location.pathname.includes('/teams') ? (
-						<TeamsSVGRed />
-					) : (
-						<TeamsSVG />
-					)}
-					Teams
-				</StyledNavLink>
-				<StyledNavLink to="/players">
-					{location.pathname.includes('/players') ? (
-						<PlayersSVGRed />
-					) : (
-						<PlayersSVG />
-					)}
-					Players
-				</StyledNavLink>
-			</List>
-			<SignOut type="button" onClick={handlerSignOut}>
-				<SignOutSVGRed /> <br />
-				Sign out
-			</SignOut>
-		</Container>
+		<>
+			<Container>
+				<List>
+					<StyledNavLink to="/teams">
+						{location.pathname.includes('/teams') ? (
+							<TeamsSVGRed />
+						) : (
+							<TeamsSVG />
+						)}
+						Teams
+					</StyledNavLink>
+					<StyledNavLink to="/players">
+						{location.pathname.includes('/players') ? (
+							<PlayersSVGRed />
+						) : (
+							<PlayersSVG />
+						)}
+						Players
+					</StyledNavLink>
+				</List>
+				<SignOut type="button" onClick={() => setLogout(true)}>
+					<SignOutSVGRed /> <br />
+					Sign out
+				</SignOut>
+			</Container>
+			{notification ? (
+				<NotificationComponent
+					message={notification}
+					error={true}
+					close={closeNotification}
+				/>
+			) : null}
+		</>
 	)
 }
 

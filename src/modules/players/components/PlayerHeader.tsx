@@ -6,10 +6,21 @@ import { FC } from 'react'
 import { IPlayerHeader } from '../interfaces/types'
 import { MultiSelectComponent } from '../../../ui/MultiSelect'
 
-export const PlayerHeader: FC<IPlayerHeader> = ({ search, onSearch }) => {
+export const PlayerHeader: FC<IPlayerHeader> = ({
+	search,
+	onSearch,
+	teamOption,
+	isOptionsLoading,
+}) => {
 	const navigate = useNavigate()
 
-	const navigateToAddPlayer = () => navigate('/players/add')
+	const navigateToAddPlayer = () =>
+		navigate('/players/add', {
+			state: {
+				teamOption,
+				isOptionsLoading,
+			},
+		})
 	return (
 		<Header>
 			<FilterBlock>
@@ -26,7 +37,8 @@ export const PlayerHeader: FC<IPlayerHeader> = ({ search, onSearch }) => {
 				type={'button'}
 				text={'Add +'}
 				onClick={navigateToAddPlayer}
-				variant={'add'}
+				variant={'addPlayer'}
+				disabled={teamOption && teamOption.length > 0 ? true : false}
 			/>
 		</Header>
 	)
