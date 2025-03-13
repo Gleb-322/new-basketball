@@ -1,66 +1,146 @@
 import styled from 'styled-components'
-import playerLogo from '../../../assets/images/Player.png'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
+import { FC, useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router'
+import { get } from '../../../api/baseRequest'
+import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
+import { useAuth } from '../../../common/hooks/useAuth'
+import { IPlayers } from '../interfaces/types'
+import { NotificationComponent } from '../../../ui/Notification'
+import { LinkComponent } from '../../../ui/Link'
+import { ReactComponent as NoImageSVG } from '../../../assets/images/noImage.svg'
+import { LoadingComponent } from '../../../ui/Loading'
 
-export const PlayerDetail = () => {
+dayjs.extend(utc)
+
+export const PlayerDetail: FC = () => {
+	const params = useParams()
+	const navigate = useNavigate()
+	const { token } = useAuth()
+	const [player, setPlayer] = useState<IPlayers>()
+	const [deletePlayer, setDeletePlayer] = useState<boolean>(false)
+	const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<
+		string | { [key: string]: string }
+	>()
+	const [notification, setNotification] = useState<string | null>(null)
+	const [loading, setLoading] = useState<boolean>(false)
+
+	// get player by id
+	useEffect(() => {
+		setLoading(true)
+
+		if (params._id) {
+			get(`/players/get/${params._id}`, undefined)
+				.then(result => {
+					console.log('get player by id', result)
+					if (result.success) {
+						const avatar = convertBufferToUrl(result.message)
+						if (avatar) {
+							setDecodedPlayerAvatar(avatar)
+						}
+						setPlayer(result.message)
+						setLoading(false)
+					}
+					if (!result.success) {
+						setNotification(`${result.message}`)
+						setLoading(false)
+					}
+				})
+				.catch(error => {
+					console.log('error', error)
+					setNotification(
+						`Something going wrong... Error status: ${error.status}`
+					)
+					setLoading(false)
+				})
+		}
+	}, [params])
+	const closeNotification = () => setNotification(null)
 	return (
-		<DetailBlock>
-			<HeaderDetail>
-				<HeaderText>
-					Players <Slash>/</Slash> Judge Sex
-				</HeaderText>
+		<Container>
+			{loading ? (
+				<LoadingComponent />
+			) : (
+				<DetailBlock>
+					<HeaderDetail>
+						<HeaderText>
+							<LinkComponent route={'/players'} text={'Players'} />{' '}
+							<Slash>/</Slash> {player?.name}
+						</HeaderText>
 
-				<div>
-					<ButtonEdit>
-						<EditSVG />
-					</ButtonEdit>
-					<ButtonDelete>
-						<DeleteSVG />
-					</ButtonDelete>
-				</div>
-			</HeaderDetail>
+						<div>
+							<ButtonEdit>
+								<EditSVG />
+							</ButtonEdit>
+							<ButtonDelete>
+								<DeleteSVG />
+							</ButtonDelete>
+						</div>
+					</HeaderDetail>
 
-			<MainDetail>
-				<Left>
-					<Img src={playerLogo} alt="logo" />
-				</Left>
-				<Right>
-					<Name>
-						Judge Sex<Number>#69</Number>{' '}
-					</Name>
-					<TextBlock>
-						<TextColumn>
-							<Key>Position</Key>
-							<Value>Always on Top</Value>
-						</TextColumn>
+					<MainDetail>
+						<Left>
+							{typeof decodedPlayerAvatar === 'string' &&
+							decodedPlayerAvatar ? (
+								<Img src={decodedPlayerAvatar} alt={player?.name} />
+							) : (
+								<StyledNoImageSVG />
+							)}
+						</Left>
+						<Right>
+							<Name>
+								{player?.name}
+								<Number>#{player?.number}</Number>{' '}
+							</Name>
+							<TextBlock>
+								<TextColumn>
+									<Key>Position</Key>
+									<Value>{player?.position}</Value>
+								</TextColumn>
 
-						<TextColumn>
-							<Key>Team</Key>
-							<Value>PornHub</Value>
-						</TextColumn>
+								<TextColumn>
+									<Key>Team</Key>
+									<Value>{player?.team.name}</Value>
+								</TextColumn>
 
-						<TextColumn>
-							<Key>Height</Key>
-							<Value>25 cm</Value>
-						</TextColumn>
+								<TextColumn>
+									<Key>Height</Key>
+									<Value>{player?.height} cm</Value>
+								</TextColumn>
 
-						<TextColumn>
-							<Key>Weight</Key>
-							<Value>100 kg</Value>
-						</TextColumn>
+								<TextColumn>
+									<Key>Weight</Key>
+									<Value>{player?.weight} kg</Value>
+								</TextColumn>
 
-						<TextColumn>
-							<Key>Age</Key>
-							<Value>Milf Hunter</Value>
-						</TextColumn>
-					</TextBlock>
-				</Right>
-			</MainDetail>
-		</DetailBlock>
+								<TextColumn>
+									<Key>Age</Key>
+
+									<Value>
+										{dayjs.utc().diff(dayjs.utc(player?.birthday), 'year')}
+									</Value>
+								</TextColumn>
+							</TextBlock>
+						</Right>
+					</MainDetail>
+				</DetailBlock>
+			)}
+			{notification ? (
+				<NotificationComponent
+					error={true}
+					message={notification}
+					close={closeNotification}
+				/>
+			) : null}
+		</Container>
 	)
 }
-
+const Container = styled.div`
+	position: relative;
+`
 const DetailBlock = styled.div`
 	border-radius: 10px;
 	background-image: ${({ theme }) => theme.colors.gradientTeamDetail};
@@ -117,6 +197,10 @@ const Left = styled.div`
 	align-items: flex-end;
 `
 const Img = styled.img`
+	width: 530px;
+	height: 460px;
+`
+const StyledNoImageSVG = styled(NoImageSVG)`
 	width: 530px;
 	height: 460px;
 `

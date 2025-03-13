@@ -16,10 +16,11 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { DatePickerComponent } from '../../../ui/DatePicker'
 import { SelectComponent } from '../../../ui/Select'
 import { IOption } from '../../../common/interfaces/types'
-import { get } from '../../../api/baseRequest'
+import { get, post } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 import dayjs from 'dayjs'
 import { useAuth } from '../../../common/hooks/useAuth'
+import { ITeams } from '../../teams/interfaces/types'
 
 const schemaCreateAndUpdatePlayer = yup.object().shape(
 	{
@@ -88,11 +89,16 @@ export const PlayerCreateAndUpdate: FC = () => {
 	const navigate = useNavigate()
 	const location = useLocation()
 
-	const [createData, setCreateData] = useState<IPlayers>()
+	const [createData, setCreateData] = useState<
+		IAddAndUpdatePlayerFormFields | undefined
+	>(undefined)
 	const [updateData, setUpdateData] = useState()
 	const [createPlayer, setCreatePlayer] = useState<boolean>(false)
 	const [updatePlayer, setUpdatePlayer] = useState<boolean>(false)
 	const [updateFormValues, setUpdateFormValues] = useState(undefined)
+
+	const [teamOption, setTeamOption] = useState<IOption[]>()
+	const [teams, setTeams] = useState<ITeams[] | []>([])
 
 	const [previewImage, setPreviewImage] = useState<string | undefined>()
 
@@ -111,10 +117,71 @@ export const PlayerCreateAndUpdate: FC = () => {
 		),
 	})
 
+	useEffect(() => {
+		if (createPlayer && createData) {
+			const createPlayerFormData = new FormData()
+			createPlayerFormData.append('playerName', createData.playerName)
+			if (typeof createData.playerPosition === 'string') {
+				createPlayerFormData.append('playerPosition', createData.playerPosition)
+			}
+			if (teams.length > 0) {
+				const team = teams.filter(team => team.name === createData.playerTeam)
+				createPlayerFormData.append('teamId', team[0]._id)
+			}
+			createPlayerFormData.append('playerHeight', createData.playerHeight)
+			createPlayerFormData.append('playerWeight', createData.playerWeight)
+			createPlayerFormData.append(
+				'playerBirthday',
+				createData.playerBirthday.toISOString()
+			)
+			if (createData.playerNumber) {
+				createPlayerFormData.append('playerNumber', createData.playerNumber)
+			}
+			if (createData.playerImage && createData.playerImage.length > 0) {
+				createPlayerFormData.append('playerImage', createData.playerImage[0])
+			}
+
+			post('/players/create', token, createPlayerFormData)
+				.then(result => {
+					console.log('player create res', result)
+					if (result.success) {
+						navigate('/players', {
+							state: { createPlayer: result.message.player.name },
+						})
+					}
+
+					if (!result.success) {
+						setNotification(`${result.message}`)
+					}
+				})
+				.catch(error => {
+					console.log('player create res error', error)
+					setNotification(
+						`Something going wrong... Error status: ${error.status}`
+					)
+				})
+		}
+
+		return () => {
+			setCreatePlayer(false)
+		}
+	}, [createData, createPlayer])
+
+	useEffect(() => {
+		if (location.state?.teamOption) {
+			setTeamOption(location.state?.teamOption)
+		}
+		if (location.state?.teams) {
+			setTeams(location.state?.teams)
+		}
+	}, [location])
+
 	const onSubmit: SubmitHandler<IAddAndUpdatePlayerFormFields> = (
 		data: IAddAndUpdatePlayerFormFields
 	): void => {
 		console.log('add player or update', data)
+		setCreateData(data)
+		setCreatePlayer(true)
 
 		// if (location.state?.team) {
 		// 	setUpdateData(data)
@@ -191,9 +258,9 @@ export const PlayerCreateAndUpdate: FC = () => {
 									label={'Team'}
 									error={errors.playerTeam?.message}
 									variant={'player'}
-									options={location.state?.teamOption ?? []}
+									options={teamOption ?? []}
 									selected={
-										location.state?.teamOption.find(
+										teamOption?.find(
 											(option: IOption) => option.value === value
 										) ?? null
 									}

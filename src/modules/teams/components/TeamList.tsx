@@ -13,7 +13,7 @@ export const TeamList: FC<ITeamList> = ({ teams, avatars }) => {
 						{avatars instanceof Object && avatars[team._id] ? (
 							<Img src={avatars[team._id]} alt={team.name} />
 						) : (
-							<div>Loading image...</div>
+							<NoImg>Loading image...</NoImg>
 						)}
 					</Image>
 
@@ -78,4 +78,11 @@ const Year = styled.div`
 	font-weight: 500;
 	font-size: 14px;
 	color: ${({ theme }) => theme.colors.lightGrey};
+`
+
+const NoImg = styled.div`
+	font-family: 'Avenir Medium';
+	font-weight: 500;
+	font-size: 18px;
+	color: ${({ theme }) => theme.colors.white};
 `

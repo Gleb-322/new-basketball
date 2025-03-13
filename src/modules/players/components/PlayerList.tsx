@@ -1,22 +1,31 @@
 import { FC } from 'react'
 import styled from 'styled-components'
+import { ReactComponent as NoImageSVG } from '../../../assets/images/noImage.svg'
 import { IPlayerList } from '../interfaces/types'
 import { useNavigate } from 'react-router'
 
 export const PlayerList: FC<IPlayerList> = ({ players, avatars }) => {
 	const navigate = useNavigate()
+
 	return (
 		<Players>
 			{players.map(player => (
-				<Card onClick={() => navigate('/players/detail')} key={player._id}>
+				<Card
+					onClick={() => navigate(`/players/${player._id}`)}
+					key={player._id}
+				>
 					<Image>
-						<Img src={'playerLogo'} alt="logo" />
+						{avatars instanceof Object && avatars[player._id] ? (
+							<Img src={avatars[player._id]} alt={player.name} />
+						) : (
+							<StyledNoImageSVG />
+						)}
 					</Image>
 					<TextBlock>
 						<Name>
-							{player.name} <Number>#{player.number}</Number>
+							{player.name} <Number>#{player?.number}</Number>
 						</Name>
-						<Team>{player.team}</Team>
+						<Team>{player.team.name}</Team>
 					</TextBlock>
 				</Card>
 			))}
@@ -38,7 +47,7 @@ const Card = styled.div`
 	background-color: ${({ theme }) => theme.colors.darkGrey};
 	border-radius: 4px;
 `
-const Image = styled.div`
+const Image = styled.div<{}>`
 	width: 100%;
 	height: 70%;
 	display: flex;
@@ -81,4 +90,8 @@ const Team = styled.div`
 	font-weight: 500;
 	font-size: 14px;
 	color: ${({ theme }) => theme.colors.lightGrey};
+`
+const StyledNoImageSVG = styled(NoImageSVG)`
+	width: 270px;
+	height: 210px;
 `

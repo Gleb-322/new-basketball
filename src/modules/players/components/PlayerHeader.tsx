@@ -11,6 +11,7 @@ export const PlayerHeader: FC<IPlayerHeader> = ({
 	onSearch,
 	teamOption,
 	isOptionsLoading,
+	teams,
 }) => {
 	const navigate = useNavigate()
 
@@ -19,6 +20,7 @@ export const PlayerHeader: FC<IPlayerHeader> = ({
 			state: {
 				teamOption,
 				isOptionsLoading,
+				teams,
 			},
 		})
 	return (

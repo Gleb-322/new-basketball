@@ -149,7 +149,7 @@ export const TeamDetail: FC = () => {
 
 	const closeNotification = () => setNotification(null)
 	return (
-		<Container $loading={loading}>
+		<Container>
 			{loading ? (
 				<LoadingComponent />
 			) : (
@@ -262,9 +262,7 @@ export const TeamDetail: FC = () => {
 	)
 }
 
-const Container = styled.div<{
-	$loading: boolean
-}>`
+const Container = styled.div`
 	position: relative;
 `
 

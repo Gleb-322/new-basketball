@@ -1,16 +1,17 @@
 import { IOption } from '../../../common/interfaces/types'
 import * as yup from 'yup'
+import { ITeams } from '../../teams/interfaces/types'
 
 export interface IPlayers {
 	__v: number
 	_id: string
 	name: string
 	position: string
-	team: string
-	height: number
-	weight: number
-	birthday: string
-	number: number
+	team: ITeams
+	height: string
+	weight: string
+	birthday: Date
+	number: string
 	playerImg: { type: string; data: number[] }
 }
 
@@ -27,12 +28,13 @@ export interface IAddAndUpdatePlayerFormFields {
 
 export interface IPlayerList {
 	players: IPlayers[]
-	avatars: { [key: string]: string }
+	avatars: { [key: string]: string } | string
 }
 
 export interface IPlayerHeader {
 	teamOption: IOption[] | undefined | null
 	isOptionsLoading: boolean
+	teams: ITeams[]
 	search: string
 	onSearch: (value: string) => void
 }

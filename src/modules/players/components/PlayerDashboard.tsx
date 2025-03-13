@@ -11,14 +11,20 @@ import { PlayerEmptyList } from './PlayerEmptyList'
 import { LoadingComponent } from '../../../ui/Loading'
 import { NotificationComponent } from '../../../ui/Notification'
 import { get } from '../../../api/baseRequest'
+import { ITeams } from '../../teams/interfaces/types'
+import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 
 export const PlayerDashboard: FC = () => {
-	const [players, setPlayers] = useState<IPlayers[] | []>([])
+	const [players, setPlayers] = useState<IPlayers[]>([])
+	const [teams, setTeams] = useState<ITeams[]>([])
 	const [notification, setNotification] = useState<string | null>(null)
 	const [loading, setLoading] = useState<boolean>(false)
-	const [decodedAvatars, setDecodedAvatars] = useState<{
-		[key: string]: string
-	}>({})
+	const [decodedAvatars, setDecodedAvatars] = useState<
+		| {
+				[key: string]: string
+		  }
+		| string
+	>({})
 	const [selectedOption, setSelectedOption] = useState<IOption>(
 		paginateOptions[0]
 	)
@@ -44,7 +50,7 @@ export const PlayerDashboard: FC = () => {
 						return { value: team.name, label: team.name }
 					})
 					setTeamOption(teamOptions)
-
+					setTeams(result.message.teams)
 					setIsOptionsLoading(false)
 				}
 				if (!result.success) {
@@ -70,29 +76,18 @@ export const PlayerDashboard: FC = () => {
 			undefined
 		)
 			.then(result => {
-				console.log('res get players')
+				console.log('res get players', result)
 				if (result.success) {
-					const playersCopy = JSON.parse(
-						JSON.stringify(result.message.players)
-					) as IPlayers[]
-					const avatars: { [key: string]: string } = {}
-					playersCopy.forEach((player: IPlayers) => {
-						if (player.playerImg && player.playerImg.data) {
-							// decode Buffer
-							const arrayBuffer = new Uint8Array(player.playerImg.data)
-							// create Blob
-							const blob = new Blob([arrayBuffer], { type: 'image/jpeg' })
-							// create img Url
-							avatars[player._id] = URL.createObjectURL(blob)
-						}
-					})
 					setPageCount(
 						Math.ceil(
 							result.message.countPlayers / parseInt(selectedOption.value)
 						)
 					)
 					setPlayers(result.message.players)
-					setDecodedAvatars(avatars)
+					const avatars = convertBufferToUrl(result.message.players)
+					if (avatars) {
+						setDecodedAvatars(avatars)
+					}
 					setLoading(false)
 				}
 				if (!result.success) {
@@ -110,8 +105,10 @@ export const PlayerDashboard: FC = () => {
 	}, [currentPage, keyword, selectedOption.value])
 
 	useEffect(() => {
-		if (location.state?.name) {
-			setNotification(`${location.state?.name} player successful created!`)
+		if (location.state?.createPlayer) {
+			setNotification(
+				`${location.state?.createPlayer} player successful created!`
+			)
 			const timer = setTimeout(() => {
 				closeNotification()
 			}, 6000)
@@ -141,12 +138,13 @@ export const PlayerDashboard: FC = () => {
 				search={keyword}
 				isOptionsLoading={isOptionsLoading}
 				teamOption={teamOption}
+				teams={teams}
 				onSearch={setKeyword}
 			/>
 			<Main $loading={loading}>
 				{loading ? (
 					<LoadingComponent />
-				) : players.length ? (
+				) : players.length > 0 ? (
 					<PlayerList players={players} avatars={decodedAvatars} />
 				) : (
 					<PlayerEmptyList />
