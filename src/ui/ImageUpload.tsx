@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { ReactComponent as AddPhotoSVG } from '../assets/icons/add-photo.svg'
 import styled from 'styled-components'
 import { IInputProps } from '../common/interfaces/types'
@@ -14,7 +14,9 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	register,
 	error,
 	defaultImage,
+	setValue,
 }: IInputProps<FormInputs> & { defaultImage?: string }) => {
+	const fileInputRef = useRef<HTMLInputElement>(null)
 	const [image, setImage] = useState<string | undefined>('')
 	const [notification, setNotification] = useState<string | null>(null)
 
@@ -22,6 +24,16 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 		// Обновляем изображение, если передали defaultImage
 		setImage(defaultImage)
 	}, [defaultImage])
+
+	const resetImage = () => {
+		setImage('')
+		if (setValue) {
+			setValue('playerImage', undefined)
+		}
+		if (fileInputRef.current) {
+			fileInputRef.current.value = '' // Сброс физически у input type="file"
+		}
+	}
 
 	const closeNotification = () => setNotification(null)
 	return (
@@ -31,10 +43,7 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 					{image ? (
 						<>
 							<Img src={image} alt="try again" />
-							<ResetButton
-								type="button"
-								onClick={() => setImage('')}
-							></ResetButton>
+							<ResetButton type="button" onClick={resetImage}></ResetButton>
 						</>
 					) : (
 						<>
@@ -56,12 +65,13 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 								id={id}
 								tabIndex={-1}
 								type={type}
+								ref={fileInputRef}
 							/>
 						</>
 					)}
 				</Label>
 				{image ? (
-					<ResetButton type="button" onClick={() => setImage('')}>
+					<ResetButton type="button" onClick={resetImage}>
 						X
 					</ResetButton>
 				) : null}

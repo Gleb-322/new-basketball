@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { useLocation, useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
 import playerLogo from '../../../assets/images/Player.png'
@@ -22,7 +22,6 @@ export const TeamDetail: FC = () => {
 	const [notification, setNotification] = useState<string | null>(null)
 	const [loading, setLoading] = useState<boolean>(false)
 	const params = useParams()
-	const location = useLocation()
 	const navigate = useNavigate()
 
 	// get team by id
@@ -39,11 +38,9 @@ export const TeamDetail: FC = () => {
 							setDecodedTeamAvatar(avatar)
 						}
 						setTeam(result.message)
-						setLoading(false)
 					}
 					if (!result.success) {
 						setNotification(`${result.message}`)
-						setLoading(false)
 					}
 				})
 				.catch(error => {
@@ -51,25 +48,26 @@ export const TeamDetail: FC = () => {
 					setNotification(
 						`Something going wrong... Error status: ${error.status}`
 					)
-					setLoading(false)
 				})
+				.finally(() => setLoading(false))
 		}
 	}, [params])
 
-	// delete team by id
+	// delete one team by id
 	useEffect(() => {
+		if (!deleteTeam) return
+
 		setLoading(true)
+
 		if (deleteTeam) {
 			remove(`/teams/delete/${team?._id}`, token)
 				.then(result => {
 					console.log('delete team by id', result)
 					if (result.success) {
 						navigate('/teams', { state: { deleteTeam: result.message } })
-						setLoading(false)
 					}
 					if (!result.success) {
 						setNotification(`${result.message}`)
-						setLoading(false)
 					}
 				})
 				.catch(error => {
@@ -77,13 +75,13 @@ export const TeamDetail: FC = () => {
 					setNotification(
 						`Something going wrong... Error status: ${error.status}`
 					)
-					setLoading(false)
 				})
+				.finally(() => setLoading(false))
 		}
 		return () => {
 			setDeleteTeam(false)
 		}
-	}, [deleteTeam])
+	}, [deleteTeam, navigate, team?._id, token])
 
 	const players: any[] = [
 		{
@@ -147,7 +145,6 @@ export const TeamDetail: FC = () => {
 		},
 	]
 
-	const closeNotification = () => setNotification(null)
 	return (
 		<Container>
 			{loading ? (
@@ -255,7 +252,7 @@ export const TeamDetail: FC = () => {
 				<NotificationComponent
 					error={true}
 					message={notification}
-					close={closeNotification}
+					close={() => setNotification(null)}
 				/>
 			) : null}
 		</Container>

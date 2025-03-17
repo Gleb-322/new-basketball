@@ -1,7 +1,8 @@
 import styled from 'styled-components'
 import { ReactComponent as EmptySearchTeamSVG } from '../../../assets/images/emptySearchTeam.svg'
+import { FC } from 'react'
 
-export const TeamEmptyList = () => {
+export const TeamEmptyList: FC = () => {
 	return (
 		<EmptyTeams>
 			<EmptyBlock>

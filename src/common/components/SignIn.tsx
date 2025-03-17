@@ -23,8 +23,8 @@ export const SignIn: FC = () => {
 	const location = useLocation()
 	const { setToken } = useAuth()
 	const navigate = useNavigate()
-	const [formData, setFormData] = useState<ISigninFormFields | null>(null)
-	const [sendData, allowSendData] = useState<boolean>(false)
+	const [signInData, setSignInData] = useState<ISigninFormFields | null>(null)
+	const [sendSignInData, allowSendSignInData] = useState<boolean>(false)
 	const [notification, setNotification] = useState<string | null>(null)
 
 	const {
@@ -37,8 +37,10 @@ export const SignIn: FC = () => {
 	})
 
 	useEffect(() => {
-		if (sendData) {
-			post('/users/login', undefined, JSON.stringify(formData))
+		if (!sendSignInData && !signInData) return
+
+		if (sendSignInData && signInData) {
+			post('/users/login', undefined, JSON.stringify(signInData))
 				.then(result => {
 					console.log(result)
 					if (result.success) {
@@ -61,9 +63,9 @@ export const SignIn: FC = () => {
 		}
 
 		return () => {
-			allowSendData(false)
+			allowSendSignInData(false)
 		}
-	}, [formData, sendData])
+	}, [signInData, sendSignInData, setToken, navigate])
 
 	useEffect(() => {
 		if (location.state?.successLogout) {
@@ -80,8 +82,8 @@ export const SignIn: FC = () => {
 		data: ISigninFormFields
 	): void => {
 		console.log('Sign in', data)
-		setFormData(data)
-		allowSendData(true)
+		setSignInData(data)
+		allowSendSignInData(true)
 	}
 
 	const closeNotification = () => setNotification(null)

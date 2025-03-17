@@ -35,12 +35,17 @@ export const TeamDashboard: FC = () => {
 	useEffect(() => {
 		setLoading(true)
 		console.log('keyword', keyword)
-		get(
-			`/teams/get?page=${currentPage + 1}&limit=${
-				selectedOption.value
-			}&keyword=${keyword}`,
-			undefined
-		)
+
+		const params = new URLSearchParams()
+		params.append('page', (currentPage + 1).toString())
+		params.append('limit', selectedOption.value)
+		params.append('keyword', keyword)
+
+		// добавляем массив фильтров
+		// const filters = selectedTeams.map(team => team._id) // массив id команд
+		// filters.forEach(id => params.append('filters', id))
+
+		get(`/teams/get?${params.toString()}`, undefined)
 			.then(result => {
 				console.log('get teams', result)
 				if (result.success) {
@@ -54,11 +59,9 @@ export const TeamDashboard: FC = () => {
 					if (avatars) {
 						setDecodedAvatars(avatars)
 					}
-					setLoading(false)
 				}
 				if (!result.success) {
 					setNotification(`${result.message}`)
-					setLoading(false)
 				}
 			})
 			.catch(error => {
@@ -66,8 +69,8 @@ export const TeamDashboard: FC = () => {
 				setNotification(
 					`Something going wrong... Error status: ${error.status}`
 				)
-				setLoading(false)
 			})
+			.finally(() => setLoading(false))
 	}, [currentPage, selectedOption.value, keyword])
 
 	useEffect(() => {
@@ -99,10 +102,8 @@ export const TeamDashboard: FC = () => {
 		}
 	}, [location])
 
-	const handlePageClick = (data: { selected: SetStateAction<number> }) => {
-		console.log('pagination data', data)
+	const handlePageClick = (data: { selected: SetStateAction<number> }) =>
 		setCurrentPage(data.selected)
-	}
 
 	const closeNotification = () => setNotification(null)
 	return (

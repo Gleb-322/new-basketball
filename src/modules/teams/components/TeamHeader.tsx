@@ -8,7 +8,6 @@ import { ITeamHeader } from '../interfaces/types'
 export const TeamHeader: FC<ITeamHeader> = ({ search, onSearch }) => {
 	const navigate = useNavigate()
 
-	const navigateToAddTeam = () => navigate('/teams/add')
 	return (
 		<Header>
 			<SearchComponent
@@ -23,7 +22,7 @@ export const TeamHeader: FC<ITeamHeader> = ({ search, onSearch }) => {
 				type={'button'}
 				text={'Add +'}
 				variant={'addTeam'}
-				onClick={navigateToAddTeam}
+				onClick={() => navigate('/teams/add')}
 			/>
 		</Header>
 	)

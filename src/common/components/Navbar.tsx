@@ -20,6 +20,8 @@ export const Navbar: FC = () => {
 	const [notification, setNotification] = useState<string | null>(null)
 
 	useEffect(() => {
+		if (!logout) return
+
 		if (logout) {
 			post('/users/logout', token)
 				.then(result => {
@@ -45,9 +47,7 @@ export const Navbar: FC = () => {
 		return () => {
 			setLogout(false)
 		}
-	}, [logout])
-
-	const closeNotification = () => setNotification(null)
+	}, [logout, navigate, setToken, token])
 
 	return (
 		<>
@@ -79,7 +79,7 @@ export const Navbar: FC = () => {
 				<NotificationComponent
 					message={notification}
 					error={true}
-					close={closeNotification}
+					close={() => setNotification(null)}
 				/>
 			) : null}
 		</>

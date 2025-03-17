@@ -1,7 +1,8 @@
 import styled from 'styled-components'
 import { ReactComponent as Img404 } from '../../assets/images/notFound.svg'
+import { FC } from 'react'
 
-export const NotFound = () => {
+export const NotFound: FC = () => {
 	return (
 		<Section>
 			<Block>

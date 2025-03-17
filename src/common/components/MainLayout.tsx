@@ -2,8 +2,9 @@ import { Outlet } from 'react-router'
 import { Header } from './Header'
 import { Navbar } from './Navbar'
 import styled from 'styled-components'
+import { FC } from 'react'
 
-export const MainLayout = () => {
+export const MainLayout: FC = () => {
 	return (
 		<div>
 			<Header />

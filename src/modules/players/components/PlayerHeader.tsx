@@ -9,20 +9,11 @@ import { MultiSelectComponent } from '../../../ui/MultiSelect'
 export const PlayerHeader: FC<IPlayerHeader> = ({
 	search,
 	onSearch,
-	teamOption,
-	isOptionsLoading,
-	teams,
+	isTeamOptions,
+	teamsOption,
 }) => {
 	const navigate = useNavigate()
 
-	const navigateToAddPlayer = () =>
-		navigate('/players/add', {
-			state: {
-				teamOption,
-				isOptionsLoading,
-				teams,
-			},
-		})
 	return (
 		<Header>
 			<FilterBlock>
@@ -33,14 +24,18 @@ export const PlayerHeader: FC<IPlayerHeader> = ({
 					onSearch={onSearch}
 					search={search}
 				/>
-				<MultiSelectComponent />
+				<MultiSelectComponent
+					options={teamsOption}
+					// selected={}
+					// onChange={() => {}}
+				/>
 			</FilterBlock>
 			<ButtonComponent
 				type={'button'}
 				text={'Add +'}
-				onClick={navigateToAddPlayer}
+				onClick={() => navigate('/players/add')}
 				variant={'addPlayer'}
-				disabled={teamOption && teamOption.length > 0 ? true : false}
+				disabled={isTeamOptions ? true : false}
 			/>
 		</Header>
 	)

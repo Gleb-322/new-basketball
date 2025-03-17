@@ -39,6 +39,7 @@ const SearchBar = styled.div`
 
 const Search = styled.input`
 	width: 365px;
+	height: 40px;
 	border-radius: 4px;
 	background-color: ${({ theme }) => theme.colors.white};
 	color: ${({ theme }) => theme.colors.grey};

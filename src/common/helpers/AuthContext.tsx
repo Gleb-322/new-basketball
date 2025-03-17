@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		return () => {
 			window.removeEventListener('storage', handleStorageChange)
 		}
-	}, [navigate])
+	}, [location.pathname, navigate])
 
 	return (
 		<AuthContext.Provider value={{ token, setToken }}>

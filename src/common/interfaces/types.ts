@@ -1,11 +1,11 @@
 import { Dayjs } from 'dayjs'
 import { SetStateAction } from 'react'
 import {
-	ControllerRenderProps,
 	FieldValues,
 	Path,
 	RefCallBack,
 	UseFormRegister,
+	UseFormSetValue,
 } from 'react-hook-form'
 import { IAddAndUpdatePlayerFormFields } from '../../modules/players/interfaces/types'
 
@@ -30,6 +30,7 @@ export interface IInputProps<FormInputs extends FieldValues> {
 	label?: string
 	defaultImage?: string
 	register: UseFormRegister<FormInputs>
+	setValue?: UseFormSetValue<IAddAndUpdatePlayerFormFields>
 	error?: string
 }
 
@@ -80,6 +81,10 @@ export interface IOption {
 	label: string
 }
 
+export interface IOptionMultiSelect extends IOption {
+	teamId?: string
+}
+
 interface ISelectBase {
 	options: IOption[]
 	name?: string
@@ -104,6 +109,10 @@ interface ISelectForPagination extends ISelectBase {
 }
 
 export type ISelect = ISelectForPlayers | ISelectForPagination
+
+export interface IMultiSelect {
+	options: IOptionMultiSelect[]
+}
 
 export const paginateOptions: IOption[] = [
 	{ value: '6', label: '6' },

@@ -35,8 +35,8 @@ export const SignUp: FC = () => {
 	const { setToken } = useAuth()
 	const navigate = useNavigate()
 	const [notification, setNotification] = useState<string | null>(null)
-	const [formData, setFormData] = useState<ISignupFormFields | null>(null)
-	const [sendData, allowSendData] = useState<boolean>(false)
+	const [signUpData, setSignUpData] = useState<ISignupFormFields | null>(null)
+	const [sendSignUpData, allowSendSignUpData] = useState<boolean>(false)
 
 	const {
 		register,
@@ -48,8 +48,10 @@ export const SignUp: FC = () => {
 	})
 
 	useEffect(() => {
-		if (sendData) {
-			post('/users/create', undefined, JSON.stringify(formData))
+		if (!signUpData && !sendSignUpData) return
+
+		if (signUpData && sendSignUpData) {
+			post('/users/create', undefined, JSON.stringify(signUpData))
 				.then(result => {
 					if (result.success) {
 						setAuthCookie(result.message.token)
@@ -70,19 +72,17 @@ export const SignUp: FC = () => {
 		}
 
 		return () => {
-			allowSendData(false)
+			allowSendSignUpData(false)
 		}
-	}, [formData, sendData])
+	}, [sendSignUpData, signUpData, navigate, setToken])
 
 	const onSubmit: SubmitHandler<ISignupFormFields> = (
 		data: ISignupFormFields
 	) => {
 		console.log('Sign up', data)
-		setFormData(data)
-		allowSendData(true)
+		setSignUpData(data)
+		allowSendSignUpData(true)
 	}
-
-	const closeNotification = () => setNotification(null)
 
 	return (
 		<Conatiner>
@@ -159,7 +159,7 @@ export const SignUp: FC = () => {
 				<NotificationComponent
 					message={notification}
 					error={true}
-					close={closeNotification}
+					close={() => setNotification(null)}
 				/>
 			) : null}
 		</Conatiner>

@@ -5,7 +5,7 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
 import { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { get } from '../../../api/baseRequest'
+import { get, remove } from '../../../api/baseRequest'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 import { useAuth } from '../../../common/hooks/useAuth'
 import { IPlayers } from '../interfaces/types'
@@ -42,11 +42,9 @@ export const PlayerDetail: FC = () => {
 							setDecodedPlayerAvatar(avatar)
 						}
 						setPlayer(result.message)
-						setLoading(false)
 					}
 					if (!result.success) {
 						setNotification(`${result.message}`)
-						setLoading(false)
 					}
 				})
 				.catch(error => {
@@ -54,10 +52,51 @@ export const PlayerDetail: FC = () => {
 					setNotification(
 						`Something going wrong... Error status: ${error.status}`
 					)
-					setLoading(false)
 				})
+				.finally(() => setLoading(false))
 		}
 	}, [params])
+
+	// delete one player by id
+	useEffect(() => {
+		if (!deletePlayer) return
+
+		setLoading(true)
+		if (deletePlayer) {
+			remove(
+				`/players/delete?playerId=${player?._id}&teamId=${player?.team._id}&playerName=${player?.name}`,
+				token
+			)
+				.then(result => {
+					console.log('res delete player', result)
+					if (result.success) {
+						navigate('/players', { state: { deletePlayer: result.message } })
+					}
+					if (!result.success) {
+						setNotification(`${result.message}`)
+					}
+				})
+				.catch(error => {
+					console.log('error', error)
+					setNotification(
+						`Something going wrong... Error status: ${error.status}`
+					)
+				})
+				.finally(() => setLoading(false))
+		}
+
+		return () => {
+			setDeletePlayer(false)
+		}
+	}, [
+		deletePlayer,
+		navigate,
+		player?._id,
+		player?.name,
+		player?.team._id,
+		token,
+	])
+
 	const closeNotification = () => setNotification(null)
 	return (
 		<Container>
@@ -72,10 +111,13 @@ export const PlayerDetail: FC = () => {
 						</HeaderText>
 
 						<div>
-							<ButtonEdit>
+							<ButtonEdit
+								type="button"
+								onClick={() => navigate('/players/add', { state: { player } })}
+							>
 								<EditSVG />
 							</ButtonEdit>
-							<ButtonDelete>
+							<ButtonDelete type="button" onClick={() => setDeletePlayer(true)}>
 								<DeleteSVG />
 							</ButtonDelete>
 						</div>

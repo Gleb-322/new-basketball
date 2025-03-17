@@ -1,4 +1,4 @@
-import { IOption } from '../../../common/interfaces/types'
+import { IOption, IOptionMultiSelect } from '../../../common/interfaces/types'
 import * as yup from 'yup'
 import { ITeams } from '../../teams/interfaces/types'
 
@@ -26,15 +26,20 @@ export interface IAddAndUpdatePlayerFormFields {
 	playerImage?: yup.Maybe<FileList | undefined>
 }
 
+export interface IUpdatePlayer extends IAddAndUpdatePlayerFormFields {
+	newTeamId?: string
+	oldTeamId?: string
+	playerId?: string
+}
+
 export interface IPlayerList {
 	players: IPlayers[]
 	avatars: { [key: string]: string } | string
 }
 
 export interface IPlayerHeader {
-	teamOption: IOption[] | undefined | null
-	isOptionsLoading: boolean
-	teams: ITeams[]
+	teamsOption: IOptionMultiSelect[]
+	isTeamOptions: boolean
 	search: string
 	onSearch: (value: string) => void
 }

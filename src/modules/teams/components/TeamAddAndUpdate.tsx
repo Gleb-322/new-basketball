@@ -15,7 +15,7 @@ import { patch, post } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 import { ImgUpload } from '../../../ui/ImageUpload'
 import { useAuth } from '../../../common/hooks/useAuth'
-import { convertToFileList } from '../../../common/helpers/converterFileToFileList'
+import { convertFileToList } from '../../../common/helpers/converterFileToFileList'
 import { convertBufferToFile } from '../helpers/converterBufferToFile'
 import { convertFileToBase64 } from '../../../common/helpers/converterFileToBase64'
 
@@ -84,6 +84,8 @@ export const TeamCreateAndUpdate: FC = () => {
 
 	// create new team
 	useEffect(() => {
+		if (!createTeam && !createData) return
+
 		if (createTeam && createData) {
 			const createTeamFormData = new FormData()
 			createTeamFormData.append('teamName', createData.teamName)
@@ -119,7 +121,7 @@ export const TeamCreateAndUpdate: FC = () => {
 		return () => {
 			setCreateTeam(false)
 		}
-	}, [createData, createTeam])
+	}, [createData, createTeam, navigate, token])
 
 	// catch one team data for update team
 	useEffect(() => {
@@ -128,7 +130,7 @@ export const TeamCreateAndUpdate: FC = () => {
 
 			const file = convertBufferToFile(locationState)
 
-			const fileList = file ? convertToFileList([file]) : undefined
+			const fileList = file ? convertFileToList([file]) : undefined
 
 			convertFileToBase64(file)
 				.then(result => {
@@ -153,6 +155,8 @@ export const TeamCreateAndUpdate: FC = () => {
 
 	// set update data in form values
 	useEffect(() => {
+		if (!updateFormValues) return
+
 		if (updateFormValues) {
 			// Сбрасываем форму с новыми значениями
 			reset(updateFormValues)
@@ -161,16 +165,17 @@ export const TeamCreateAndUpdate: FC = () => {
 
 	// update team by updateData
 	useEffect(() => {
+		if (!updateTeam && !updateData) return
+
 		if (updateTeam && updateData) {
-			console.log('updateData', updateData)
 			const updateTeamFormData = new FormData()
 			updateTeamFormData.append('teamName', updateData.teamName)
 			updateTeamFormData.append('teamDivision', updateData.teamDivision)
 			updateTeamFormData.append('teamConference', updateData.teamConference)
 			updateTeamFormData.append('teamYear', updateData.teamYear)
 
-			if (updateData.teamId) {
-				updateTeamFormData.append('teamId', updateData.teamId)
+			if (updateFormValues?.teamId) {
+				updateTeamFormData.append('teamId', updateFormValues.teamId)
 			}
 
 			if (updateFormValues?.teamImage !== updateData.teamImage) {
@@ -196,7 +201,18 @@ export const TeamCreateAndUpdate: FC = () => {
 					)
 				})
 		}
-	}, [updateTeam, updateData])
+
+		return () => {
+			setUpdateTeam(false)
+		}
+	}, [
+		updateTeam,
+		updateData,
+		updateFormValues?.teamImage,
+		token,
+		navigate,
+		updateFormValues?.teamId,
+	])
 
 	const onSubmit: SubmitHandler<IAddAndUpdateTeamFormFields> = (
 		data: IAddAndUpdateTeamFormFields
@@ -212,8 +228,6 @@ export const TeamCreateAndUpdate: FC = () => {
 		}
 	}
 
-	const closeNotification = () => setNotification(null)
-	const navigateToTeamDashboard = () => navigate('/teams')
 	return (
 		<Section>
 			<Header>
@@ -274,7 +288,7 @@ export const TeamCreateAndUpdate: FC = () => {
 								type={'button'}
 								text={'Cancel'}
 								variant={'cancel'}
-								onClick={navigateToTeamDashboard}
+								onClick={() => navigate('/teams')}
 							/>
 							<ButtonComponent type={'submit'} text={'Save'} variant={'save'} />
 						</Buttons>
@@ -285,7 +299,7 @@ export const TeamCreateAndUpdate: FC = () => {
 				<NotificationComponent
 					error={true}
 					message={notification}
-					close={closeNotification}
+					close={() => setNotification(null)}
 				/>
 			) : null}
 		</Section>

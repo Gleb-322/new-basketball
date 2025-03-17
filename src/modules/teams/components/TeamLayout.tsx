@@ -1,7 +1,8 @@
+import { FC } from 'react'
 import { Outlet } from 'react-router'
 import styled from 'styled-components'
 
-export const TeamLayout = () => {
+export const TeamLayout: FC = () => {
 	return (
 		<Section>
 			<Outlet />

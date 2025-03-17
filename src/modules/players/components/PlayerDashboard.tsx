@@ -4,7 +4,11 @@ import { IPlayers } from '../interfaces/types'
 import { PlayerHeader } from './PlayerHeader'
 import { PaginationComponent } from '../../../ui/Pagination'
 import { SelectComponent } from '../../../ui/Select'
-import { IOption, paginateOptions } from '../../../common/interfaces/types'
+import {
+	IOption,
+	IOptionMultiSelect,
+	paginateOptions,
+} from '../../../common/interfaces/types'
 import { useLocation } from 'react-router'
 import { PlayerList } from './PlayerList'
 import { PlayerEmptyList } from './PlayerEmptyList'
@@ -15,8 +19,10 @@ import { ITeams } from '../../teams/interfaces/types'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 
 export const PlayerDashboard: FC = () => {
+	const location = useLocation()
 	const [players, setPlayers] = useState<IPlayers[]>([])
-	const [teams, setTeams] = useState<ITeams[]>([])
+	const [teamsOption, setTeamsOption] = useState<IOptionMultiSelect[]>([])
+	const [isTeamOptions, setIsTeamOption] = useState<boolean>(false)
 	const [notification, setNotification] = useState<string | null>(null)
 	const [loading, setLoading] = useState<boolean>(false)
 	const [decodedAvatars, setDecodedAvatars] = useState<
@@ -32,30 +38,27 @@ export const PlayerDashboard: FC = () => {
 	const [pageCount, setPageCount] = useState<number>(0)
 	const [keyword, setKeyword] = useState<string>('')
 
-	const [teamOption, setTeamOption] = useState<IOption[] | undefined | null>()
-	const [isOptionsLoading, setIsOptionsLoading] = useState<boolean>(false)
-
-	const location = useLocation()
-
+	// check if we have teams or not
 	useEffect(() => {
-		setIsOptionsLoading(true)
 		get('/teams/get', undefined)
 			.then(result => {
 				console.log('get all teams', result)
 				if (result.success) {
-					const teamsCopy = JSON.parse(
-						JSON.stringify(result.message.teams)
-					) as IPlayers[]
-					const teamOptions = teamsCopy.map(team => {
-						return { value: team.name, label: team.name }
-					})
-					setTeamOption(teamOptions)
-					setTeams(result.message.teams)
-					setIsOptionsLoading(false)
+					if (result.message.teams) {
+						const teamsCopy = JSON.parse(
+							JSON.stringify(result.message.teams)
+						) as ITeams[]
+						const teamOptions = teamsCopy.map(team => ({
+							value: team.name,
+							label: team.name,
+							teamId: team._id,
+						}))
+						setTeamsOption(teamOptions)
+						setIsTeamOption(true)
+					} else setIsTeamOption(false)
 				}
 				if (!result.success) {
 					setNotification(`${result.message}`)
-					setIsOptionsLoading(false)
 				}
 			})
 			.catch(error => {
@@ -63,7 +66,6 @@ export const PlayerDashboard: FC = () => {
 				setNotification(
 					`Something going wrong... Error status: ${error.status}`
 				)
-				setIsOptionsLoading(false)
 			})
 	}, [])
 
@@ -126,19 +128,17 @@ export const PlayerDashboard: FC = () => {
 		}
 	}, [location])
 
-	const handlePageClick = (data: { selected: SetStateAction<number> }) => {
-		console.log('pagination data', data)
+	const handlePageClick = (data: { selected: SetStateAction<number> }) =>
 		setCurrentPage(data.selected)
-	}
 
 	const closeNotification = () => setNotification(null)
+
 	return (
 		<>
 			<PlayerHeader
 				search={keyword}
-				isOptionsLoading={isOptionsLoading}
-				teamOption={teamOption}
-				teams={teams}
+				teamsOption={teamsOption}
+				isTeamOptions={isTeamOptions}
 				onSearch={setKeyword}
 			/>
 			<Main $loading={loading}>
