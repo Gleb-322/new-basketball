@@ -5,9 +5,7 @@ import {
 	Path,
 	RefCallBack,
 	UseFormRegister,
-	UseFormReset,
 	UseFormResetField,
-	UseFormSetValue,
 } from 'react-hook-form'
 import { IAddAndUpdatePlayerFormFields } from '../../modules/players/interfaces/types'
 
@@ -32,7 +30,7 @@ export interface IInputProps<FormInputs extends FieldValues> {
 	label?: string
 	defaultImage?: string
 	register: UseFormRegister<FormInputs>
-	reset?: UseFormResetField<IAddAndUpdatePlayerFormFields>
+	resetField?: UseFormResetField<IAddAndUpdatePlayerFormFields>
 	error?: string
 }
 

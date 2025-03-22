@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { ReactComponent as AddPhotoSVG } from '../assets/icons/add-photo.svg'
 import styled from 'styled-components'
 import { IInputProps } from '../common/interfaces/types'
@@ -14,42 +14,18 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	register,
 	error,
 	defaultImage,
-	reset,
+	resetField,
 }: IInputProps<FormInputs> & { defaultImage?: string }) => {
-	// const fileInputRef = useRef<HTMLInputElement>(null)
 	const [image, setImage] = useState<string | undefined>('')
 	const [notification, setNotification] = useState<string | null>(null)
 
 	useEffect(() => {
-		// Обновляем изображение, если передали defaultImage
 		setImage(defaultImage)
 	}, [defaultImage])
 
-	// console.log('ref', fileInputRef.current?.files)
-
-	// useEffect(() => {
-	// 	if (!fileInputRef.current?.files) {
-	// 		if (resetReactForm) {
-	// 			resetReactForm('clear')
-	// 		}
-	// 	}
-	// })
-
 	const resetImage = () => {
 		setImage('')
-
-		// if (!fileInputRef.current?.files) {
-		// if (resetReactForm) {
-		// 	resetReactForm('clear')
-		// }
-		if (reset) {
-			reset('playerImage')
-		}
-		// }
-
-		// if (fileInputRef.current) {
-		// 	fileInputRef.current.value = '' // Сброс физически у input type="file"
-		// }
+		resetField && resetField('playerImage', { defaultValue: null })
 	}
 
 	const closeNotification = () => setNotification(null)
@@ -82,7 +58,6 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 								id={id}
 								tabIndex={-1}
 								type={type}
-								// ref={fileInputRef}
 							/>
 						</>
 					)}

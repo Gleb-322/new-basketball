@@ -70,6 +70,7 @@ const schemaCreateAndUpdatePlayer = yup.object().shape(
 		playerImage: yup
 			.mixed<FileList>()
 			.notRequired()
+			.nullable()
 			.test('fileSize', 'The file is too big (max. 2MB)!', value => {
 				// Пропускаем, если файла нет
 				if (!value || !(value instanceof FileList) || value.length === 0)
@@ -119,17 +120,16 @@ export const PlayerCreateAndUpdate: FC = () => {
 		reset,
 		trigger,
 		control,
-		setValue,
 		resetField,
-		getValues,
 		formState: { errors },
 	} = useForm<IAddAndUpdatePlayerFormFields>({
 		resolver: yupResolver<IAddAndUpdatePlayerFormFields>(
 			schemaCreateAndUpdatePlayer
 		),
 		defaultValues: {
-			playerImage: undefined,
+			playerImage: null,
 		},
+		mode: 'onTouched',
 	})
 
 	// get all teams for playerTeams
@@ -364,23 +364,14 @@ export const PlayerCreateAndUpdate: FC = () => {
 	): void => {
 		console.log('add player or update', data)
 
-		// if (location.state?.player) {
-		// 	setUpdateData(data)
-		// 	setUpdatePlayer(true)
-		// } else {
-		// 	setCreateData(data)
-		// 	setCreatePlayer(true)
-		// }
+		if (location.state?.player) {
+			setUpdateData(data)
+			setUpdatePlayer(true)
+		} else {
+			setCreateData(data)
+			setCreatePlayer(true)
+		}
 	}
-
-	// const resetImage = (value: string | undefined) => {
-	// 	console.log('resetImage', value)
-	// 	if (value === 'clear') {
-	// 		reset({ playerImage: undefined })
-	// 	}
-	// }
-
-	console.log('formstate', getValues('playerImage'))
 
 	const navigateToPlayerDashboard = () => navigate('/players')
 	const closeNotification = () => setNotification(null)
@@ -398,7 +389,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 						name={'playerImage'}
 						id={'playerImage'}
 						defaultImage={previewImage}
-						reset={resetField}
+						resetField={resetField}
 						error={errors.playerImage?.message}
 					/>
 				</Left>

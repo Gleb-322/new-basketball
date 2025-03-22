@@ -47,7 +47,7 @@ const Card = styled.div`
 	background-color: ${({ theme }) => theme.colors.darkGrey};
 	border-radius: 4px;
 `
-const Image = styled.div<{}>`
+const Image = styled.div`
 	width: 100%;
 	height: 70%;
 	display: flex;

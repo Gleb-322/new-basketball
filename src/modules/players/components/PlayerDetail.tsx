@@ -127,7 +127,9 @@ export const PlayerDetail: FC = () => {
 						<Left>
 							{typeof decodedPlayerAvatar === 'string' &&
 							decodedPlayerAvatar ? (
-								<Img src={decodedPlayerAvatar} alt={player?.name} />
+								<>
+									<Img src={decodedPlayerAvatar} alt={player?.name} />
+								</>
 							) : (
 								<StyledNoImageSVG />
 							)}
