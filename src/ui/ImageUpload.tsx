@@ -14,9 +14,9 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	register,
 	error,
 	defaultImage,
-	setValue,
+	reset,
 }: IInputProps<FormInputs> & { defaultImage?: string }) => {
-	const fileInputRef = useRef<HTMLInputElement>(null)
+	// const fileInputRef = useRef<HTMLInputElement>(null)
 	const [image, setImage] = useState<string | undefined>('')
 	const [notification, setNotification] = useState<string | null>(null)
 
@@ -25,14 +25,31 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 		setImage(defaultImage)
 	}, [defaultImage])
 
+	// console.log('ref', fileInputRef.current?.files)
+
+	// useEffect(() => {
+	// 	if (!fileInputRef.current?.files) {
+	// 		if (resetReactForm) {
+	// 			resetReactForm('clear')
+	// 		}
+	// 	}
+	// })
+
 	const resetImage = () => {
 		setImage('')
-		if (setValue) {
-			setValue('playerImage', undefined)
+
+		// if (!fileInputRef.current?.files) {
+		// if (resetReactForm) {
+		// 	resetReactForm('clear')
+		// }
+		if (reset) {
+			reset('playerImage')
 		}
-		if (fileInputRef.current) {
-			fileInputRef.current.value = '' // Сброс физически у input type="file"
-		}
+		// }
+
+		// if (fileInputRef.current) {
+		// 	fileInputRef.current.value = '' // Сброс физически у input type="file"
+		// }
 	}
 
 	const closeNotification = () => setNotification(null)
@@ -65,7 +82,7 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 								id={id}
 								tabIndex={-1}
 								type={type}
-								ref={fileInputRef}
+								// ref={fileInputRef}
 							/>
 						</>
 					)}
