@@ -4,11 +4,7 @@ import { IPlayers } from '../interfaces/types'
 import { PlayerHeader } from './PlayerHeader'
 import { PaginationComponent } from '../../../ui/Pagination'
 import { SelectComponent } from '../../../ui/Select'
-import {
-	IOption,
-	IOptionMultiSelect,
-	paginateOptions,
-} from '../../../common/interfaces/types'
+import { IOption, paginateOptions } from '../../../common/interfaces/types'
 import { useLocation } from 'react-router'
 import { PlayerList } from './PlayerList'
 import { PlayerEmptyList } from './PlayerEmptyList'
@@ -21,7 +17,7 @@ import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 export const PlayerDashboard: FC = () => {
 	const location = useLocation()
 	const [players, setPlayers] = useState<IPlayers[]>([])
-	const [teamsOption, setTeamsOption] = useState<IOptionMultiSelect[]>([])
+	const [teamsOption, setTeamsOption] = useState<IOption[]>([])
 	const [isTeamOptions, setIsTeamOption] = useState<boolean>(false)
 	const [notification, setNotification] = useState<string | null>(null)
 	const [loading, setLoading] = useState<boolean>(false)
@@ -51,7 +47,6 @@ export const PlayerDashboard: FC = () => {
 						const teamOptions = teamsCopy.map(team => ({
 							value: team.name,
 							label: team.name,
-							teamId: team._id,
 						}))
 						setTeamsOption(teamOptions)
 						setIsTeamOption(true)

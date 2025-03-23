@@ -1,74 +1,81 @@
-import { FC } from 'react'
-import Select, { components } from 'react-select'
+import { FC, useState } from 'react'
+import Select, {
+	components,
+	ValueContainerProps,
+	MultiValue,
+} from 'react-select'
 import { IMultiSelect, IOption } from '../common/interfaces/types'
 import styled from 'styled-components'
 
+// Кастомный ValueContainer
+const CustomValueContainer = (props: ValueContainerProps<IOption, true>) => {
+	const { getValue, children, selectProps } = props
+	const selected = getValue() || []
+	const maxToShow = 1
+
+	const displayValues = selected.slice(0, maxToShow)
+
+	const extraValues =
+		selected.length > maxToShow ? selected.length - maxToShow : 0
+
+	const CustomTag = (option: IOption) => {
+		const handleRemove = () => {
+			const currentValues = getValue() as IOption[]
+
+			const newValues = currentValues.filter(val => val.value !== option.value)
+
+			if (selectProps.onChange) {
+				selectProps.onChange(newValues as MultiValue<IOption>, {
+					action: 'remove-value',
+					removedValue: option,
+				})
+			}
+		}
+
+		return (
+			<TagContainer key={option.value}>
+				<DisplayValues>{option.value}</DisplayValues>
+				<RemoveButton type={'button'} onClick={handleRemove}>
+					×
+				</RemoveButton>
+			</TagContainer>
+		)
+	}
+	return (
+		<components.ValueContainer {...props}>
+			{displayValues.map(val => CustomTag(val))}
+			{extraValues > 0 && <ExtraValues>...</ExtraValues>}
+			{Array.isArray(children) ? (
+				<>
+					{selected.length === 0 && children[0]}
+					{children[1]}
+				</>
+			) : (
+				children
+			)}
+		</components.ValueContainer>
+	)
+}
+
 export const MultiSelectComponent: FC<IMultiSelect> = ({ options }) => {
-	const t = [
-		{
-			label: 'Philadelphia seventy sixers',
-			value: 'Philadelphia seventy sixers',
-		},
-		{
-			label: 'Oklahoma city thunder',
-			value: 'Oklahoma city thunder',
-		},
-		{
-			label: 'Lakers',
-			value: 'Lakers',
-		},
-		{
-			label: 'Portland trail blazers',
-			value: 'Portland trail blazers',
-		},
-	]
-	// const CustomValueContainer = ({ children, ...props }: any) => {
-	// 	const maxToShow = 2
-	// 	const [values, input] = children
-
-	// 	const selected = props.getValue()
-
-	// 	return (
-	// 		<components.ValueContainer {...props}>
-	// 			{selected.slice(0, maxToShow).map((val: any) => (
-	// 				<components.MultiValue key={val.value} data={val} {...props}>
-	// 					{val.label}
-	// 				</components.MultiValue>
-	// 			))}
-
-	// 			{selected.length > maxToShow && (
-	// 				<div
-	// 					style={{
-	// 						marginLeft: 8,
-	// 						fontSize: 14,
-	// 						color: '#fff',
-	// 						backgroundColor: '#D32F2F',
-	// 						padding: '0 8px',
-	// 						borderRadius: 4,
-	// 						height: 24,
-	// 						display: 'flex',
-	// 						alignItems: 'center',
-	// 					}}
-	// 				>
-	// 					+{selected.length - maxToShow} ещё
-	// 				</div>
-	// 			)}
-
-	// 			{input}
-	// 		</components.ValueContainer>
-	// 	)
-	// }
+	const selectOnChange = (e: any) => {
+		console.log(e)
+	}
 
 	return (
 		<StyledSelect
-			// components={{ ValueContainer: CustomValueContainer }}
+			components={{
+				...components,
+				ValueContainer: CustomValueContainer,
+			}}
+			placeholder="Select..."
 			isClearable={true}
 			isSearchable={false}
 			isMulti
-			options={t}
-			// isOptionDisabled={() => t.length >= 2}
-			// value={selected}
-			// onChange={handleChangeSelect}
+			options={options}
+			menuPosition="fixed"
+			// value={selectedOptions}
+			onChange={selectOnChange}
 			menuPlacement={'bottom'}
 			classNamePrefix="react-multiselect"
 			// isLoading={isLoading}
@@ -79,7 +86,7 @@ export const MultiSelectComponent: FC<IMultiSelect> = ({ options }) => {
 	)
 }
 
-const StyledSelect = styled(Select)`
+const StyledSelect = styled(Select<IOption, true>)`
 	.react-multiselect__control {
 		background-color: ${({ theme }) => theme.colors.white};
 		border: ${({ theme }) => `0.5px solid ${theme.colors.lightestGrey}`};
@@ -91,6 +98,7 @@ const StyledSelect = styled(Select)`
 		border-radius: 4px;
 		height: 40px;
 		width: 365px;
+		margin-left: 24px;
 		cursor: pointer;
 	}
 
@@ -139,49 +147,6 @@ const StyledSelect = styled(Select)`
 		color: ${({ theme }) => theme.colors.white} !important;
 	}
 
-	.react-multiselect__multi-value {
-		border-radius: 4px;
-		height: 24px;
-		padding: 0px 4px;
-		margin: 0px;
-		margin-right: 4px;
-		background-color: ${({ theme }) => theme.colors.red};
-		color: ${({ theme }) => theme.colors.white};
-	}
-	.react-multiselect__multi-value__label {
-		color: ${({ theme }) => theme.colors.white};
-		font-family: 'Avenir Book';
-		font-weight: 500;
-		font-size: 14px;
-		padding: 0;
-		border-radius: 0px;
-		padding-right: 8px;
-		/* Новые стили для обрезки текста с троеточием */
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		overflow: hidden;
-		max-width: 142px;
-	}
-
-	.react-multiselect__multi-value__remove {
-		padding: 0;
-		width: 14px;
-		& svg {
-			width: 12px;
-			height: 12px;
-		}
-	}
-
-	.react-multiselect__multi-value__remove:hover {
-		color: ${({ theme }) => theme.colors.white};
-		background-color: ${({ theme }) => theme.colors.red};
-	}
-
-	/* .react-multiselect__multi-value__remove {
-		width: 12px;
-		height: 12px;
-	} */
-
 	.css-15lsz6c-indicatorContainer {
 		color: ${({ theme }) => theme.colors.lightestGrey} !important;
 	}
@@ -215,4 +180,50 @@ const StyledSelect = styled(Select)`
 		padding-top: 0px;
 		padding-bottom: 0px;
 	}
+`
+
+const TagContainer = styled.div`
+	display: flex;
+	align-items: center;
+	background-color: ${({ theme }) => theme.colors.red};
+	border-radius: 4px;
+	height: 24px;
+	padding: 0px 4px;
+	margin: 0;
+`
+
+const DisplayValues = styled.div`
+	color: ${({ theme }) => theme.colors.white};
+	font-family: 'Avenir Book';
+	font-weight: 500;
+	font-size: 14px;
+`
+const RemoveButton = styled.button`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: ${({ theme }) => theme.colors.white};
+	font-family: 'Avenir Book';
+	font-weight: 500;
+	font-size: 14px;
+	cursor: pointer;
+	margin-left: 8px;
+	background-color: inherit;
+	outline: none;
+	border: none;
+	width: 13px;
+	height: 13px;
+`
+
+const ExtraValues = styled.div`
+	border-radius: 4px;
+	height: 24px;
+	padding: 0px 4px;
+	margin: 0px;
+	margin-left: 4px;
+	background-color: ${({ theme }) => theme.colors.red};
+	color: ${({ theme }) => theme.colors.white};
+	font-family: 'Avenir Book';
+	font-weight: 500;
+	font-size: 14px;
 `

@@ -1,4 +1,4 @@
-import { IOption, IOptionMultiSelect } from '../../../common/interfaces/types'
+import { IOption } from '../../../common/interfaces/types'
 import * as yup from 'yup'
 import { ITeams } from '../../teams/interfaces/types'
 
@@ -38,7 +38,7 @@ export interface IPlayerList {
 }
 
 export interface IPlayerHeader {
-	teamsOption: IOptionMultiSelect[]
+	teamsOption: IOption[]
 	isTeamOptions: boolean
 	search: string
 	onSearch: (value: string) => void

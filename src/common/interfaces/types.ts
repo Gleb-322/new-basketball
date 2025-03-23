@@ -81,10 +81,6 @@ export interface IOption {
 	label: string
 }
 
-export interface IOptionMultiSelect extends IOption {
-	teamId?: string
-}
-
 interface ISelectBase {
 	options: IOption[]
 	name?: string
@@ -111,7 +107,7 @@ interface ISelectForPagination extends ISelectBase {
 export type ISelect = ISelectForPlayers | ISelectForPagination
 
 export interface IMultiSelect {
-	options: IOptionMultiSelect[]
+	options: IOption[]
 }
 
 export const paginateOptions: IOption[] = [
