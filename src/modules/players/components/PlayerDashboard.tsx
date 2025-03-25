@@ -21,21 +21,20 @@ export const PlayerDashboard: FC = () => {
 	const [isTeamOptions, setIsTeamOption] = useState<boolean>(false)
 	const [notification, setNotification] = useState<string | null>(null)
 	const [loading, setLoading] = useState<boolean>(false)
-	const [decodedAvatars, setDecodedAvatars] = useState<
-		| {
-				[key: string]: string
-		  }
-		| string
-	>({})
+	const [decodedAvatars, setDecodedAvatars] = useState<{
+		[key: string]: string
+	}>({})
 	const [selectedOption, setSelectedOption] = useState<IOption>(
 		paginateOptions[0]
 	)
 	const [currentPage, setCurrentPage] = useState<number>(0)
 	const [pageCount, setPageCount] = useState<number>(0)
 	const [keyword, setKeyword] = useState<string>('')
+	const [teamsFilter, setTeamsFilter] = useState<readonly IOption[]>([])
 
 	// check if we have teams or not
 	useEffect(() => {
+		setLoading(true)
 		get('/teams/get', undefined)
 			.then(result => {
 				console.log('get all teams', result)
@@ -47,6 +46,7 @@ export const PlayerDashboard: FC = () => {
 						const teamOptions = teamsCopy.map(team => ({
 							value: team.name,
 							label: team.name,
+							teamId: team._id,
 						}))
 						setTeamsOption(teamOptions)
 						setIsTeamOption(true)
@@ -62,16 +62,28 @@ export const PlayerDashboard: FC = () => {
 					`Something going wrong... Error status: ${error.status}`
 				)
 			})
+			.finally(() => setLoading(false))
 	}, [])
 
 	useEffect(() => {
 		setLoading(true)
-		get(
-			`/players/get?page=${currentPage + 1}&limit=${
-				selectedOption.value
-			}&keyword=${keyword}`,
-			undefined
-		)
+
+		const params = new URLSearchParams()
+		params.append('page', (currentPage + 1).toString())
+		params.append('limit', selectedOption.value)
+		params.append('keyword', keyword)
+
+		const filters = [...teamsFilter]
+			.filter(team => team.teamId)
+			.map(team => team.teamId)
+
+		filters.forEach(teamId => {
+			if (teamId) {
+				params.append('filters', teamId)
+			}
+		})
+
+		get(`/players/get?${params.toString()}`, undefined)
 			.then(result => {
 				console.log('res get players', result)
 				if (result.success) {
@@ -85,11 +97,9 @@ export const PlayerDashboard: FC = () => {
 					if (avatars) {
 						setDecodedAvatars(avatars)
 					}
-					setLoading(false)
 				}
 				if (!result.success) {
 					setNotification(`${result.message}`)
-					setLoading(false)
 				}
 			})
 			.catch(error => {
@@ -97,14 +107,14 @@ export const PlayerDashboard: FC = () => {
 				setNotification(
 					`Something going wrong... Error status: ${error.status}`
 				)
-				setLoading(false)
 			})
-	}, [currentPage, keyword, selectedOption.value])
+			.finally(() => setLoading(false))
+	}, [currentPage, keyword, selectedOption.value, teamsFilter])
 
 	useEffect(() => {
 		if (location.state?.createPlayer) {
 			setNotification(
-				`${location.state?.createPlayer} player successful created!`
+				`Player with name: ${location.state?.createPlayer} successful created!`
 			)
 			const timer = setTimeout(() => {
 				closeNotification()
@@ -113,8 +123,19 @@ export const PlayerDashboard: FC = () => {
 			return () => clearTimeout(timer)
 		}
 
-		if (location.state?.successDelete) {
-			setNotification(`${location.state?.successDelete}`)
+		if (location.state?.updatePlayer) {
+			setNotification(
+				`Player with name: ${location.state?.updatePlayer} successful updated!`
+			)
+			const timer = setTimeout(() => {
+				closeNotification()
+			}, 6000)
+
+			return () => clearTimeout(timer)
+		}
+
+		if (location.state?.deletePlayer) {
+			setNotification(`${location.state?.deletePlayer}`)
 			const timer = setTimeout(() => {
 				closeNotification()
 			}, 6000)
@@ -127,14 +148,15 @@ export const PlayerDashboard: FC = () => {
 		setCurrentPage(data.selected)
 
 	const closeNotification = () => setNotification(null)
-
 	return (
 		<>
 			<PlayerHeader
 				search={keyword}
-				teamsOption={teamsOption}
-				isTeamOptions={isTeamOptions}
 				onSearch={setKeyword}
+				isTeamOptions={isTeamOptions}
+				teamsOption={teamsOption}
+				isLoading={loading}
+				onMultiValue={setTeamsFilter}
 			/>
 			<Main $loading={loading}>
 				{loading ? (
@@ -147,7 +169,13 @@ export const PlayerDashboard: FC = () => {
 
 				{notification ? (
 					<NotificationComponent
-						error={location.state?.name ? false : true}
+						error={
+							location.state?.createPlayer ||
+							location.state?.updatePlayer ||
+							location.state?.deletePlayer
+								? false
+								: true
+						}
 						message={notification}
 						close={closeNotification}
 					/>

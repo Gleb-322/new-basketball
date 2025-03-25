@@ -1,9 +1,9 @@
 import { ITeams } from '../interfaces/types'
 
 export const convertBufferToUrl = (team: ITeams[] | ITeams) => {
+	const avatars: { [key: string]: string } = {}
 	if (Array.isArray(team)) {
 		const teamsCopy = JSON.parse(JSON.stringify(team)) as ITeams[]
-		const avatars: { [key: string]: string } = {}
 		teamsCopy.forEach((t: ITeams) => {
 			if (t.teamImg && t.teamImg.data) {
 				// Декодируем Buffer
@@ -20,7 +20,8 @@ export const convertBufferToUrl = (team: ITeams[] | ITeams) => {
 		if (teamCopy.teamImg && teamCopy.teamImg.data) {
 			const byteArray = new Uint8Array(teamCopy.teamImg.data)
 			const blob = new Blob([byteArray], { type: 'image/jpeg' })
-			return URL.createObjectURL(blob)
+			avatars[teamCopy._id] = URL.createObjectURL(blob)
 		}
+		return avatars
 	}
 }

@@ -219,7 +219,6 @@ export const PlayerCreateAndUpdate: FC = () => {
 	// catch one player data for update player
 	useEffect(() => {
 		if (location.state?.player) {
-			console.log(location.state?.player)
 			const locationState = location.state?.player as IPlayers
 
 			const file = convertBufferToFile(locationState)
@@ -241,7 +240,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 				playerId: locationState._id,
 				oldTeamId: locationState.team._id,
 			}
-			console.log(data)
+
 			setUpdateFormValues(data)
 		}
 	}, [location])
@@ -249,6 +248,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 	// set update data in form values
 	useEffect(() => {
 		if (!updateFormValues) return
+
 		if (updateFormValues) {
 			reset(updateFormValues)
 		}
@@ -373,8 +373,6 @@ export const PlayerCreateAndUpdate: FC = () => {
 		}
 	}
 
-	const navigateToPlayerDashboard = () => navigate('/players')
-	const closeNotification = () => setNotification(null)
 	return (
 		<Section>
 			<Header>
@@ -510,7 +508,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 								type={'button'}
 								text={'Cancel'}
 								variant={'cancel'}
-								onClick={navigateToPlayerDashboard}
+								onClick={() => navigate('/players')}
 							/>
 							<ButtonComponent type={'submit'} text={'Save'} variant={'save'} />
 						</Buttons>
@@ -521,7 +519,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 				<NotificationComponent
 					error={true}
 					message={notification}
-					close={closeNotification}
+					close={() => setNotification(null)}
 				/>
 			) : null}
 		</Section>

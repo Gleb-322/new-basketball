@@ -1,6 +1,7 @@
 import { IOption } from '../../../common/interfaces/types'
 import * as yup from 'yup'
 import { ITeams } from '../../teams/interfaces/types'
+import { OnChangeValue } from 'react-select'
 
 export interface IPlayers {
 	__v: number
@@ -34,14 +35,16 @@ export interface IUpdatePlayer extends IAddAndUpdatePlayerFormFields {
 
 export interface IPlayerList {
 	players: IPlayers[]
-	avatars: { [key: string]: string } | string
+	avatars: { [key: string]: string }
 }
 
 export interface IPlayerHeader {
 	teamsOption: IOption[]
 	isTeamOptions: boolean
+	isLoading: boolean
 	search: string
 	onSearch: (value: string) => void
+	onMultiValue: (value: OnChangeValue<IOption, true>) => void
 }
 
 export const playerPositionOption: IOption[] = [

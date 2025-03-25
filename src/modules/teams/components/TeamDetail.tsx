@@ -2,7 +2,6 @@ import styled from 'styled-components'
 import { useNavigate, useParams } from 'react-router'
 import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
-import playerLogo from '../../../assets/images/Player.png'
 import { FC, useEffect, useState } from 'react'
 import { get, remove } from '../../../api/baseRequest'
 import { ITeams } from '../interfaces/types'
@@ -11,14 +10,19 @@ import { LoadingComponent } from '../../../ui/Loading'
 import { LinkComponent } from '../../../ui/Link'
 import { useAuth } from '../../../common/hooks/useAuth'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
+import { convertBufferToUrl as convertBufferToUrlForPlayers } from '../../players/helpers/converterBufferToUrl'
+import dayjs from 'dayjs'
 
 export const TeamDetail: FC = () => {
 	const { token } = useAuth()
 	const [team, setTeam] = useState<ITeams>()
 	const [deleteTeam, setDeleteTeam] = useState<boolean>(false)
-	const [decodedTeamAvatar, setDecodedTeamAvatar] = useState<
-		string | { [key: string]: string }
-	>()
+	const [decodedTeamAvatar, setDecodedTeamAvatar] = useState<{
+		[key: string]: string
+	}>({})
+	const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<{
+		[key: string]: string
+	}>({})
 	const [notification, setNotification] = useState<string | null>(null)
 	const [loading, setLoading] = useState<boolean>(false)
 	const params = useParams()
@@ -33,11 +37,17 @@ export const TeamDetail: FC = () => {
 				.then(result => {
 					console.log('get team by id', result)
 					if (result.success) {
-						const avatar = convertBufferToUrl(result.message)
-						if (avatar) {
-							setDecodedTeamAvatar(avatar)
-						}
 						setTeam(result.message)
+						const teamAvatar = convertBufferToUrl(result.message)
+						if (teamAvatar) {
+							setDecodedTeamAvatar(teamAvatar)
+						}
+						const playerAvatar = convertBufferToUrlForPlayers(
+							result.message.players
+						)
+						if (playerAvatar) {
+							setDecodedPlayerAvatar(playerAvatar)
+						}
 					}
 					if (!result.success) {
 						setNotification(`${result.message}`)
@@ -83,121 +93,68 @@ export const TeamDetail: FC = () => {
 		}
 	}, [deleteTeam, navigate, team?._id, token])
 
-	const players: any[] = [
-		{
-			_id: '12345235213233',
-			name: 'Bol Bol',
-			position: 'Centerforward',
-			height: 218,
-			weight: 100,
-			birthday: 21,
-			number: 3,
-			playerImg: 'img',
-		},
-		{
-			_id: '2',
-			name: 'Greg Whittington',
-			position: 'Forward',
-			height: 218,
-			weight: 100,
-			birthday: 21,
-			playerImg: 'img',
-		},
-		{
-			_id: '3',
-			name: 'Zeke Nnaji',
-			position: 'Forward-center',
-			height: 218,
-			weight: 100,
-			birthday: 21,
-			number: 99,
-			playerImg: 'img',
-		},
-		{
-			_id: '546456',
-			name: 'R. J. Hampton',
-			position: 'Defender',
-			height: 218,
-			weight: 100,
-			birthday: 21,
-			number: 1,
-			playerImg: 'img',
-		},
-		{
-			_id: '4322342',
-			name: 'Bol Bol',
-			position: 'Centerforward',
-			height: 218,
-			weight: 100,
-			birthday: 21,
-			number: 3,
-			playerImg: 'img',
-		},
-		{
-			_id: '123455235235235213233',
-			name: 'Bol Bol',
-			position: 'Centerforward',
-			height: 218,
-			weight: 100,
-			birthday: 21,
-			number: 3,
-			playerImg: 'img',
-		},
-	]
-
 	return (
 		<Container>
 			{loading ? (
 				<LoadingComponent />
 			) : (
 				<>
-					<DetailBlock>
-						<HeaderDetail>
-							<HeaderText>
-								<LinkComponent route={'/teams'} text={'Teams'} />{' '}
-								<Slash>/</Slash> {team?.name}
-							</HeaderText>
+					{team ? (
+						<>
+							<DetailBlock>
+								<HeaderDetail>
+									<HeaderText>
+										<LinkComponent route={'/teams'} text={'Teams'} />{' '}
+										<Slash>/</Slash> {team.name}
+									</HeaderText>
 
-							<div>
-								<ButtonEdit
-									type="button"
-									onClick={() => navigate('/teams/add', { state: { team } })}
-								>
-									<EditSVG />
-								</ButtonEdit>
-								<ButtonDelete type="button" onClick={() => setDeleteTeam(true)}>
-									<DeleteSVG />
-								</ButtonDelete>
-							</div>
-						</HeaderDetail>
+									<div>
+										<ButtonEdit
+											type="button"
+											onClick={() =>
+												navigate('/teams/add', { state: { team } })
+											}
+										>
+											<EditSVG />
+										</ButtonEdit>
+										<ButtonDelete
+											type="button"
+											onClick={() => setDeleteTeam(true)}
+										>
+											<DeleteSVG />
+										</ButtonDelete>
+									</div>
+								</HeaderDetail>
 
-						<MainDetail>
-							<Left>
-								{typeof decodedTeamAvatar === 'string' && decodedTeamAvatar ? (
-									<Img src={decodedTeamAvatar} alt={team?.name} />
-								) : (
-									<div>Loading image...</div>
-								)}
-							</Left>
-							<Right>
-								<Name>{team?.name}</Name>
-								<TextBlock>
-									<TextColumn>
-										<Key>Year of foundation</Key>
-										<Value>{team?.year}</Value>
-									</TextColumn>
-									<TextColumn>
-										<Key>Division</Key>
-										<Value>{team?.division}</Value>
-									</TextColumn>
-									<TextColumn>
-										<Key>Conference</Key>
-										<Value>{team?.conference}</Value>
-									</TextColumn>
-								</TextBlock>
-							</Right>
-						</MainDetail>
-					</DetailBlock>
+								<MainDetail>
+									<Left>
+										{decodedTeamAvatar && decodedTeamAvatar[team._id] ? (
+											<Img src={decodedTeamAvatar[team._id]} alt={team.name} />
+										) : (
+											<div>Loading image...</div>
+										)}
+									</Left>
+									<Right>
+										<Name>{team.name}</Name>
+										<TextBlock>
+											<TextColumn>
+												<Key>Year of foundation</Key>
+												<Value>{team.year}</Value>
+											</TextColumn>
+											<TextColumn>
+												<Key>Division</Key>
+												<Value>{team.division}</Value>
+											</TextColumn>
+											<TextColumn>
+												<Key>Conference</Key>
+												<Value>{team.conference}</Value>
+											</TextColumn>
+										</TextBlock>
+									</Right>
+								</MainDetail>
+							</DetailBlock>
+						</>
+					) : null}
 
 					<RosterBlock>
 						<RoosterTitle>Roster</RoosterTitle>
@@ -214,10 +171,13 @@ export const TeamDetail: FC = () => {
 								</PlayerHeaderRight>
 							</PlayerHeader>
 
-							{players.length ? (
+							{team?.players.length ? (
 								<>
-									{players.map(player => (
-										<Player key={player._id}>
+									{team?.players.map(player => (
+										<Player
+											key={player._id}
+											onClick={() => navigate(`/players/${player._id}`)}
+										>
 											<PlayerLeft>
 												<MarginRight>
 													<PlayerNumber>
@@ -226,7 +186,15 @@ export const TeamDetail: FC = () => {
 												</MarginRight>
 
 												<PlayerInfo>
-													<PlayerImg src={playerLogo} alt="player" />
+													{decodedPlayerAvatar &&
+													decodedPlayerAvatar[player._id] ? (
+														<PlayerImg
+															src={decodedPlayerAvatar[player._id]}
+															alt={player.name}
+														/>
+													) : (
+														<NoImage />
+													)}
 													<PlayerNameAndPosition>
 														<div>{player.name}</div>
 														<PlayerPosition>{player.position}</PlayerPosition>
@@ -236,13 +204,15 @@ export const TeamDetail: FC = () => {
 											<PlayerRight>
 												<div>{player.height} cm</div>
 												<div>{player.weight} kg</div>
-												<div>{player.birthday}</div>
+												<div>
+													{dayjs.utc().diff(dayjs.utc(player.birthday), 'year')}
+												</div>
 											</PlayerRight>
 										</Player>
 									))}
 								</>
 							) : (
-								<EmptyPlayers>Team doesn't have any players...</EmptyPlayers>
+								<EmptyPlayers>Team has no players...</EmptyPlayers>
 							)}
 						</RosterTable>
 					</RosterBlock>
@@ -409,6 +379,7 @@ const PlayerHeaderRight = styled.div`
 `
 
 const Player = styled.div`
+	cursor: pointer;
 	padding: 5px 32px;
 	display: flex;
 	justify-content: space-between;
@@ -418,6 +389,13 @@ const Player = styled.div`
 	font-weight: 500;
 	line-height: 24px;
 	color: ${({ theme }) => theme.colors.grey};
+	&:hover {
+		background-color: ${({ theme }) => theme.colors.mostLightGrey};
+	}
+	&:last-child:hover {
+		border-bottom-left-radius: 10px;
+		border-bottom-right-radius: 10px;
+	}
 `
 const PlayerLeft = styled.div`
 	width: 70%;
@@ -443,6 +421,13 @@ const PlayerImg = styled.img`
 	border-radius: 100%;
 	margin-right: 16px;
 `
+const NoImage = styled.div`
+	width: 40px;
+	height: 40px;
+	border-radius: 100%;
+	margin-right: 16px;
+	background-color: ${({ theme }) => theme.colors.mostLightGrey};
+`
 
 const PlayerPosition = styled.div`
 	font-family: 'Avenir Medium';
@@ -463,8 +448,7 @@ const PlayerRight = styled.div`
 const EmptyPlayers = styled.div`
 	padding: 5px 32px;
 	font-family: 'Avenir Medium';
-	font-size: 12px;
+	font-size: 18px;
 	font-weight: 500;
-	line-height: 18px;
-	color: ${({ theme }) => theme.colors.lightestRed};
+	color: ${({ theme }) => theme.colors.grey};
 `

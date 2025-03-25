@@ -15,7 +15,7 @@ export const PlayerList: FC<IPlayerList> = ({ players, avatars }) => {
 					key={player._id}
 				>
 					<Image>
-						{avatars instanceof Object && avatars[player._id] ? (
+						{avatars && avatars[player._id] ? (
 							<Img src={avatars[player._id]} alt={player.name} />
 						) : (
 							<StyledNoImageSVG />

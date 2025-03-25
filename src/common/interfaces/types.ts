@@ -8,6 +8,7 @@ import {
 	UseFormResetField,
 } from 'react-hook-form'
 import { IAddAndUpdatePlayerFormFields } from '../../modules/players/interfaces/types'
+import { OnChangeValue } from 'react-select'
 
 export interface ISigninFormFields {
 	loginSignin: string
@@ -79,6 +80,7 @@ export interface IAuthContext {
 export interface IOption {
 	value: string
 	label: string
+	teamId?: string
 }
 
 interface ISelectBase {
@@ -108,6 +110,8 @@ export type ISelect = ISelectForPlayers | ISelectForPagination
 
 export interface IMultiSelect {
 	options: IOption[]
+	isLoading: boolean
+	onMultiValue: (value: OnChangeValue<IOption, true>) => void
 }
 
 export const paginateOptions: IOption[] = [

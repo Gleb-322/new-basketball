@@ -17,12 +17,9 @@ export const TeamDashboard: FC = () => {
 	const [notification, setNotification] = useState<string | null>(null)
 	const [loading, setLoading] = useState<boolean>(false)
 	const [teams, setTeams] = useState<ITeams[]>([])
-	const [decodedAvatars, setDecodedAvatars] = useState<
-		| string
-		| {
-				[key: string]: string
-		  }
-	>({})
+	const [decodedAvatars, setDecodedAvatars] = useState<{
+		[key: string]: string
+	}>({})
 	const [selectedOption, setSelectedOption] = useState<IOption>(
 		paginateOptions[0]
 	)
@@ -34,16 +31,11 @@ export const TeamDashboard: FC = () => {
 
 	useEffect(() => {
 		setLoading(true)
-		console.log('keyword', keyword)
 
 		const params = new URLSearchParams()
 		params.append('page', (currentPage + 1).toString())
 		params.append('limit', selectedOption.value)
 		params.append('keyword', keyword)
-
-		// добавляем массив фильтров
-		// const filters = selectedTeams.map(team => team._id) // массив id команд
-		// filters.forEach(id => params.append('filters', id))
 
 		get(`/teams/get?${params.toString()}`, undefined)
 			.then(result => {

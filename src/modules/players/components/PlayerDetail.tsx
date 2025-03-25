@@ -22,9 +22,9 @@ export const PlayerDetail: FC = () => {
 	const { token } = useAuth()
 	const [player, setPlayer] = useState<IPlayers>()
 	const [deletePlayer, setDeletePlayer] = useState<boolean>(false)
-	const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<
-		string | { [key: string]: string }
-	>()
+	const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<{
+		[key: string]: string
+	}>()
 	const [notification, setNotification] = useState<string | null>(null)
 	const [loading, setLoading] = useState<boolean>(false)
 
@@ -97,86 +97,98 @@ export const PlayerDetail: FC = () => {
 		token,
 	])
 
-	const closeNotification = () => setNotification(null)
 	return (
 		<Container>
 			{loading ? (
 				<LoadingComponent />
 			) : (
-				<DetailBlock>
-					<HeaderDetail>
-						<HeaderText>
-							<LinkComponent route={'/players'} text={'Players'} />{' '}
-							<Slash>/</Slash> {player?.name}
-						</HeaderText>
+				<>
+					{player ? (
+						<>
+							<DetailBlock>
+								<HeaderDetail>
+									<HeaderText>
+										<LinkComponent route={'/players'} text={'Players'} />{' '}
+										<Slash>/</Slash> {player.name}
+									</HeaderText>
 
-						<div>
-							<ButtonEdit
-								type="button"
-								onClick={() => navigate('/players/add', { state: { player } })}
-							>
-								<EditSVG />
-							</ButtonEdit>
-							<ButtonDelete type="button" onClick={() => setDeletePlayer(true)}>
-								<DeleteSVG />
-							</ButtonDelete>
-						</div>
-					</HeaderDetail>
+									<div>
+										<ButtonEdit
+											type="button"
+											onClick={() =>
+												navigate('/players/add', { state: { player } })
+											}
+										>
+											<EditSVG />
+										</ButtonEdit>
+										<ButtonDelete
+											type="button"
+											onClick={() => setDeletePlayer(true)}
+										>
+											<DeleteSVG />
+										</ButtonDelete>
+									</div>
+								</HeaderDetail>
 
-					<MainDetail>
-						<Left>
-							{typeof decodedPlayerAvatar === 'string' &&
-							decodedPlayerAvatar ? (
-								<>
-									<Img src={decodedPlayerAvatar} alt={player?.name} />
-								</>
-							) : (
-								<StyledNoImageSVG />
-							)}
-						</Left>
-						<Right>
-							<Name>
-								{player?.name}
-								<Number>#{player?.number}</Number>{' '}
-							</Name>
-							<TextBlock>
-								<TextColumn>
-									<Key>Position</Key>
-									<Value>{player?.position}</Value>
-								</TextColumn>
+								<MainDetail>
+									<Left>
+										{decodedPlayerAvatar && decodedPlayerAvatar[player._id] ? (
+											<>
+												<Img
+													src={decodedPlayerAvatar[player._id]}
+													alt={player.name}
+												/>
+											</>
+										) : (
+											<StyledNoImageSVG />
+										)}
+									</Left>
+									<Right>
+										<Name>
+											{player.name}
+											<Number>#{player?.number}</Number>{' '}
+										</Name>
+										<TextBlock>
+											<TextColumn>
+												<Key>Position</Key>
+												<Value>{player.position}</Value>
+											</TextColumn>
 
-								<TextColumn>
-									<Key>Team</Key>
-									<Value>{player?.team.name}</Value>
-								</TextColumn>
+											<TextColumn>
+												<Key>Team</Key>
+												<Value>{player.team.name}</Value>
+											</TextColumn>
 
-								<TextColumn>
-									<Key>Height</Key>
-									<Value>{player?.height} cm</Value>
-								</TextColumn>
+											<TextColumn>
+												<Key>Height</Key>
+												<Value>{player.height} cm</Value>
+											</TextColumn>
 
-								<TextColumn>
-									<Key>Weight</Key>
-									<Value>{player?.weight} kg</Value>
-								</TextColumn>
+											<TextColumn>
+												<Key>Weight</Key>
+												<Value>{player.weight} kg</Value>
+											</TextColumn>
 
-								<TextColumn>
-									<Key>Age</Key>
+											<TextColumn>
+												<Key>Age</Key>
 
-									<Value>
-										{dayjs.utc().diff(dayjs.utc(player?.birthday), 'year')}
-									</Value>
-								</TextColumn>
-							</TextBlock>
-						</Right>
-					</MainDetail>
-				</DetailBlock>
+												<Value>
+													{dayjs.utc().diff(dayjs.utc(player.birthday), 'year')}
+												</Value>
+											</TextColumn>
+										</TextBlock>
+									</Right>
+								</MainDetail>
+							</DetailBlock>
+						</>
+					) : null}
+				</>
 			)}
 			{notification ? (
 				<NotificationComponent
 					error={true}
 					message={notification}
-					close={closeNotification}
+					close={() => setNotification(null)}
 				/>
 			) : null}
 		</Container>

@@ -133,12 +133,8 @@ export const TeamCreateAndUpdate: FC = () => {
 			const fileList = file ? convertFileToList([file]) : undefined
 
 			convertFileToBase64(file)
-				.then(result => {
-					setPreviewImage(result)
-				})
-				.catch(error => {
-					setNotification(`Something going wrong... Error: ${error.message}`)
-				})
+				.then(result => setPreviewImage(result))
+				.catch(error => setNotification(`${error.message}`))
 
 			const data: IUpdateTeamData = {
 				teamName: locationState.name,
@@ -158,7 +154,6 @@ export const TeamCreateAndUpdate: FC = () => {
 		if (!updateFormValues) return
 
 		if (updateFormValues) {
-			// Сбрасываем форму с новыми значениями
 			reset(updateFormValues)
 		}
 	}, [updateFormValues, reset])
@@ -240,7 +235,7 @@ export const TeamCreateAndUpdate: FC = () => {
 						type={'file'}
 						name={'teamImage'}
 						id={'teamImage'}
-						defaultImage={previewImage} // Передаём картинку
+						defaultImage={previewImage}
 						error={errors.teamImage?.message}
 					/>
 				</Left>

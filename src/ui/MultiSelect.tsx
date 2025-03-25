@@ -1,8 +1,9 @@
-import { FC, useState } from 'react'
+import { FC } from 'react'
 import Select, {
 	components,
 	ValueContainerProps,
 	MultiValue,
+	OnChangeValue,
 } from 'react-select'
 import { IMultiSelect, IOption } from '../common/interfaces/types'
 import styled from 'styled-components'
@@ -57,10 +58,13 @@ const CustomValueContainer = (props: ValueContainerProps<IOption, true>) => {
 	)
 }
 
-export const MultiSelectComponent: FC<IMultiSelect> = ({ options }) => {
-	const selectOnChange = (e: any) => {
-		console.log(e)
-	}
+export const MultiSelectComponent: FC<IMultiSelect> = ({
+	options,
+	onMultiValue,
+	isLoading,
+}) => {
+	const selectOnChange = (newValue: OnChangeValue<IOption, true>) =>
+		onMultiValue(newValue)
 
 	return (
 		<StyledSelect
@@ -74,14 +78,13 @@ export const MultiSelectComponent: FC<IMultiSelect> = ({ options }) => {
 			isMulti
 			options={options}
 			menuPosition="fixed"
-			// value={selectedOptions}
 			onChange={selectOnChange}
 			menuPlacement={'bottom'}
 			classNamePrefix="react-multiselect"
-			// isLoading={isLoading}
-			// noOptionsMessage={() =>
-			// 	isLoading ? 'Loading options...' : 'No positions found'
-			// }
+			isLoading={isLoading}
+			noOptionsMessage={() =>
+				isLoading ? 'Loading options...' : 'No positions found'
+			}
 		/>
 	)
 }

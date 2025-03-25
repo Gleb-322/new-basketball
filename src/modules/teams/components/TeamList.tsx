@@ -10,7 +10,7 @@ export const TeamList: FC<ITeamList> = ({ teams, avatars }) => {
 			{teams.map(team => (
 				<Card onClick={() => navigate(`/teams/${team._id}`)} key={team._id}>
 					<Image>
-						{avatars instanceof Object && avatars[team._id] ? (
+						{avatars && avatars[team._id] ? (
 							<Img src={avatars[team._id]} alt={team.name} />
 						) : (
 							<NoImg>Loading image...</NoImg>

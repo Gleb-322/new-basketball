@@ -11,6 +11,8 @@ export const PlayerHeader: FC<IPlayerHeader> = ({
 	onSearch,
 	isTeamOptions,
 	teamsOption,
+	onMultiValue,
+	isLoading,
 }) => {
 	const navigate = useNavigate()
 
@@ -26,8 +28,8 @@ export const PlayerHeader: FC<IPlayerHeader> = ({
 				/>
 				<MultiSelectComponent
 					options={teamsOption}
-					// selected={}
-					// onChange={() => {}}
+					isLoading={isLoading}
+					onMultiValue={onMultiValue}
 				/>
 			</FilterBlock>
 			<ButtonComponent
