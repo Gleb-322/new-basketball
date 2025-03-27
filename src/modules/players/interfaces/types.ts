@@ -54,3 +54,50 @@ export const playerPositionOption: IOption[] = [
 	{ value: 'Center', label: 'Center' },
 	{ value: 'Guard', label: 'Guard' },
 ]
+
+export interface IAddAndUpdatePlayerLocationState {
+	state?: { player: IPlayers }
+}
+
+export interface IDashPlayerLocationState {
+	state?: {
+		createPlayer?: string
+		updatePlayer?: string
+		deletePlayer?: string
+	}
+}
+
+export interface ICreatePlayersResponse {
+	errorCode: string
+	success: boolean
+	message: { player: IPlayers } | string
+}
+
+export interface IGetPlayersResponse {
+	errorCode: string
+	success: boolean
+	message:
+		| {
+				players: IPlayers[]
+				countPlayers: number
+		  }
+		| string
+}
+
+export interface IGetPlayerResponse {
+	errorCode: string
+	success: boolean
+	message: IPlayers | string
+}
+
+export interface IPatchPlayerResponse {
+	errorCode: string
+	success: boolean
+	message: IPlayers | string
+}
+
+export interface IRemovePlayerResponse {
+	errorCode: string
+	success: boolean
+	message: string
+}

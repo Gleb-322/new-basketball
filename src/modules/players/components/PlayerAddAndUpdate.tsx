@@ -9,6 +9,7 @@ import * as yup from 'yup'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import {
 	IAddAndUpdatePlayerFormFields,
+	IAddAndUpdatePlayerLocationState,
 	IPlayers,
 	IUpdatePlayer,
 	playerPositionOption,
@@ -17,7 +18,6 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { DatePickerComponent } from '../../../ui/DatePicker'
 import { SelectComponent } from '../../../ui/Select'
 import { IOption } from '../../../common/interfaces/types'
-import { get, patch, post } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 import dayjs from 'dayjs'
 import { useAuth } from '../../../common/hooks/useAuth'
@@ -25,6 +25,8 @@ import { ITeams } from '../../teams/interfaces/types'
 import { convertBufferToFile } from '../helpers/converterBufferToFile'
 import { convertFileToList } from '../../../common/helpers/converterFileToFileList'
 import { convertFileToBase64 } from '../../../common/helpers/converterFileToBase64'
+import { getTeams } from '../../../api/teams/teamsService'
+import { createPlayers, patchPlayer } from '../../../api/players/playerService'
 
 const schemaCreateAndUpdatePlayer = yup.object().shape(
 	{
@@ -92,7 +94,8 @@ const schemaCreateAndUpdatePlayer = yup.object().shape(
 export const PlayerCreateAndUpdate: FC = () => {
 	const { token } = useAuth()
 	const navigate = useNavigate()
-	const location = useLocation()
+	const location = useLocation() as unknown as Location &
+		IAddAndUpdatePlayerLocationState
 
 	const [createData, setCreateData] = useState<
 		IAddAndUpdatePlayerFormFields | undefined
@@ -136,22 +139,26 @@ export const PlayerCreateAndUpdate: FC = () => {
 	useEffect(() => {
 		setIsOptionsLoading(true)
 
-		get('/teams/get', undefined)
+		getTeams()
 			.then(result => {
 				console.log('get all teams', result)
 				if (result.success) {
-					const teamsCopy = JSON.parse(
-						JSON.stringify(result.message.teams)
-					) as IPlayers[]
-					const teamOptions = teamsCopy.map(team => ({
-						value: team.name,
-						label: team.name,
-					}))
-					setTeamOption(teamOptions)
-					setTeams(result.message.teams)
+					if (result.message instanceof Object) {
+						const teamsCopy = JSON.parse(
+							JSON.stringify(result.message.teams)
+						) as IPlayers[]
+						const teamOptions = teamsCopy.map(team => ({
+							value: team.name,
+							label: team.name,
+						}))
+						setTeamOption(teamOptions)
+						setTeams(result.message.teams)
+					}
 				}
 				if (!result.success) {
-					setNotification(`${result.message}`)
+					if (typeof result.message === 'string') {
+						setNotification(`${result.message}`)
+					}
 				}
 			})
 			.catch(error => {
@@ -190,17 +197,21 @@ export const PlayerCreateAndUpdate: FC = () => {
 				createPlayerFormData.append('playerImage', createData.playerImage[0])
 			}
 
-			post('/players/create', token, createPlayerFormData)
+			createPlayers(createPlayerFormData, token)
 				.then(result => {
 					console.log('player create res', result)
 					if (result.success) {
-						navigate('/players', {
-							state: { createPlayer: result.message.player.name },
-						})
+						if (result.message instanceof Object) {
+							navigate('/players', {
+								state: { createPlayer: result.message.player.name },
+							})
+						}
 					}
 
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						if (typeof result.message === 'string') {
+							setNotification(`${result.message}`)
+						}
 					}
 				})
 				.catch(error => {
@@ -218,31 +229,31 @@ export const PlayerCreateAndUpdate: FC = () => {
 
 	// catch one player data for update player
 	useEffect(() => {
-		if (location.state?.player) {
-			const locationState = location.state?.player as IPlayers
+		if (!location.state?.player) return
 
-			const file = convertBufferToFile(locationState)
-			const fileList = file ? convertFileToList([file]) : undefined
+		const locationState = location.state?.player
 
-			convertFileToBase64(file)
-				.then(result => setPreviewImage(result))
-				.catch(error => setNotification(`${error.message}`))
+		const file = convertBufferToFile(locationState)
+		const fileList = file ? convertFileToList([file]) : undefined
 
-			const data = {
-				playerName: locationState.name,
-				playerPosition: locationState.position,
-				playerTeam: locationState.team.name,
-				playerHeight: locationState.height,
-				playerWeight: locationState.weight,
-				playerBirthday: locationState.birthday,
-				playerNumber: locationState?.number,
-				playerImage: fileList,
-				playerId: locationState._id,
-				oldTeamId: locationState.team._id,
-			}
+		convertFileToBase64(file)
+			.then(result => setPreviewImage(result))
+			.catch(error => setNotification(`${error.message}`))
 
-			setUpdateFormValues(data)
+		const data = {
+			playerName: locationState.name,
+			playerPosition: locationState.position,
+			playerTeam: locationState.team.name,
+			playerHeight: locationState.height,
+			playerWeight: locationState.weight,
+			playerBirthday: locationState.birthday,
+			playerNumber: locationState?.number,
+			playerImage: fileList,
+			playerId: locationState._id,
+			oldTeamId: locationState.team._id,
 		}
+
+		setUpdateFormValues(data)
 	}, [location])
 
 	// set update data in form values
@@ -325,16 +336,20 @@ export const PlayerCreateAndUpdate: FC = () => {
 				updatePlayerFormData.append('playerId', updateFormValues.playerId)
 			}
 
-			patch('/players/update', token, updatePlayerFormData)
+			patchPlayer(updatePlayerFormData, token)
 				.then(result => {
 					console.log('res update player', result)
 					if (result.success) {
-						navigate('/players', {
-							state: { updatePlayer: result.message.name },
-						})
+						if (result.message instanceof Object) {
+							navigate('/players', {
+								state: { updatePlayer: result.message.name },
+							})
+						}
 					}
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						if (typeof result.message === 'string') {
+							setNotification(`${result.message}`)
+						}
 					}
 				})
 				.catch(error => {
@@ -387,7 +402,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 						name={'playerImage'}
 						id={'playerImage'}
 						defaultImage={previewImage}
-						resetField={resetField}
+						resetFieldPlayerImage={resetField}
 						error={errors.playerImage?.message}
 					/>
 				</Left>

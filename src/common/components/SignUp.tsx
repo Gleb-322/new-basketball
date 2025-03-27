@@ -8,11 +8,11 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { ISignupFormFields } from '../interfaces/types'
-import { post } from '../../api/baseRequest'
 import { useNavigate } from 'react-router'
 import { NotificationComponent } from '../../ui/Notification'
 import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
+import { createUser } from '../../api/users/usersService'
 
 const schemaSignUp = yup.object().shape({
 	nameSignup: yup.string().required('Name is required!'),
@@ -34,7 +34,9 @@ const schemaSignUp = yup.object().shape({
 export const SignUp: FC = () => {
 	const { setToken } = useAuth()
 	const navigate = useNavigate()
-	const [notification, setNotification] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | undefined>(
+		undefined
+	)
 	const [signUpData, setSignUpData] = useState<ISignupFormFields | null>(null)
 	const [sendSignUpData, allowSendSignUpData] = useState<boolean>(false)
 
@@ -51,17 +53,21 @@ export const SignUp: FC = () => {
 		if (!signUpData && !sendSignUpData) return
 
 		if (signUpData && sendSignUpData) {
-			post('/users/create', undefined, JSON.stringify(signUpData))
+			createUser(JSON.stringify(signUpData))
 				.then(result => {
 					if (result.success) {
-						setAuthCookie(result.message.token)
-						setToken(result.message.token)
-						localStorage.setItem('name', result.message.user.name)
-						navigate('/teams')
+						if (result.message instanceof Object) {
+							setAuthCookie(result.message.token)
+							setToken(result.message.token)
+							localStorage.setItem('name', result.message.user.name)
+							navigate('/teams')
+						}
 					}
 
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						if (typeof result.message === 'string') {
+							setNotification(`${result.message}`)
+						}
 					}
 				})
 				.catch(error => {
@@ -159,7 +165,7 @@ export const SignUp: FC = () => {
 				<NotificationComponent
 					message={notification}
 					error={true}
-					close={() => setNotification(null)}
+					close={() => setNotification(undefined)}
 				/>
 			) : null}
 		</Conatiner>

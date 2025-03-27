@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router'
 import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
 import { FC, useEffect, useState } from 'react'
-import { get, remove } from '../../../api/baseRequest'
 import { ITeams } from '../interfaces/types'
 import { NotificationComponent } from '../../../ui/Notification'
 import { LoadingComponent } from '../../../ui/Loading'
@@ -12,6 +11,10 @@ import { useAuth } from '../../../common/hooks/useAuth'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 import { convertBufferToUrl as convertBufferToUrlForPlayers } from '../../players/helpers/converterBufferToUrl'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import { getTeam, removeTeam } from '../../../api/teams/teamsService'
+
+dayjs.extend(utc)
 
 export const TeamDetail: FC = () => {
 	const { token } = useAuth()
@@ -23,7 +26,9 @@ export const TeamDetail: FC = () => {
 	const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<{
 		[key: string]: string
 	}>({})
-	const [notification, setNotification] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | undefined>(
+		undefined
+	)
 	const [loading, setLoading] = useState<boolean>(false)
 	const params = useParams()
 	const navigate = useNavigate()
@@ -33,24 +38,28 @@ export const TeamDetail: FC = () => {
 		setLoading(true)
 
 		if (params._id) {
-			get(`/teams/get/${params._id}`, undefined)
+			getTeam(params._id)
 				.then(result => {
 					console.log('get team by id', result)
 					if (result.success) {
-						setTeam(result.message)
-						const teamAvatar = convertBufferToUrl(result.message)
-						if (teamAvatar) {
-							setDecodedTeamAvatar(teamAvatar)
-						}
-						const playerAvatar = convertBufferToUrlForPlayers(
-							result.message.players
-						)
-						if (playerAvatar) {
-							setDecodedPlayerAvatar(playerAvatar)
+						if (result.message instanceof Object) {
+							setTeam(result.message)
+							const teamAvatar = convertBufferToUrl(result.message)
+							if (teamAvatar) {
+								setDecodedTeamAvatar(teamAvatar)
+							}
+							const playerAvatar = convertBufferToUrlForPlayers(
+								result.message.players
+							)
+							if (playerAvatar) {
+								setDecodedPlayerAvatar(playerAvatar)
+							}
 						}
 					}
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						if (typeof result.message === 'string') {
+							setNotification(`${result.message}`)
+						}
 					}
 				})
 				.catch(error => {
@@ -65,12 +74,12 @@ export const TeamDetail: FC = () => {
 
 	// delete one team by id
 	useEffect(() => {
-		if (!deleteTeam) return
+		if (!deleteTeam && !team?._id) return
 
 		setLoading(true)
 
-		if (deleteTeam) {
-			remove(`/teams/delete/${team?._id}`, token)
+		if (deleteTeam && team?._id) {
+			removeTeam(team._id, token)
 				.then(result => {
 					console.log('delete team by id', result)
 					if (result.success) {
@@ -222,7 +231,7 @@ export const TeamDetail: FC = () => {
 				<NotificationComponent
 					error={true}
 					message={notification}
-					close={() => setNotification(null)}
+					close={() => setNotification(undefined)}
 				/>
 			) : null}
 		</Container>

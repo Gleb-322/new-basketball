@@ -1,6 +1,6 @@
 import { FC, SetStateAction, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { IPlayers } from '../interfaces/types'
+import { IDashPlayerLocationState, IPlayers } from '../interfaces/types'
 import { PlayerHeader } from './PlayerHeader'
 import { PaginationComponent } from '../../../ui/Pagination'
 import { SelectComponent } from '../../../ui/Select'
@@ -10,16 +10,20 @@ import { PlayerList } from './PlayerList'
 import { PlayerEmptyList } from './PlayerEmptyList'
 import { LoadingComponent } from '../../../ui/Loading'
 import { NotificationComponent } from '../../../ui/Notification'
-import { get } from '../../../api/baseRequest'
 import { ITeams } from '../../teams/interfaces/types'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
+import { getTeams } from '../../../api/teams/teamsService'
+import { getPlayers } from '../../../api/players/playerService'
 
 export const PlayerDashboard: FC = () => {
-	const location = useLocation()
+	const location = useLocation() as unknown as Location &
+		IDashPlayerLocationState
 	const [players, setPlayers] = useState<IPlayers[]>([])
 	const [teamsOption, setTeamsOption] = useState<IOption[]>([])
 	const [isTeamOptions, setIsTeamOption] = useState<boolean>(false)
-	const [notification, setNotification] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | undefined>(
+		undefined
+	)
 	const [loading, setLoading] = useState<boolean>(false)
 	const [decodedAvatars, setDecodedAvatars] = useState<{
 		[key: string]: string
@@ -35,11 +39,11 @@ export const PlayerDashboard: FC = () => {
 	// check if we have teams or not
 	useEffect(() => {
 		setLoading(true)
-		get('/teams/get', undefined)
+		getTeams()
 			.then(result => {
 				console.log('get all teams', result)
 				if (result.success) {
-					if (result.message.teams) {
+					if (result.message instanceof Object) {
 						const teamsCopy = JSON.parse(
 							JSON.stringify(result.message.teams)
 						) as ITeams[]
@@ -53,7 +57,9 @@ export const PlayerDashboard: FC = () => {
 					} else setIsTeamOption(false)
 				}
 				if (!result.success) {
-					setNotification(`${result.message}`)
+					if (typeof result.message === 'string') {
+						setNotification(`${result.message}`)
+					}
 				}
 			})
 			.catch(error => {
@@ -65,13 +71,14 @@ export const PlayerDashboard: FC = () => {
 			.finally(() => setLoading(false))
 	}, [])
 
+	// get all players
 	useEffect(() => {
 		setLoading(true)
 
-		const params = new URLSearchParams()
-		params.append('page', (currentPage + 1).toString())
-		params.append('limit', selectedOption.value)
-		params.append('keyword', keyword)
+		const query = new URLSearchParams()
+		query.append('page', (currentPage + 1).toString())
+		query.append('limit', selectedOption.value)
+		query.append('keyword', keyword)
 
 		const filters = [...teamsFilter]
 			.filter(team => team.teamId)
@@ -79,27 +86,31 @@ export const PlayerDashboard: FC = () => {
 
 		filters.forEach(teamId => {
 			if (teamId) {
-				params.append('filters', teamId)
+				query.append('filters', teamId)
 			}
 		})
 
-		get(`/players/get?${params.toString()}`, undefined)
+		getPlayers(query)
 			.then(result => {
 				console.log('res get players', result)
 				if (result.success) {
-					setPageCount(
-						Math.ceil(
-							result.message.countPlayers / parseInt(selectedOption.value)
+					if (result.message instanceof Object) {
+						setPageCount(
+							Math.ceil(
+								result.message.countPlayers / parseInt(selectedOption.value)
+							)
 						)
-					)
-					setPlayers(result.message.players)
-					const avatars = convertBufferToUrl(result.message.players)
-					if (avatars) {
-						setDecodedAvatars(avatars)
+						setPlayers(result.message.players)
+						const avatars = convertBufferToUrl(result.message.players)
+						if (avatars) {
+							setDecodedAvatars(avatars)
+						}
 					}
 				}
 				if (!result.success) {
-					setNotification(`${result.message}`)
+					if (typeof result.message === 'string') {
+						setNotification(`${result.message}`)
+					}
 				}
 			})
 			.catch(error => {
@@ -112,42 +123,28 @@ export const PlayerDashboard: FC = () => {
 	}, [currentPage, keyword, selectedOption.value, teamsFilter])
 
 	useEffect(() => {
-		if (location.state?.createPlayer) {
-			setNotification(
-				`Player with name: ${location.state?.createPlayer} successful created!`
-			)
-			const timer = setTimeout(() => {
-				closeNotification()
-			}, 6000)
+		if (location.state) {
+			const { createPlayer, updatePlayer, deletePlayer } = location.state
+			if (createPlayer || updatePlayer || deletePlayer) {
+				const message = createPlayer
+					? `Player with name: ${createPlayer} successful created!`
+					: updatePlayer
+					? `Player with name: ${location.state?.updatePlayer} successful updated!`
+					: deletePlayer
+				setNotification(message)
+				const timer = setTimeout(() => {
+					closeNotification()
+				}, 6000)
 
-			return () => clearTimeout(timer)
-		}
-
-		if (location.state?.updatePlayer) {
-			setNotification(
-				`Player with name: ${location.state?.updatePlayer} successful updated!`
-			)
-			const timer = setTimeout(() => {
-				closeNotification()
-			}, 6000)
-
-			return () => clearTimeout(timer)
-		}
-
-		if (location.state?.deletePlayer) {
-			setNotification(`${location.state?.deletePlayer}`)
-			const timer = setTimeout(() => {
-				closeNotification()
-			}, 6000)
-
-			return () => clearTimeout(timer)
+				return () => clearTimeout(timer)
+			}
 		}
 	}, [location])
 
 	const handlePageClick = (data: { selected: SetStateAction<number> }) =>
 		setCurrentPage(data.selected)
 
-	const closeNotification = () => setNotification(null)
+	const closeNotification = () => setNotification(undefined)
 	return (
 		<>
 			<PlayerHeader

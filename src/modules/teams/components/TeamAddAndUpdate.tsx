@@ -5,19 +5,19 @@ import { ButtonComponent } from '../../../ui/Button'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import {
+	IAddAndUpdateTeamLocationState,
 	IAddAndUpdateTeamFormFields,
-	ITeams,
 	IUpdateTeamData,
 } from '../interfaces/types'
 import { FC, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { patch, post } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 import { ImgUpload } from '../../../ui/ImageUpload'
 import { useAuth } from '../../../common/hooks/useAuth'
 import { convertFileToList } from '../../../common/helpers/converterFileToFileList'
 import { convertBufferToFile } from '../helpers/converterBufferToFile'
 import { convertFileToBase64 } from '../../../common/helpers/converterFileToBase64'
+import { createTeams, patchTeam } from '../../../api/teams/teamsService'
 
 const schemaCreateAndUpdateTeam = yup.object().shape({
 	teamName: yup.string().required('Team Name is required!'),
@@ -29,6 +29,8 @@ const schemaCreateAndUpdateTeam = yup.object().shape({
 		.matches(/^\d{4}$/, 'Four digits required!'),
 	teamImage: yup
 		.mixed<FileList>()
+		// .defined()
+		// .required('Team Logo is required!')
 		.test('required', 'Team Logo is required!', value => {
 			// Если файла нет — ошибка
 			return value instanceof FileList && value.length > 0
@@ -52,7 +54,8 @@ const schemaCreateAndUpdateTeam = yup.object().shape({
 export const TeamCreateAndUpdate: FC = () => {
 	const { token } = useAuth()
 	const navigate = useNavigate()
-	const location = useLocation()
+	const location = useLocation() as unknown as Location &
+		IAddAndUpdateTeamLocationState
 
 	const [createData, setCreateData] = useState<
 		IAddAndUpdateTeamFormFields | undefined
@@ -68,17 +71,23 @@ export const TeamCreateAndUpdate: FC = () => {
 
 	const [previewImage, setPreviewImage] = useState<string | undefined>()
 
-	const [notification, setNotification] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | undefined>(
+		undefined
+	)
 
 	const {
 		register,
 		handleSubmit,
+		resetField,
 		reset,
 		formState: { errors },
 	} = useForm<IAddAndUpdateTeamFormFields>({
 		resolver: yupResolver<IAddAndUpdateTeamFormFields>(
 			schemaCreateAndUpdateTeam
 		),
+		defaultValues: {
+			teamImage: undefined,
+		},
 		mode: 'onTouched',
 	})
 
@@ -97,17 +106,21 @@ export const TeamCreateAndUpdate: FC = () => {
 				createTeamFormData.append('teamImage', createData.teamImage[0])
 			}
 
-			post('/teams/create', token, createTeamFormData)
+			createTeams(createTeamFormData, token)
 				.then(result => {
 					console.log('team create res', result)
 					if (result.success) {
-						navigate('/teams', {
-							state: { createTeam: result.message.team.name },
-						})
+						if (result.message instanceof Object) {
+							navigate('/teams', {
+								state: { createTeam: result.message.team.name },
+							})
+						}
 					}
 
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						if (typeof result.message === 'string') {
+							setNotification(`${result.message}`)
+						}
 					}
 				})
 				.catch(error => {
@@ -125,28 +138,28 @@ export const TeamCreateAndUpdate: FC = () => {
 
 	// catch one team data for update team
 	useEffect(() => {
-		if (location.state?.team) {
-			const locationState = location.state?.team as ITeams
+		if (!location.state?.team) return
 
-			const file = convertBufferToFile(locationState)
+		const locationState = location.state?.team
 
-			const fileList = file ? convertFileToList([file]) : undefined
+		const file = convertBufferToFile(locationState)
 
-			convertFileToBase64(file)
-				.then(result => setPreviewImage(result))
-				.catch(error => setNotification(`${error.message}`))
+		const fileList = convertFileToList([file!])
 
-			const data: IUpdateTeamData = {
-				teamName: locationState.name,
-				teamDivision: locationState.division,
-				teamConference: locationState.conference,
-				teamYear: locationState.year,
-				teamImage: fileList,
-				teamId: locationState._id,
-			}
+		convertFileToBase64(file)
+			.then(result => setPreviewImage(result))
+			.catch(error => setNotification(`${error.message}`))
 
-			setUpdateFormValues(data)
+		const data: IUpdateTeamData = {
+			teamName: locationState.name,
+			teamDivision: locationState.division,
+			teamConference: locationState.conference,
+			teamYear: locationState.year,
+			teamImage: fileList,
+			teamId: locationState._id,
 		}
+
+		setUpdateFormValues(data)
 	}, [location])
 
 	// set update data in form values
@@ -179,14 +192,18 @@ export const TeamCreateAndUpdate: FC = () => {
 				}
 			}
 
-			patch('/teams/update', token, updateTeamFormData)
+			patchTeam(updateTeamFormData, token)
 				.then(result => {
 					console.log('res update team', result)
 					if (result.success) {
-						navigate('/teams', { state: { updateTeam: result.message.name } })
+						if (result.message instanceof Object) {
+							navigate('/teams', { state: { updateTeam: result.message.name } })
+						}
 					}
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						if (typeof result.message === 'string') {
+							setNotification(`${result.message}`)
+						}
 					}
 				})
 				.catch(error => {
@@ -235,6 +252,7 @@ export const TeamCreateAndUpdate: FC = () => {
 						type={'file'}
 						name={'teamImage'}
 						id={'teamImage'}
+						resetFieldTeamImage={resetField}
 						defaultImage={previewImage}
 						error={errors.teamImage?.message}
 					/>
@@ -294,7 +312,7 @@ export const TeamCreateAndUpdate: FC = () => {
 				<NotificationComponent
 					error={true}
 					message={notification}
-					close={() => setNotification(null)}
+					close={() => setNotification(undefined)}
 				/>
 			) : null}
 		</Section>

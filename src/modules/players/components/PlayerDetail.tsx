@@ -5,7 +5,6 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
 import { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { get, remove } from '../../../api/baseRequest'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 import { useAuth } from '../../../common/hooks/useAuth'
 import { IPlayers } from '../interfaces/types'
@@ -13,6 +12,7 @@ import { NotificationComponent } from '../../../ui/Notification'
 import { LinkComponent } from '../../../ui/Link'
 import { ReactComponent as NoImageSVG } from '../../../assets/images/noImage.svg'
 import { LoadingComponent } from '../../../ui/Loading'
+import { getPlayer, removePlayer } from '../../../api/players/playerService'
 
 dayjs.extend(utc)
 
@@ -25,7 +25,9 @@ export const PlayerDetail: FC = () => {
 	const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<{
 		[key: string]: string
 	}>()
-	const [notification, setNotification] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | undefined>(
+		undefined
+	)
 	const [loading, setLoading] = useState<boolean>(false)
 
 	// get player by id
@@ -33,18 +35,22 @@ export const PlayerDetail: FC = () => {
 		setLoading(true)
 
 		if (params._id) {
-			get(`/players/get/${params._id}`, undefined)
+			getPlayer(params._id)
 				.then(result => {
 					console.log('get player by id', result)
 					if (result.success) {
-						const avatar = convertBufferToUrl(result.message)
-						if (avatar) {
-							setDecodedPlayerAvatar(avatar)
+						if (result.message instanceof Object) {
+							const avatar = convertBufferToUrl(result.message)
+							if (avatar) {
+								setDecodedPlayerAvatar(avatar)
+							}
+							setPlayer(result.message)
 						}
-						setPlayer(result.message)
 					}
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						if (typeof result.message === 'string') {
+							setNotification(`${result.message}`)
+						}
 					}
 				})
 				.catch(error => {
@@ -59,14 +65,16 @@ export const PlayerDetail: FC = () => {
 
 	// delete one player by id
 	useEffect(() => {
-		if (!deletePlayer) return
+		if (!deletePlayer && !player) return
 
 		setLoading(true)
-		if (deletePlayer) {
-			remove(
-				`/players/delete?playerId=${player?._id}&teamId=${player?.team._id}&playerName=${player?.name}`,
-				token
-			)
+		if (deletePlayer && player) {
+			const query = new URLSearchParams()
+			query.append('playerId', player._id)
+			query.append('teamId', player.team._id)
+			query.append('playerName', player.name)
+
+			removePlayer(query, token)
 				.then(result => {
 					console.log('res delete player', result)
 					if (result.success) {
@@ -88,14 +96,7 @@ export const PlayerDetail: FC = () => {
 		return () => {
 			setDeletePlayer(false)
 		}
-	}, [
-		deletePlayer,
-		navigate,
-		player?._id,
-		player?.name,
-		player?.team._id,
-		token,
-	])
+	}, [deletePlayer, navigate, player, token])
 
 	return (
 		<Container>
@@ -188,7 +189,7 @@ export const PlayerDetail: FC = () => {
 				<NotificationComponent
 					error={true}
 					message={notification}
-					close={() => setNotification(null)}
+					close={() => setNotification(undefined)}
 				/>
 			) : null}
 		</Container>

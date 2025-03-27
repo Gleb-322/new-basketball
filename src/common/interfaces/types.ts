@@ -9,6 +9,7 @@ import {
 } from 'react-hook-form'
 import { IAddAndUpdatePlayerFormFields } from '../../modules/players/interfaces/types'
 import { OnChangeValue } from 'react-select'
+import { IAddAndUpdateTeamFormFields } from '../../modules/teams/interfaces/types'
 
 export interface ISigninFormFields {
 	loginSignin: string
@@ -31,7 +32,8 @@ export interface IInputProps<FormInputs extends FieldValues> {
 	label?: string
 	defaultImage?: string
 	register: UseFormRegister<FormInputs>
-	resetField?: UseFormResetField<IAddAndUpdatePlayerFormFields>
+	resetFieldTeamImage?: UseFormResetField<IAddAndUpdateTeamFormFields>
+	resetFieldPlayerImage?: UseFormResetField<IAddAndUpdatePlayerFormFields>
 	error?: string
 }
 
@@ -57,7 +59,7 @@ export interface ISearch {
 }
 
 export interface INotification {
-	message: string | null
+	message: string | undefined
 	error: boolean
 	close: () => void
 }
@@ -128,4 +130,35 @@ export interface IDatePicker {
 	value: Dayjs | null
 	error?: string
 	onChange: (newValue: Dayjs | null) => void
+}
+
+export interface ISignInLocationState {
+	state?: {
+		successLogout?: string
+	}
+}
+
+export interface IUsers {
+	name: string
+	login: string
+	password: string
+	tokens?: { token: string }[]
+}
+
+export interface ICreateUserResponse {
+	errorCode: string
+	success: boolean
+	message: { user: IUsers; token: string } | string
+}
+
+export interface ILoginUserResponse {
+	errorCode: string
+	success: boolean
+	message: { user: IUsers; token: string } | string
+}
+
+export interface ILogoutUserResponse {
+	errorCode: string
+	success: boolean
+	message: string
 }

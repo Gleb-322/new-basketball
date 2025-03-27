@@ -7,12 +7,12 @@ import { LinkComponent } from '../../ui/Link'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { ISigninFormFields } from '../interfaces/types'
+import { ISigninFormFields, ISignInLocationState } from '../interfaces/types'
 import { NotificationComponent } from '../../ui/Notification'
-import { post } from '../../api/baseRequest'
 import { useLocation, useNavigate } from 'react-router'
 import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
+import { loginUser } from '../../api/users/usersService'
 
 const schemaSignIn = yup.object().shape({
 	loginSignin: yup.string().required('Login is required!'),
@@ -20,12 +20,14 @@ const schemaSignIn = yup.object().shape({
 })
 
 export const SignIn: FC = () => {
-	const location = useLocation()
+	const location = useLocation() as unknown as Location & ISignInLocationState
 	const { setToken } = useAuth()
 	const navigate = useNavigate()
 	const [signInData, setSignInData] = useState<ISigninFormFields | null>(null)
 	const [sendSignInData, allowSendSignInData] = useState<boolean>(false)
-	const [notification, setNotification] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | undefined>(
+		undefined
+	)
 
 	const {
 		register,
@@ -40,18 +42,22 @@ export const SignIn: FC = () => {
 		if (!sendSignInData && !signInData) return
 
 		if (sendSignInData && signInData) {
-			post('/users/login', undefined, JSON.stringify(signInData))
+			loginUser(JSON.stringify(signInData))
 				.then(result => {
-					console.log(result)
+					console.log('signin res', result)
 					if (result.success) {
-						setAuthCookie(result.message.token)
-						setToken(result.message.token)
-						localStorage.setItem('name', result.message.user.name)
-						navigate('/teams')
+						if (result.message instanceof Object) {
+							setAuthCookie(result.message.token)
+							setToken(result.message.token)
+							localStorage.setItem('name', result.message.user.name)
+							navigate('/teams')
+						}
 					}
 
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						if (typeof result.message === 'string') {
+							setNotification(`${result.message}`)
+						}
 					}
 				})
 				.catch(error => {
@@ -68,13 +74,16 @@ export const SignIn: FC = () => {
 	}, [signInData, sendSignInData, setToken, navigate])
 
 	useEffect(() => {
-		if (location.state?.successLogout) {
-			setNotification(`${location.state?.successLogout}`)
-			const timer = setTimeout(() => {
-				closeNotification()
-			}, 6000)
+		if (location.state) {
+			const { successLogout } = location.state
+			if (successLogout) {
+				setNotification(`${successLogout}`)
+				const timer = setTimeout(() => {
+					closeNotification()
+				}, 6000)
 
-			return () => clearTimeout(timer)
+				return () => clearTimeout(timer)
+			}
 		}
 	}, [location])
 
@@ -86,7 +95,7 @@ export const SignIn: FC = () => {
 		allowSendSignInData(true)
 	}
 
-	const closeNotification = () => setNotification(null)
+	const closeNotification = () => setNotification(undefined)
 
 	return (
 		<Conatiner>

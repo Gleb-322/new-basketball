@@ -14,10 +14,13 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	register,
 	error,
 	defaultImage,
-	resetField,
+	resetFieldTeamImage,
+	resetFieldPlayerImage,
 }: IInputProps<FormInputs> & { defaultImage?: string }) => {
 	const [image, setImage] = useState<string | undefined>('')
-	const [notification, setNotification] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | undefined>(
+		undefined
+	)
 
 	useEffect(() => {
 		setImage(defaultImage)
@@ -25,10 +28,17 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 
 	const resetImage = () => {
 		setImage('')
-		resetField && resetField('playerImage', { defaultValue: null })
+		if (id === 'playerImage') {
+			resetFieldPlayerImage &&
+				resetFieldPlayerImage('playerImage', { defaultValue: null })
+		}
+
+		if (id === 'teamImage') {
+			resetFieldTeamImage &&
+				resetFieldTeamImage('teamImage', { defaultValue: undefined })
+		}
 	}
 
-	const closeNotification = () => setNotification(null)
 	return (
 		<>
 			<Conatiner>
@@ -73,7 +83,7 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 				<NotificationComponent
 					error={true}
 					message={notification}
-					close={closeNotification}
+					close={() => setNotification(undefined)}
 				/>
 			) : null}
 		</>

@@ -1,6 +1,5 @@
 import { FC } from 'react'
 import Select, { SingleValue } from 'react-select'
-// import Creatable from 'react-select/creatable'
 import styled from 'styled-components'
 import { IOption, ISelect } from '../common/interfaces/types'
 

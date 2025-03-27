@@ -1,6 +1,7 @@
 import { IRequestBaseBody } from '../common/interfaces/types'
 
 const baseUrl = process.env.REACT_APP_BASE_URL
+
 export const baseRequest = async (
 	url: string,
 	data: IRequestBaseBody,
@@ -21,6 +22,7 @@ export const baseRequest = async (
 
 	console.log('baseData', data)
 	console.log('token', token)
+	console.log('url', url)
 
 	const response = await fetch(url, {
 		...data,
@@ -33,6 +35,7 @@ export const baseRequest = async (
 	if (response.ok) {
 		return await response.json()
 	}
+	console.log('response', response)
 
 	// eslint-disable-next-line no-throw-literal
 	throw { isCustomError: true, status: response.status }
@@ -57,3 +60,23 @@ export const patch = (
 export const remove = (url: string, token?: string) => {
 	return baseRequest(`${baseUrl}${url}`, { method: 'DELETE' }, token)
 }
+
+// if (!response.ok) {
+// 	if (response.status === 401) {
+// 		throw new Error('Please authorization!')
+// 	} else if (response.status === 403) {
+// 		throw new Error('Access denied!')
+// 	} else if (response.status === 500) {
+// 		throw new Error('Server error! Try again later.')
+// 	}
+// 	throw new Error(`HTTP error! Status: ${response.status}`)
+// }
+
+// } catch (error) {
+// if (error instanceof TypeError && error.message === 'Failed to fetch') {
+// 	throw new Error('Network error! Check your internet connection.')
+// } else if (error instanceof SyntaxError) {
+// 	throw new Error('Invalid response from server!')
+// }
+// throw error
+// }

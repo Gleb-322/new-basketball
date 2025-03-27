@@ -1,20 +1,22 @@
 import { FC, SetStateAction, useEffect, useState } from 'react'
-import { ITeams } from '../interfaces/types'
+import { IDashTeamLocationState, ITeams } from '../interfaces/types'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
 import { TeamHeader } from './TeamHeader'
 import { TeamList } from './TeamList'
 import { TeamEmptyList } from './TeamEmptyList'
-import { get } from '../../../api/baseRequest'
 import { NotificationComponent } from '../../../ui/Notification'
 import { PaginationComponent } from '../../../ui/Pagination'
 import { SelectComponent } from '../../../ui/Select'
 import { LoadingComponent } from '../../../ui/Loading'
 import { IOption, paginateOptions } from '../../../common/interfaces/types'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
+import { getTeams } from '../../../api/teams/teamsService'
 
 export const TeamDashboard: FC = () => {
-	const [notification, setNotification] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | undefined>(
+		undefined
+	)
 	const [loading, setLoading] = useState<boolean>(false)
 	const [teams, setTeams] = useState<ITeams[]>([])
 	const [decodedAvatars, setDecodedAvatars] = useState<{
@@ -27,77 +29,80 @@ export const TeamDashboard: FC = () => {
 	const [pageCount, setPageCount] = useState<number>(0)
 	const [keyword, setKeyword] = useState<string>('')
 
-	const location = useLocation()
+	const location = useLocation() as unknown as Location & IDashTeamLocationState
 
+	// get all teams
 	useEffect(() => {
 		setLoading(true)
 
-		const params = new URLSearchParams()
-		params.append('page', (currentPage + 1).toString())
-		params.append('limit', selectedOption.value)
-		params.append('keyword', keyword)
+		const query = new URLSearchParams()
+		query.append('page', (currentPage + 1).toString())
+		query.append('limit', selectedOption.value)
+		query.append('keyword', keyword)
 
-		get(`/teams/get?${params.toString()}`, undefined)
+		getTeams(query)
 			.then(result => {
 				console.log('get teams', result)
 				if (result.success) {
-					setPageCount(
-						Math.ceil(
-							result.message.countTeams / parseInt(selectedOption.value)
+					if (result.message instanceof Object) {
+						setPageCount(
+							Math.ceil(
+								result.message.countTeams / parseInt(selectedOption.value)
+							)
 						)
-					)
-					setTeams(result.message.teams)
-					const avatars = convertBufferToUrl(result.message.teams)
-					if (avatars) {
-						setDecodedAvatars(avatars)
+						setTeams(result.message.teams)
+						const avatars = convertBufferToUrl(result.message.teams)
+						if (avatars) {
+							setDecodedAvatars(avatars)
+						}
 					}
 				}
 				if (!result.success) {
-					setNotification(`${result.message}`)
+					if (typeof result.message === 'string')
+						setNotification(`${result.message}`)
 				}
 			})
 			.catch(error => {
 				console.log('error', error)
+				// if (error.isCustomError) {
 				setNotification(
 					`Something going wrong... Error status: ${error.status}`
 				)
+				// }
+				// if (error) {
+				// 	setNotification(
+				// 		`Something going wrong... Error status: ${error.message}`
+				// 	)
+				// }
 			})
 			.finally(() => setLoading(false))
 	}, [currentPage, selectedOption.value, keyword])
 
 	useEffect(() => {
-		if (location.state?.createTeam) {
-			setNotification(`Team: ${location.state?.createTeam} successful created!`)
-			const timer = setTimeout(() => {
-				closeNotification()
-			}, 6000)
+		if (location.state) {
+			const { createTeam, updateTeam, deleteTeam } = location.state
+			if (createTeam || updateTeam || deleteTeam) {
+				const message = createTeam
+					? `Team: ${createTeam} successful created!`
+					: updateTeam
+					? `Team: ${updateTeam} successful updated!`
+					: deleteTeam
 
-			return () => clearTimeout(timer)
-		}
+				setNotification(message)
 
-		if (location.state?.updateTeam) {
-			setNotification(`Team: ${location.state?.updateTeam} successful updated!`)
-			const timer = setTimeout(() => {
-				closeNotification()
-			}, 6000)
+				const timer = setTimeout(() => {
+					closeNotification()
+				}, 6000)
 
-			return () => clearTimeout(timer)
-		}
-
-		if (location.state?.deleteTeam) {
-			setNotification(`${location.state?.deleteTeam}`)
-			const timer = setTimeout(() => {
-				closeNotification()
-			}, 6000)
-
-			return () => clearTimeout(timer)
+				return () => clearTimeout(timer)
+			}
 		}
 	}, [location])
 
 	const handlePageClick = (data: { selected: SetStateAction<number> }) =>
 		setCurrentPage(data.selected)
 
-	const closeNotification = () => setNotification(null)
+	const closeNotification = () => setNotification(undefined)
 	return (
 		<>
 			<TeamHeader search={keyword} onSearch={setKeyword} />

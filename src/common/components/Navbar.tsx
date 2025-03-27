@@ -8,8 +8,8 @@ import { ReactComponent as SignOutSVGRed } from '../../assets/icons/input.svg'
 import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
 import { FC, useEffect, useState } from 'react'
-import { post } from '../../api/baseRequest'
 import { NotificationComponent } from '../../ui/Notification'
+import { logoutUser } from '../../api/users/usersService'
 
 export const Navbar: FC = () => {
 	const { token, setToken } = useAuth()
@@ -17,13 +17,15 @@ export const Navbar: FC = () => {
 	const navigate = useNavigate()
 
 	const [logout, setLogout] = useState<boolean>(false)
-	const [notification, setNotification] = useState<string | null>(null)
+	const [notification, setNotification] = useState<string | undefined>(
+		undefined
+	)
 
 	useEffect(() => {
 		if (!logout) return
 
 		if (logout) {
-			post('/users/logout', token)
+			logoutUser(token)
 				.then(result => {
 					if (result.success) {
 						setAuthCookie(undefined)
@@ -79,7 +81,7 @@ export const Navbar: FC = () => {
 				<NotificationComponent
 					message={notification}
 					error={true}
-					close={() => setNotification(null)}
+					close={() => setNotification(undefined)}
 				/>
 			) : null}
 		</>
