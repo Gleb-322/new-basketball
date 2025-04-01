@@ -2,11 +2,11 @@ import { IRequestBaseBody } from '../common/interfaces/types'
 
 const baseUrl = process.env.REACT_APP_BASE_URL
 
-export const baseRequest = async (
+export const baseRequest = async <T>(
 	url: string,
 	data: IRequestBaseBody,
 	token: string | undefined
-) => {
+): Promise<T> => {
 	const headersForToken = token
 		? {
 				Authorization: `Bearer ${token}`,
@@ -33,32 +33,35 @@ export const baseRequest = async (
 	})
 
 	if (response.ok) {
-		return await response.json()
+		return (await response.json()) as T
 	}
-	console.log('response', response)
 
 	// eslint-disable-next-line no-throw-literal
 	throw { isCustomError: true, status: response.status }
 }
 
-export const get = (url: string, token?: string) => {
-	return baseRequest(`${baseUrl}${url}`, { method: 'GET' }, token)
+export const get = <T>(url: string, token?: string) => {
+	return baseRequest<T>(`${baseUrl}${url}`, { method: 'GET' }, token)
 }
 
-export const post = (url: string, token?: string, body?: string | FormData) => {
-	return baseRequest(`${baseUrl}${url}`, { method: 'POST', body }, token)
-}
-
-export const patch = (
+export const post = <T>(
 	url: string,
 	token?: string,
 	body?: string | FormData
 ) => {
-	return baseRequest(`${baseUrl}${url}`, { method: 'PATCH', body }, token)
+	return baseRequest<T>(`${baseUrl}${url}`, { method: 'POST', body }, token)
 }
 
-export const remove = (url: string, token?: string) => {
-	return baseRequest(`${baseUrl}${url}`, { method: 'DELETE' }, token)
+export const patch = <T>(
+	url: string,
+	token?: string,
+	body?: string | FormData
+) => {
+	return baseRequest<T>(`${baseUrl}${url}`, { method: 'PATCH', body }, token)
+}
+
+export const remove = <T>(url: string, token?: string) => {
+	return baseRequest<T>(`${baseUrl}${url}`, { method: 'DELETE' }, token)
 }
 
 // if (!response.ok) {

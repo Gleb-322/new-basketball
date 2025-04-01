@@ -13,6 +13,7 @@ import { useLocation, useNavigate } from 'react-router'
 import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
 import { loginUser } from '../../api/users/usersService'
+import { toast } from 'react-toastify'
 
 const schemaSignIn = yup.object().shape({
 	loginSignin: yup.string().required('Login is required!'),
@@ -66,23 +67,23 @@ export const SignIn: FC = () => {
 						`Something going wrong... Error status: ${error.status}`
 					)
 				})
-		}
-
-		return () => {
-			allowSendSignInData(false)
+				.finally(() => allowSendSignInData(false))
 		}
 	}, [signInData, sendSignInData, setToken, navigate])
 
 	useEffect(() => {
+		if (!location.state) return
+
 		if (location.state) {
 			const { successLogout } = location.state
 			if (successLogout) {
-				setNotification(`${successLogout}`)
-				const timer = setTimeout(() => {
-					closeNotification()
-				}, 6000)
+				// setNotification(`${successLogout}`)
+				// const timer = setTimeout(() => {
+				// 	closeNotification()
+				// }, 6000)
 
-				return () => clearTimeout(timer)
+				// return () => clearTimeout(timer)
+				toast.success(`${successLogout}`)
 			}
 		}
 	}, [location])

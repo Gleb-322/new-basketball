@@ -8,11 +8,15 @@ export const NotificationComponent: FC<INotification> = ({
 	error,
 }) => {
 	return (
+		// <Container $error={error} onClick={() => close()}>
 		<Container $error={error} onClick={() => close()}>
 			{message}
 		</Container>
+		// <StyledToastContainer />
 	)
 }
+
+// const StyledToastContainer = styled(ToastContainer)``
 
 const Container = styled.div<{
 	$error: boolean

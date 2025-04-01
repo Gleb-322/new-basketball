@@ -29,8 +29,6 @@ const schemaCreateAndUpdateTeam = yup.object().shape({
 		.matches(/^\d{4}$/, 'Four digits required!'),
 	teamImage: yup
 		.mixed<FileList>()
-		// .defined()
-		// .required('Team Logo is required!')
 		.test('required', 'Team Logo is required!', value => {
 			// Если файла нет — ошибка
 			return value instanceof FileList && value.length > 0
@@ -53,6 +51,7 @@ const schemaCreateAndUpdateTeam = yup.object().shape({
 
 export const TeamCreateAndUpdate: FC = () => {
 	const { token } = useAuth()
+
 	const navigate = useNavigate()
 	const location = useLocation() as unknown as Location &
 		IAddAndUpdateTeamLocationState
@@ -78,8 +77,9 @@ export const TeamCreateAndUpdate: FC = () => {
 	const {
 		register,
 		handleSubmit,
-		resetField,
 		reset,
+		setValue,
+		trigger,
 		formState: { errors },
 	} = useForm<IAddAndUpdateTeamFormFields>({
 		resolver: yupResolver<IAddAndUpdateTeamFormFields>(
@@ -165,11 +165,12 @@ export const TeamCreateAndUpdate: FC = () => {
 	// set update data in form values
 	useEffect(() => {
 		if (!updateFormValues) return
-
+		console.log(updateFormValues)
 		if (updateFormValues) {
 			reset(updateFormValues)
+			setValue('teamImage', updateFormValues.teamImage || undefined)
 		}
-	}, [updateFormValues, reset])
+	}, [updateFormValues, reset, setValue])
 
 	// update team by updateData
 	useEffect(() => {
@@ -252,7 +253,8 @@ export const TeamCreateAndUpdate: FC = () => {
 						type={'file'}
 						name={'teamImage'}
 						id={'teamImage'}
-						resetFieldTeamImage={resetField}
+						setTeamImage={setValue}
+						triggerTeamImage={trigger}
 						defaultImage={previewImage}
 						error={errors.teamImage?.message}
 					/>

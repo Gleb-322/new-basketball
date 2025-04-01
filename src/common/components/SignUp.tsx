@@ -55,6 +55,7 @@ export const SignUp: FC = () => {
 		if (signUpData && sendSignUpData) {
 			createUser(JSON.stringify(signUpData))
 				.then(result => {
+					console.log('Sign Up', result)
 					if (result.success) {
 						if (result.message instanceof Object) {
 							setAuthCookie(result.message.token)
@@ -71,14 +72,12 @@ export const SignUp: FC = () => {
 					}
 				})
 				.catch(error => {
+					console.log('error', error)
 					setNotification(
 						`Something going wrong... Error status: ${error.status}`
 					)
 				})
-		}
-
-		return () => {
-			allowSendSignUpData(false)
+				.finally(() => allowSendSignUpData(false))
 		}
 	}, [sendSignUpData, signUpData, navigate, setToken])
 

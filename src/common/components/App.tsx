@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router'
+import { ToastContainer } from 'react-toastify'
 import { ThemeProvider } from 'styled-components'
 import { SignIn } from './SignIn'
 import { SignUp } from './SignUp'
@@ -58,6 +59,7 @@ export const App = () => {
 				<Route path="signup" element={<SignUp />} />
 				<Route path="*" element={<NotFound />} />
 			</Routes>
+			<ToastContainer />
 		</ThemeProvider>
 	)
 }

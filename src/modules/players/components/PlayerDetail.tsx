@@ -38,13 +38,14 @@ export const PlayerDetail: FC = () => {
 			getPlayer(params._id)
 				.then(result => {
 					console.log('get player by id', result)
+
 					if (result.success) {
 						if (result.message instanceof Object) {
+							setPlayer(result.message)
 							const avatar = convertBufferToUrl(result.message)
 							if (avatar) {
 								setDecodedPlayerAvatar(avatar)
 							}
-							setPlayer(result.message)
 						}
 					}
 					if (!result.success) {
@@ -55,6 +56,7 @@ export const PlayerDetail: FC = () => {
 				})
 				.catch(error => {
 					console.log('error', error)
+
 					setNotification(
 						`Something going wrong... Error status: ${error.status}`
 					)
@@ -65,10 +67,12 @@ export const PlayerDetail: FC = () => {
 
 	// delete one player by id
 	useEffect(() => {
-		if (!deletePlayer && !player) return
+		if (!deletePlayer && !player?._id && !player?.team._id && !player?.name)
+			return
 
 		setLoading(true)
-		if (deletePlayer && player) {
+
+		if (deletePlayer && player?._id && player?.team._id && player?.name) {
 			const query = new URLSearchParams()
 			query.append('playerId', player._id)
 			query.append('teamId', player.team._id)
@@ -96,7 +100,14 @@ export const PlayerDetail: FC = () => {
 		return () => {
 			setDeletePlayer(false)
 		}
-	}, [deletePlayer, navigate, player, token])
+	}, [
+		deletePlayer,
+		navigate,
+		player?._id,
+		player?.name,
+		player?.team._id,
+		token,
+	])
 
 	return (
 		<Container>

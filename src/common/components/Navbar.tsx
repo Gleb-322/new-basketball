@@ -27,6 +27,7 @@ export const Navbar: FC = () => {
 		if (logout) {
 			logoutUser(token)
 				.then(result => {
+					console.log('logout res', result)
 					if (result.success) {
 						setAuthCookie(undefined)
 						setToken(undefined)

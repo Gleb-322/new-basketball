@@ -123,6 +123,8 @@ export const PlayerCreateAndUpdate: FC = () => {
 		reset,
 		trigger,
 		control,
+		getValues,
+		setValue,
 		resetField,
 		formState: { errors },
 	} = useForm<IAddAndUpdatePlayerFormFields>({
@@ -259,11 +261,12 @@ export const PlayerCreateAndUpdate: FC = () => {
 	// set update data in form values
 	useEffect(() => {
 		if (!updateFormValues) return
-
+		console.log(updateFormValues)
 		if (updateFormValues) {
 			reset(updateFormValues)
+			setValue('playerImage', updateFormValues.playerImage || undefined)
 		}
-	}, [updateFormValues, reset])
+	}, [updateFormValues, reset, setValue])
 
 	// update player by updateData
 	useEffect(() => {
@@ -378,6 +381,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 		data: IAddAndUpdatePlayerFormFields
 	): void => {
 		console.log('add player or update', data)
+		console.log('form value', getValues())
 
 		if (location.state?.player) {
 			setUpdateData(data)
@@ -403,6 +407,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 						id={'playerImage'}
 						defaultImage={previewImage}
 						resetFieldPlayerImage={resetField}
+						triggerPlayerImage={trigger}
 						error={errors.playerImage?.message}
 					/>
 				</Left>

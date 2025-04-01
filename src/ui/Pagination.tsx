@@ -1,4 +1,4 @@
-import { FC, SetStateAction, useState } from 'react'
+import { FC } from 'react'
 import ReactPaginate from 'react-paginate'
 import { ReactComponent as ChevronLeft } from '../assets/icons/chevron-left.svg'
 import { ReactComponent as ChevronRight } from '../assets/icons/chevron-right.svg'

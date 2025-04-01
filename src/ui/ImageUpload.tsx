@@ -14,8 +14,10 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	register,
 	error,
 	defaultImage,
-	resetFieldTeamImage,
+	setTeamImage,
 	resetFieldPlayerImage,
+	triggerTeamImage,
+	triggerPlayerImage,
 }: IInputProps<FormInputs> & { defaultImage?: string }) => {
 	const [image, setImage] = useState<string | undefined>('')
 	const [notification, setNotification] = useState<string | undefined>(
@@ -31,11 +33,13 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 		if (id === 'playerImage') {
 			resetFieldPlayerImage &&
 				resetFieldPlayerImage('playerImage', { defaultValue: null })
+			triggerPlayerImage && triggerPlayerImage('playerImage')
 		}
 
 		if (id === 'teamImage') {
-			resetFieldTeamImage &&
-				resetFieldTeamImage('teamImage', { defaultValue: undefined })
+			setTeamImage &&
+				setTeamImage('teamImage', undefined, { shouldValidate: true })
+			triggerTeamImage && triggerTeamImage('teamImage')
 		}
 	}
 
