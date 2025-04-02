@@ -11,13 +11,13 @@ import {
 } from '../interfaces/types'
 import { FC, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { NotificationComponent } from '../../../ui/Notification'
 import { ImgUpload } from '../../../ui/ImageUpload'
 import { useAuth } from '../../../common/hooks/useAuth'
 import { convertFileToList } from '../../../common/helpers/converterFileToFileList'
 import { convertBufferToFile } from '../helpers/converterBufferToFile'
 import { convertFileToBase64 } from '../../../common/helpers/converterFileToBase64'
 import { createTeams, patchTeam } from '../../../api/teams/teamsService'
+import { showToast } from '../../../ui/ToastrNotification'
 
 const schemaCreateAndUpdateTeam = yup.object().shape({
 	teamName: yup.string().required('Team Name is required!'),
@@ -70,10 +70,6 @@ export const TeamCreateAndUpdate: FC = () => {
 
 	const [previewImage, setPreviewImage] = useState<string | undefined>()
 
-	const [notification, setNotification] = useState<string | undefined>(
-		undefined
-	)
-
 	const {
 		register,
 		handleSubmit,
@@ -111,23 +107,25 @@ export const TeamCreateAndUpdate: FC = () => {
 					console.log('team create res', result)
 					if (result.success) {
 						if (result.message instanceof Object) {
-							navigate('/teams', {
-								state: { createTeam: result.message.team.name },
+							navigate('/teams')
+							showToast({
+								type: 'success',
+								message: `Team: ${result.message.team.name} successful created!`,
 							})
 						}
 					}
 
 					if (!result.success) {
 						if (typeof result.message === 'string') {
-							setNotification(`${result.message}`)
+							showToast({
+								type: 'error',
+								message: `${result.message}`,
+							})
 						}
 					}
 				})
 				.catch(error => {
 					console.log('team create res error', error)
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 		}
 
@@ -148,7 +146,12 @@ export const TeamCreateAndUpdate: FC = () => {
 
 		convertFileToBase64(file)
 			.then(result => setPreviewImage(result))
-			.catch(error => setNotification(`${error.message}`))
+			.catch(error =>
+				showToast({
+					type: 'error',
+					message: `${error.message}`,
+				})
+			)
 
 		const data: IUpdateTeamData = {
 			teamName: locationState.name,
@@ -198,20 +201,24 @@ export const TeamCreateAndUpdate: FC = () => {
 					console.log('res update team', result)
 					if (result.success) {
 						if (result.message instanceof Object) {
-							navigate('/teams', { state: { updateTeam: result.message.name } })
+							navigate('/teams')
+							showToast({
+								type: 'success',
+								message: `Team: ${result.message.name} successful updated!`,
+							})
 						}
 					}
 					if (!result.success) {
 						if (typeof result.message === 'string') {
-							setNotification(`${result.message}`)
+							showToast({
+								type: 'error',
+								message: `${result.message}`,
+							})
 						}
 					}
 				})
 				.catch(error => {
 					console.log('error update team', error)
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 		}
 
@@ -310,13 +317,6 @@ export const TeamCreateAndUpdate: FC = () => {
 					</InputsBlock>
 				</Right>
 			</MainForm>
-			{notification ? (
-				<NotificationComponent
-					error={true}
-					message={notification}
-					close={() => setNotification(undefined)}
-				/>
-			) : null}
 		</Section>
 	)
 }

@@ -3,7 +3,7 @@ import { ReactComponent as AddPhotoSVG } from '../assets/icons/add-photo.svg'
 import styled from 'styled-components'
 import { IInputProps } from '../common/interfaces/types'
 import { convertFileToBase64 } from '../common/helpers/converterFileToBase64'
-import { NotificationComponent } from './Notification'
+import { showToast } from './ToastrNotification'
 
 export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	FormInputs extends Record<string, any>
@@ -20,9 +20,6 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	triggerPlayerImage,
 }: IInputProps<FormInputs> & { defaultImage?: string }) => {
 	const [image, setImage] = useState<string | undefined>('')
-	const [notification, setNotification] = useState<string | undefined>(
-		undefined
-	)
 
 	useEffect(() => {
 		setImage(defaultImage)
@@ -62,9 +59,10 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 											convertFileToBase64(e.target?.files[0])
 												.then(result => setImage(result))
 												.catch(error =>
-													setNotification(
-														`Something going wrong... Error: ${error.message}`
-													)
+													showToast({
+														type: 'error',
+														message: `${error.message}`,
+													})
 												)
 										}
 									},
@@ -83,13 +81,6 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 				) : null}
 				{error && <InputError>{error}</InputError>}
 			</Conatiner>
-			{notification ? (
-				<NotificationComponent
-					error={true}
-					message={notification}
-					close={() => setNotification(undefined)}
-				/>
-			) : null}
 		</>
 	)
 }

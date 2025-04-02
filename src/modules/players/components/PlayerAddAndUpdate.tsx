@@ -18,7 +18,6 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { DatePickerComponent } from '../../../ui/DatePicker'
 import { SelectComponent } from '../../../ui/Select'
 import { IOption } from '../../../common/interfaces/types'
-import { NotificationComponent } from '../../../ui/Notification'
 import dayjs from 'dayjs'
 import { useAuth } from '../../../common/hooks/useAuth'
 import { ITeams } from '../../teams/interfaces/types'
@@ -27,6 +26,7 @@ import { convertFileToList } from '../../../common/helpers/converterFileToFileLi
 import { convertFileToBase64 } from '../../../common/helpers/converterFileToBase64'
 import { getTeams } from '../../../api/teams/teamsService'
 import { createPlayers, patchPlayer } from '../../../api/players/playerService'
+import { showToast } from '../../../ui/ToastrNotification'
 
 const schemaCreateAndUpdatePlayer = yup.object().shape(
 	{
@@ -115,8 +115,6 @@ export const PlayerCreateAndUpdate: FC = () => {
 
 	const [previewImage, setPreviewImage] = useState<string | undefined>()
 
-	const [notification, setNotification] = useState<string | null>(null)
-
 	const {
 		register,
 		handleSubmit,
@@ -159,15 +157,15 @@ export const PlayerCreateAndUpdate: FC = () => {
 				}
 				if (!result.success) {
 					if (typeof result.message === 'string') {
-						setNotification(`${result.message}`)
+						showToast({
+							type: 'error',
+							message: `${result.message}`,
+						})
 					}
 				}
 			})
 			.catch(error => {
 				console.log('error get teams', error)
-				setNotification(
-					`Something going wrong... Error status: ${error.status}`
-				)
 			})
 			.finally(() => setIsOptionsLoading(false))
 	}, [])
@@ -204,23 +202,25 @@ export const PlayerCreateAndUpdate: FC = () => {
 					console.log('player create res', result)
 					if (result.success) {
 						if (result.message instanceof Object) {
-							navigate('/players', {
-								state: { createPlayer: result.message.player.name },
+							navigate('/players')
+							showToast({
+								type: 'success',
+								message: `Player with name: ${result.message.player.name} successful created!`,
 							})
 						}
 					}
 
 					if (!result.success) {
 						if (typeof result.message === 'string') {
-							setNotification(`${result.message}`)
+							showToast({
+								type: 'error',
+								message: `${result.message}`,
+							})
 						}
 					}
 				})
 				.catch(error => {
 					console.log('player create res error', error)
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 		}
 
@@ -240,7 +240,12 @@ export const PlayerCreateAndUpdate: FC = () => {
 
 		convertFileToBase64(file)
 			.then(result => setPreviewImage(result))
-			.catch(error => setNotification(`${error.message}`))
+			.catch(error =>
+				showToast({
+					type: 'error',
+					message: `${error.message}`,
+				})
+			)
 
 		const data = {
 			playerName: locationState.name,
@@ -344,22 +349,24 @@ export const PlayerCreateAndUpdate: FC = () => {
 					console.log('res update player', result)
 					if (result.success) {
 						if (result.message instanceof Object) {
-							navigate('/players', {
-								state: { updatePlayer: result.message.name },
+							navigate('/players')
+							showToast({
+								type: 'success',
+								message: `Player with name: ${result.message.name} successful updated!`,
 							})
 						}
 					}
 					if (!result.success) {
 						if (typeof result.message === 'string') {
-							setNotification(`${result.message}`)
+							showToast({
+								type: 'error',
+								message: `${result.message}`,
+							})
 						}
 					}
 				})
 				.catch(error => {
 					console.log('error update player', error)
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 		}
 		return () => {
@@ -535,13 +542,6 @@ export const PlayerCreateAndUpdate: FC = () => {
 					</InputsBlock>
 				</Right>
 			</MainForm>
-			{notification ? (
-				<NotificationComponent
-					error={true}
-					message={notification}
-					close={() => setNotification(null)}
-				/>
-			) : null}
 		</Section>
 	)
 }

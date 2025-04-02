@@ -16,7 +16,10 @@ export const convertFileToBase64 = (
 		}
 
 		reader.onerror = () => {
-			reject(new Error('Failed to convert file to base64'))
+			reject(() => {
+				// eslint-disable-next-line no-throw-literal
+				throw { message: 'Failed to convert file to base64' }
+			})
 		}
 	})
 }

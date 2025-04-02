@@ -59,14 +59,6 @@ export interface IAddAndUpdatePlayerLocationState {
 	state?: { player: IPlayers }
 }
 
-export interface IDashPlayerLocationState {
-	state?: {
-		createPlayer?: string
-		updatePlayer?: string
-		deletePlayer?: string
-	}
-}
-
 export interface ICreatePlayersResponse {
 	errorCode: string
 	success: boolean

@@ -1,29 +1,23 @@
 import { FC, SetStateAction, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { IDashPlayerLocationState, IPlayers } from '../interfaces/types'
+import { IPlayers } from '../interfaces/types'
 import { PlayerHeader } from './PlayerHeader'
 import { PaginationComponent } from '../../../ui/Pagination'
 import { SelectComponent } from '../../../ui/Select'
 import { IOption, paginateOptions } from '../../../common/interfaces/types'
-import { useLocation } from 'react-router'
 import { PlayerList } from './PlayerList'
 import { PlayerEmptyList } from './PlayerEmptyList'
 import { LoadingComponent } from '../../../ui/Loading'
-import { NotificationComponent } from '../../../ui/Notification'
 import { ITeams } from '../../teams/interfaces/types'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 import { getTeams } from '../../../api/teams/teamsService'
 import { getPlayers } from '../../../api/players/playerService'
+import { showToast } from '../../../ui/ToastrNotification'
 
 export const PlayerDashboard: FC = () => {
-	const location = useLocation() as unknown as Location &
-		IDashPlayerLocationState
 	const [players, setPlayers] = useState<IPlayers[]>([])
 	const [teamsOption, setTeamsOption] = useState<IOption[]>([])
 	const [isTeamOptions, setIsTeamOption] = useState<boolean>(false)
-	const [notification, setNotification] = useState<string | undefined>(
-		undefined
-	)
 	const [loading, setLoading] = useState<boolean>(false)
 	const [decodedAvatars, setDecodedAvatars] = useState<{
 		[key: string]: string
@@ -58,15 +52,15 @@ export const PlayerDashboard: FC = () => {
 				}
 				if (!result.success) {
 					if (typeof result.message === 'string') {
-						setNotification(`${result.message}`)
+						showToast({
+							type: 'error',
+							message: `${result.message}`,
+						})
 					}
 				}
 			})
 			.catch(error => {
 				console.log('error get teams', error)
-				setNotification(
-					`Something going wrong... Error status: ${error.status}`
-				)
 			})
 			.finally(() => setLoading(false))
 	}, [])
@@ -109,42 +103,22 @@ export const PlayerDashboard: FC = () => {
 				}
 				if (!result.success) {
 					if (typeof result.message === 'string') {
-						setNotification(`${result.message}`)
+						showToast({
+							type: 'error',
+							message: `${result.message}`,
+						})
 					}
 				}
 			})
 			.catch(error => {
 				console.log('error', error)
-				setNotification(
-					`Something going wrong... Error status: ${error.status}`
-				)
 			})
 			.finally(() => setLoading(false))
 	}, [currentPage, keyword, selectedOption.value, teamsFilter])
 
-	useEffect(() => {
-		if (location.state) {
-			const { createPlayer, updatePlayer, deletePlayer } = location.state
-			if (createPlayer || updatePlayer || deletePlayer) {
-				const message = createPlayer
-					? `Player with name: ${createPlayer} successful created!`
-					: updatePlayer
-					? `Player with name: ${location.state?.updatePlayer} successful updated!`
-					: deletePlayer
-				setNotification(message)
-				const timer = setTimeout(() => {
-					closeNotification()
-				}, 6000)
-
-				return () => clearTimeout(timer)
-			}
-		}
-	}, [location])
-
 	const handlePageClick = (data: { selected: SetStateAction<number> }) =>
 		setCurrentPage(data.selected)
 
-	const closeNotification = () => setNotification(undefined)
 	return (
 		<>
 			<PlayerHeader
@@ -163,20 +137,6 @@ export const PlayerDashboard: FC = () => {
 				) : (
 					<PlayerEmptyList />
 				)}
-
-				{notification ? (
-					<NotificationComponent
-						error={
-							location.state?.createPlayer ||
-							location.state?.updatePlayer ||
-							location.state?.deletePlayer
-								? false
-								: true
-						}
-						message={notification}
-						close={closeNotification}
-					/>
-				) : null}
 			</Main>
 			<Footer>
 				{players.length > 0 ? (

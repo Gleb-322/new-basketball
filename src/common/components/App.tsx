@@ -1,5 +1,4 @@
 import { Navigate, Route, Routes } from 'react-router'
-import { ToastContainer } from 'react-toastify'
 import { ThemeProvider } from 'styled-components'
 import { SignIn } from './SignIn'
 import { SignUp } from './SignUp'
@@ -13,6 +12,7 @@ import { PlayerLayout } from '../../modules/players/components/PlayerLayout'
 import { PlayerDashboard } from '../../modules/players/components/PlayerDashboard'
 import { PlayerDetail } from '../../modules/players/components/PlayerDetail'
 import { PlayerCreateAndUpdate } from '../../modules/players/components/PlayerAddAndUpdate'
+import { ToastNotification } from '../../ui/ToastrNotification'
 
 const theme = {
 	colors: {
@@ -59,7 +59,7 @@ export const App = () => {
 				<Route path="signup" element={<SignUp />} />
 				<Route path="*" element={<NotFound />} />
 			</Routes>
-			<ToastContainer />
+			<ToastNotification />
 		</ThemeProvider>
 	)
 }

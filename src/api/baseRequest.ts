@@ -1,4 +1,5 @@
-import { IRequestBaseBody } from '../common/interfaces/types'
+import { CustomError, IRequestBaseBody } from '../common/interfaces/types'
+import { showToast } from '../ui/ToastrNotification'
 
 const baseUrl = process.env.REACT_APP_BASE_URL
 
@@ -22,22 +23,75 @@ export const baseRequest = async <T>(
 
 	console.log('baseData', data)
 	console.log('token', token)
-	console.log('url', url)
 
-	const response = await fetch(url, {
-		...data,
-		headers: {
-			...(headersForToken as HeadersInit),
-			...(headersForMultiPart as HeadersInit),
-		},
-	})
+	try {
+		const response = await fetch(url, {
+			...data,
+			headers: {
+				...(headersForToken as HeadersInit),
+				...(headersForMultiPart as HeadersInit),
+			},
+		})
+		console.log('response.status', response.status)
 
-	if (response.ok) {
+		if (!response.ok) {
+			if (response.status === 401) {
+				showToast({
+					type: 'error',
+					message: 'Authorization error! Please Login again!',
+				})
+			} else if (response.status >= 500) {
+				showToast({
+					type: 'error',
+					message: 'Server error! Try again later...',
+				})
+			} else {
+				showToast({
+					type: 'error',
+					message: `Something going wrong... Error status: ${response.status}`,
+				})
+			}
+
+			// eslint-disable-next-line no-throw-literal
+			throw {
+				isCustomError: true,
+				status: response.status,
+				// Пытаемся получить сообщение из ответа, если это возможно
+				message: response.headers
+					.get('content-type')
+					?.includes('application/json')
+					? (await response.json()).message
+					: undefined,
+			} as CustomError
+		}
+
 		return (await response.json()) as T
-	}
+	} catch (error: any) {
+		// Проверяем, если это наша кастомная ошибка - просто пробрасываем
+		if (error.isCustomError) {
+			throw error
+		}
 
-	// eslint-disable-next-line no-throw-literal
-	throw { isCustomError: true, status: response.status }
+		if (!navigator.onLine) {
+			showToast({ type: 'error', message: 'There is no internet connection!' })
+		} else {
+			showToast({
+				type: 'error',
+				message: 'Something going wrong... Try again later...',
+			})
+		}
+
+		throw error
+
+		// eslint-disable-next-line no-throw-literal
+		// throw {
+		// 	isCustomError: true,
+		// 	status: 0,
+		// 	message: !navigator.onLine
+		// 		? 'There is no internet connection!'
+		// 		: 'Something going wrong... Try again later...',
+		// } as CustomError
+	}
 }
 
 export const get = <T>(url: string, token?: string) => {
@@ -63,23 +117,3 @@ export const patch = <T>(
 export const remove = <T>(url: string, token?: string) => {
 	return baseRequest<T>(`${baseUrl}${url}`, { method: 'DELETE' }, token)
 }
-
-// if (!response.ok) {
-// 	if (response.status === 401) {
-// 		throw new Error('Please authorization!')
-// 	} else if (response.status === 403) {
-// 		throw new Error('Access denied!')
-// 	} else if (response.status === 500) {
-// 		throw new Error('Server error! Try again later.')
-// 	}
-// 	throw new Error(`HTTP error! Status: ${response.status}`)
-// }
-
-// } catch (error) {
-// if (error instanceof TypeError && error.message === 'Failed to fetch') {
-// 	throw new Error('Network error! Check your internet connection.')
-// } else if (error instanceof SyntaxError) {
-// 	throw new Error('Invalid response from server!')
-// }
-// throw error
-// }

@@ -4,7 +4,6 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
 import { FC, useEffect, useState } from 'react'
 import { ITeams } from '../interfaces/types'
-import { NotificationComponent } from '../../../ui/Notification'
 import { LoadingComponent } from '../../../ui/Loading'
 import { LinkComponent } from '../../../ui/Link'
 import { useAuth } from '../../../common/hooks/useAuth'
@@ -13,6 +12,7 @@ import { convertBufferToUrl as convertBufferToUrlForPlayers } from '../../player
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { getTeam, removeTeam } from '../../../api/teams/teamsService'
+import { showToast } from '../../../ui/ToastrNotification'
 
 dayjs.extend(utc)
 
@@ -26,9 +26,7 @@ export const TeamDetail: FC = () => {
 	const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<{
 		[key: string]: string
 	}>({})
-	const [notification, setNotification] = useState<string | undefined>(
-		undefined
-	)
+
 	const [loading, setLoading] = useState<boolean>(false)
 	const params = useParams()
 	const navigate = useNavigate()
@@ -58,15 +56,15 @@ export const TeamDetail: FC = () => {
 					}
 					if (!result.success) {
 						if (typeof result.message === 'string') {
-							setNotification(`${result.message}`)
+							showToast({
+								type: 'error',
+								message: `${result.message}`,
+							})
 						}
 					}
 				})
 				.catch(error => {
 					console.log('error', error)
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 				.finally(() => setLoading(false))
 		}
@@ -83,17 +81,21 @@ export const TeamDetail: FC = () => {
 				.then(result => {
 					console.log('delete team by id', result)
 					if (result.success) {
-						navigate('/teams', { state: { deleteTeam: result.message } })
+						navigate('/teams')
+						showToast({
+							type: 'success',
+							message: `${result.message}`,
+						})
 					}
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						showToast({
+							type: 'error',
+							message: `${result.message}`,
+						})
 					}
 				})
 				.catch(error => {
 					console.log('error', error)
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 				.finally(() => setLoading(false))
 		}
@@ -227,13 +229,6 @@ export const TeamDetail: FC = () => {
 					</RosterBlock>
 				</>
 			)}
-			{notification ? (
-				<NotificationComponent
-					error={true}
-					message={notification}
-					close={() => setNotification(undefined)}
-				/>
-			) : null}
 		</Container>
 	)
 }

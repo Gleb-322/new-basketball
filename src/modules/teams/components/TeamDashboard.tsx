@@ -1,22 +1,18 @@
 import { FC, SetStateAction, useEffect, useState } from 'react'
-import { IDashTeamLocationState, ITeams } from '../interfaces/types'
-import { useLocation } from 'react-router'
+import { ITeams } from '../interfaces/types'
 import styled from 'styled-components'
 import { TeamHeader } from './TeamHeader'
 import { TeamList } from './TeamList'
 import { TeamEmptyList } from './TeamEmptyList'
-import { NotificationComponent } from '../../../ui/Notification'
 import { PaginationComponent } from '../../../ui/Pagination'
 import { SelectComponent } from '../../../ui/Select'
 import { LoadingComponent } from '../../../ui/Loading'
 import { IOption, paginateOptions } from '../../../common/interfaces/types'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 import { getTeams } from '../../../api/teams/teamsService'
+import { showToast } from '../../../ui/ToastrNotification'
 
 export const TeamDashboard: FC = () => {
-	const [notification, setNotification] = useState<string | undefined>(
-		undefined
-	)
 	const [loading, setLoading] = useState<boolean>(false)
 	const [teams, setTeams] = useState<ITeams[]>([])
 	const [decodedAvatars, setDecodedAvatars] = useState<{
@@ -28,8 +24,6 @@ export const TeamDashboard: FC = () => {
 	const [currentPage, setCurrentPage] = useState<number>(0)
 	const [pageCount, setPageCount] = useState<number>(0)
 	const [keyword, setKeyword] = useState<string>('')
-
-	const location = useLocation() as unknown as Location & IDashTeamLocationState
 
 	// get all teams
 	useEffect(() => {
@@ -59,50 +53,21 @@ export const TeamDashboard: FC = () => {
 				}
 				if (!result.success) {
 					if (typeof result.message === 'string')
-						setNotification(`${result.message}`)
+						showToast({
+							type: 'error',
+							message: `${result.message}`,
+						})
 				}
 			})
 			.catch(error => {
 				console.log('error', error)
-				// if (error.isCustomError) {
-				setNotification(
-					`Something going wrong... Error status: ${error.status}`
-				)
-				// }
-				// if (error) {
-				// 	setNotification(
-				// 		`Something going wrong... Error status: ${error.message}`
-				// 	)
-				// }
 			})
 			.finally(() => setLoading(false))
 	}, [currentPage, selectedOption.value, keyword])
 
-	useEffect(() => {
-		if (location.state) {
-			const { createTeam, updateTeam, deleteTeam } = location.state
-			if (createTeam || updateTeam || deleteTeam) {
-				const message = createTeam
-					? `Team: ${createTeam} successful created!`
-					: updateTeam
-					? `Team: ${updateTeam} successful updated!`
-					: deleteTeam
-
-				setNotification(message)
-
-				const timer = setTimeout(() => {
-					closeNotification()
-				}, 6000)
-
-				return () => clearTimeout(timer)
-			}
-		}
-	}, [location])
-
 	const handlePageClick = (data: { selected: SetStateAction<number> }) =>
 		setCurrentPage(data.selected)
 
-	const closeNotification = () => setNotification(undefined)
 	return (
 		<>
 			<TeamHeader search={keyword} onSearch={setKeyword} />
@@ -114,20 +79,6 @@ export const TeamDashboard: FC = () => {
 				) : (
 					<TeamEmptyList />
 				)}
-
-				{notification ? (
-					<NotificationComponent
-						error={
-							location.state?.createTeam ||
-							location.state?.updateTeam ||
-							location.state?.deleteTeam
-								? false
-								: true
-						}
-						message={notification}
-						close={closeNotification}
-					/>
-				) : null}
 			</Main>
 			<Footer>
 				{teams.length > 0 ? (

@@ -9,10 +9,10 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { ISignupFormFields } from '../interfaces/types'
 import { useNavigate } from 'react-router'
-import { NotificationComponent } from '../../ui/Notification'
 import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
 import { createUser } from '../../api/users/usersService'
+import { showToast } from '../../ui/ToastrNotification'
 
 const schemaSignUp = yup.object().shape({
 	nameSignup: yup.string().required('Name is required!'),
@@ -34,9 +34,6 @@ const schemaSignUp = yup.object().shape({
 export const SignUp: FC = () => {
 	const { setToken } = useAuth()
 	const navigate = useNavigate()
-	const [notification, setNotification] = useState<string | undefined>(
-		undefined
-	)
 	const [signUpData, setSignUpData] = useState<ISignupFormFields | null>(null)
 	const [sendSignUpData, allowSendSignUpData] = useState<boolean>(false)
 
@@ -62,20 +59,21 @@ export const SignUp: FC = () => {
 							setToken(result.message.token)
 							localStorage.setItem('name', result.message.user.name)
 							navigate('/teams')
+							showToast({
+								type: 'success',
+								message: 'You succesfully sign up!',
+							})
 						}
 					}
 
 					if (!result.success) {
 						if (typeof result.message === 'string') {
-							setNotification(`${result.message}`)
+							showToast({ type: 'error', message: result.message })
 						}
 					}
 				})
 				.catch(error => {
 					console.log('error', error)
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 				.finally(() => allowSendSignUpData(false))
 		}
@@ -160,13 +158,6 @@ export const SignUp: FC = () => {
 			<Right>
 				<SignUpSVG />
 			</Right>
-			{notification ? (
-				<NotificationComponent
-					message={notification}
-					error={true}
-					close={() => setNotification(undefined)}
-				/>
-			) : null}
 		</Conatiner>
 	)
 }

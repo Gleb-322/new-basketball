@@ -136,10 +136,9 @@ export interface IDatePicker {
 	onChange: (newValue: Dayjs | null) => void
 }
 
-export interface ISignInLocationState {
-	state?: {
-		successLogout?: string
-	}
+export interface IToastNotificationProps {
+	type: 'success' | 'error'
+	message: string
 }
 
 export interface IUsers {
@@ -165,4 +164,11 @@ export interface ILogoutUserResponse {
 	errorCode: string
 	success: boolean
 	message: string
+}
+
+// Пользовательский тип ошибки для удобной передачи в компоненты
+export type CustomError = {
+	isCustomError: true
+	status: number
+	message?: string
 }

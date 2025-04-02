@@ -8,8 +8,8 @@ import { ReactComponent as SignOutSVGRed } from '../../assets/icons/input.svg'
 import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
 import { FC, useEffect, useState } from 'react'
-import { NotificationComponent } from '../../ui/Notification'
 import { logoutUser } from '../../api/users/usersService'
+import { showToast } from '../../ui/ToastrNotification'
 
 export const Navbar: FC = () => {
 	const { token, setToken } = useAuth()
@@ -17,9 +17,6 @@ export const Navbar: FC = () => {
 	const navigate = useNavigate()
 
 	const [logout, setLogout] = useState<boolean>(false)
-	const [notification, setNotification] = useState<string | undefined>(
-		undefined
-	)
 
 	useEffect(() => {
 		if (!logout) return
@@ -32,18 +29,16 @@ export const Navbar: FC = () => {
 						setAuthCookie(undefined)
 						setToken(undefined)
 						localStorage.removeItem('name')
-						navigate('/signin', { state: { successLogout: result.message } })
+						navigate('/signin')
+						showToast({ type: 'success', message: result.message })
 					}
 
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						showToast({ type: 'error', message: result.message })
 					}
 				})
 				.catch(error => {
 					console.log('error logout', error)
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 		}
 
@@ -78,13 +73,6 @@ export const Navbar: FC = () => {
 					Sign out
 				</SignOut>
 			</Container>
-			{notification ? (
-				<NotificationComponent
-					message={notification}
-					error={true}
-					close={() => setNotification(undefined)}
-				/>
-			) : null}
 		</>
 	)
 }

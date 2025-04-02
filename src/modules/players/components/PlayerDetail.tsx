@@ -8,11 +8,11 @@ import { useNavigate, useParams } from 'react-router'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 import { useAuth } from '../../../common/hooks/useAuth'
 import { IPlayers } from '../interfaces/types'
-import { NotificationComponent } from '../../../ui/Notification'
 import { LinkComponent } from '../../../ui/Link'
 import { ReactComponent as NoImageSVG } from '../../../assets/images/noImage.svg'
 import { LoadingComponent } from '../../../ui/Loading'
 import { getPlayer, removePlayer } from '../../../api/players/playerService'
+import { showToast } from '../../../ui/ToastrNotification'
 
 dayjs.extend(utc)
 
@@ -25,9 +25,7 @@ export const PlayerDetail: FC = () => {
 	const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<{
 		[key: string]: string
 	}>()
-	const [notification, setNotification] = useState<string | undefined>(
-		undefined
-	)
+
 	const [loading, setLoading] = useState<boolean>(false)
 
 	// get player by id
@@ -50,16 +48,15 @@ export const PlayerDetail: FC = () => {
 					}
 					if (!result.success) {
 						if (typeof result.message === 'string') {
-							setNotification(`${result.message}`)
+							showToast({
+								type: 'error',
+								message: `${result.message}`,
+							})
 						}
 					}
 				})
 				.catch(error => {
 					console.log('error', error)
-
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 				.finally(() => setLoading(false))
 		}
@@ -82,17 +79,21 @@ export const PlayerDetail: FC = () => {
 				.then(result => {
 					console.log('res delete player', result)
 					if (result.success) {
-						navigate('/players', { state: { deletePlayer: result.message } })
+						navigate('/players')
+						showToast({
+							type: 'success',
+							message: `${result.message}`,
+						})
 					}
 					if (!result.success) {
-						setNotification(`${result.message}`)
+						showToast({
+							type: 'error',
+							message: `${result.message}`,
+						})
 					}
 				})
 				.catch(error => {
 					console.log('error', error)
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 				.finally(() => setLoading(false))
 		}
@@ -196,13 +197,6 @@ export const PlayerDetail: FC = () => {
 					) : null}
 				</>
 			)}
-			{notification ? (
-				<NotificationComponent
-					error={true}
-					message={notification}
-					close={() => setNotification(undefined)}
-				/>
-			) : null}
 		</Container>
 	)
 }

@@ -7,13 +7,12 @@ import { LinkComponent } from '../../ui/Link'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { ISigninFormFields, ISignInLocationState } from '../interfaces/types'
-import { NotificationComponent } from '../../ui/Notification'
-import { useLocation, useNavigate } from 'react-router'
+import { ISigninFormFields } from '../interfaces/types'
+import { useNavigate } from 'react-router'
 import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
 import { loginUser } from '../../api/users/usersService'
-import { toast } from 'react-toastify'
+import { showToast } from '../../ui/ToastrNotification'
 
 const schemaSignIn = yup.object().shape({
 	loginSignin: yup.string().required('Login is required!'),
@@ -21,14 +20,10 @@ const schemaSignIn = yup.object().shape({
 })
 
 export const SignIn: FC = () => {
-	const location = useLocation() as unknown as Location & ISignInLocationState
 	const { setToken } = useAuth()
 	const navigate = useNavigate()
 	const [signInData, setSignInData] = useState<ISigninFormFields | null>(null)
 	const [sendSignInData, allowSendSignInData] = useState<boolean>(false)
-	const [notification, setNotification] = useState<string | undefined>(
-		undefined
-	)
 
 	const {
 		register,
@@ -52,41 +47,22 @@ export const SignIn: FC = () => {
 							setToken(result.message.token)
 							localStorage.setItem('name', result.message.user.name)
 							navigate('/teams')
+							showToast({ type: 'success', message: 'You succesfully login!' })
 						}
 					}
 
 					if (!result.success) {
 						if (typeof result.message === 'string') {
-							setNotification(`${result.message}`)
+							showToast({ type: 'error', message: result.message })
 						}
 					}
 				})
 				.catch(error => {
 					console.log('error', error)
-					setNotification(
-						`Something going wrong... Error status: ${error.status}`
-					)
 				})
 				.finally(() => allowSendSignInData(false))
 		}
 	}, [signInData, sendSignInData, setToken, navigate])
-
-	useEffect(() => {
-		if (!location.state) return
-
-		if (location.state) {
-			const { successLogout } = location.state
-			if (successLogout) {
-				// setNotification(`${successLogout}`)
-				// const timer = setTimeout(() => {
-				// 	closeNotification()
-				// }, 6000)
-
-				// return () => clearTimeout(timer)
-				toast.success(`${successLogout}`)
-			}
-		}
-	}, [location])
 
 	const onSubmit: SubmitHandler<ISigninFormFields> = (
 		data: ISigninFormFields
@@ -95,8 +71,6 @@ export const SignIn: FC = () => {
 		setSignInData(data)
 		allowSendSignInData(true)
 	}
-
-	const closeNotification = () => setNotification(undefined)
 
 	return (
 		<Conatiner>
@@ -136,13 +110,6 @@ export const SignIn: FC = () => {
 			<Right>
 				<SignInSVG />
 			</Right>
-			{notification ? (
-				<NotificationComponent
-					error={location.state?.successLogout ? false : true}
-					message={notification}
-					close={closeNotification}
-				/>
-			) : null}
 		</Conatiner>
 	)
 }

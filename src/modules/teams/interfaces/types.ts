@@ -37,10 +37,6 @@ export interface IAddAndUpdateTeamLocationState {
 	state?: { team: ITeams }
 }
 
-export interface IDashTeamLocationState {
-	state?: { createTeam?: string; updateTeam?: string; deleteTeam?: string }
-}
-
 export interface ICreateTeamResponse {
 	errorCode: string
 	success: boolean
