@@ -32,7 +32,6 @@ export const baseRequest = async <T>(
 				...(headersForMultiPart as HeadersInit),
 			},
 		})
-		console.log('response.status', response.status)
 
 		if (!response.ok) {
 			if (response.status === 401) {

@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { ReactComponent as SignInSVG } from '../../assets/images/signin.svg'
 import { InputComponent } from '../../ui/Input'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect } from 'react'
 import { ButtonComponent } from '../../ui/Button'
 import { LinkComponent } from '../../ui/Link'
 import { useForm, SubmitHandler } from 'react-hook-form'
@@ -9,10 +9,11 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { ISigninFormFields } from '../interfaces/types'
 import { useNavigate } from 'react-router'
-import { setAuthCookie } from '../helpers/setAuthToken'
-import { useAuth } from '../hooks/useAuth'
-import { loginUser } from '../../api/users/usersService'
 import { showToast } from '../../ui/ToastrNotification'
+import { useAppDispatch } from '../hooks/useAppDispatch'
+import { loginUserThunk } from '../../api/users/userThunks'
+import { useAppSelector } from '../hooks/useAppSelector'
+import { useAuth } from '../hooks/useAuth'
 
 const schemaSignIn = yup.object().shape({
 	loginSignin: yup.string().required('Login is required!'),
@@ -20,10 +21,10 @@ const schemaSignIn = yup.object().shape({
 })
 
 export const SignIn: FC = () => {
-	const { setToken } = useAuth()
 	const navigate = useNavigate()
-	const [signInData, setSignInData] = useState<ISigninFormFields | null>(null)
-	const [sendSignInData, allowSendSignInData] = useState<boolean>(false)
+	const dispatch = useAppDispatch()
+	const { setToken } = useAuth()
+	const { userName, status, error } = useAppSelector(state => state.user)
 
 	const {
 		register,
@@ -35,41 +36,20 @@ export const SignIn: FC = () => {
 	})
 
 	useEffect(() => {
-		if (!sendSignInData && !signInData) return
-
-		if (sendSignInData && signInData) {
-			loginUser(JSON.stringify(signInData))
-				.then(result => {
-					console.log('signin res', result)
-					if (result.success) {
-						if (result.message instanceof Object) {
-							setAuthCookie(result.message.token)
-							setToken(result.message.token)
-							localStorage.setItem('name', result.message.user.name)
-							navigate('/teams')
-							showToast({ type: 'success', message: 'You succesfully login!' })
-						}
-					}
-
-					if (!result.success) {
-						if (typeof result.message === 'string') {
-							showToast({ type: 'error', message: result.message })
-						}
-					}
-				})
-				.catch(error => {
-					console.log('error', error)
-				})
-				.finally(() => allowSendSignInData(false))
+		if (status === 'success') {
+			navigate('/teams')
+			showToast({ type: 'success', message: 'You succesfully login!' })
 		}
-	}, [signInData, sendSignInData, setToken, navigate])
+		if (status === 'error' && error) {
+			showToast({ type: 'error', message: error })
+		}
+	}, [userName, status, error, navigate])
 
 	const onSubmit: SubmitHandler<ISigninFormFields> = (
-		data: ISigninFormFields
+		body: ISigninFormFields
 	): void => {
-		console.log('Sign in', data)
-		setSignInData(data)
-		allowSendSignInData(true)
+		console.log('Sign in', body)
+		dispatch(loginUserThunk({ body, setToken }))
 	}
 
 	return (
