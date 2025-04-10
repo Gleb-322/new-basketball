@@ -5,47 +5,33 @@ import { ReactComponent as TeamsSVGRed } from '../../assets/icons/group-person-r
 import { ReactComponent as PlayersSVG } from '../../assets/icons/person.svg'
 import { ReactComponent as PlayersSVGRed } from '../../assets/icons/person-red.svg'
 import { ReactComponent as SignOutSVGRed } from '../../assets/icons/input.svg'
-import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
-import { FC, useEffect, useState } from 'react'
-import { logoutUser } from '../../api/users/usersService'
+import { FC, useEffect } from 'react'
 import { showToast } from '../../ui/ToastrNotification'
+import { useAppDispatch } from '../hooks/useAppDispatch'
+import { useAppSelector } from '../hooks/useAppSelector'
+import { logoutUserThunk } from '../../api/users/userThunks'
+import { resetUserState } from '../../core/redux/userSlice'
 
 export const Navbar: FC = () => {
 	const { token, setToken } = useAuth()
+	const dispatch = useAppDispatch()
+	const { logoutMessage, error, status } = useAppSelector(state => state.user)
 	const location = useLocation()
 	const navigate = useNavigate()
 
-	const [logout, setLogout] = useState<boolean>(false)
-
 	useEffect(() => {
-		if (!logout) return
-
-		if (logout) {
-			logoutUser(token)
-				.then(result => {
-					console.log('logout res', result)
-					if (result.success) {
-						setAuthCookie(undefined)
-						setToken(undefined)
-						localStorage.removeItem('name')
-						navigate('/signin')
-						showToast({ type: 'success', message: result.message })
-					}
-
-					if (!result.success) {
-						showToast({ type: 'error', message: result.message })
-					}
-				})
-				.catch(error => {
-					console.log('error logout', error)
-				})
+		if (status === 'success' && logoutMessage) {
+			navigate('/signin')
+			showToast({ type: 'success', message: logoutMessage })
 		}
-
+		if (status === 'error' && error) {
+			showToast({ type: 'error', message: error })
+		}
 		return () => {
-			setLogout(false)
+			dispatch(resetUserState())
 		}
-	}, [logout, navigate, setToken, token])
+	}, [dispatch, error, logoutMessage, navigate, status])
 
 	return (
 		<>
@@ -68,7 +54,10 @@ export const Navbar: FC = () => {
 						Players
 					</StyledNavLink>
 				</List>
-				<SignOut type="button" onClick={() => setLogout(true)}>
+				<SignOut
+					type="button"
+					onClick={() => dispatch(logoutUserThunk({ token, setToken }))}
+				>
 					<SignOutSVGRed /> <br />
 					Sign out
 				</SignOut>

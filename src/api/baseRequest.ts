@@ -81,15 +81,6 @@ export const baseRequest = async <T>(
 		}
 
 		throw error
-
-		// eslint-disable-next-line no-throw-literal
-		// throw {
-		// 	isCustomError: true,
-		// 	status: 0,
-		// 	message: !navigator.onLine
-		// 		? 'There is no internet connection!'
-		// 		: 'Something going wrong... Try again later...',
-		// } as CustomError
 	}
 }
 

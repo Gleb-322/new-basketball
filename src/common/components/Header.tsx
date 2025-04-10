@@ -2,17 +2,15 @@ import styled from 'styled-components'
 import { ReactComponent as AppLogoSVG } from '../../assets/images/logo.svg'
 import { ReactComponent as UserIconSVG } from '../../assets/icons/profile.svg'
 import { FC } from 'react'
+import { useAppSelector } from '../hooks/useAppSelector'
 
 export const Header: FC = () => {
+	const { userName } = useAppSelector(state => state.user)
 	return (
 		<Container>
 			<AppLogoSVG />
 			<User>
-				<UserName>
-					{localStorage.getItem('name') !== undefined
-						? localStorage.getItem('name')
-						: null}
-				</UserName>
+				<UserName>{userName ? userName : null}</UserName>
 				<UserIconStyled />
 			</User>
 		</Container>

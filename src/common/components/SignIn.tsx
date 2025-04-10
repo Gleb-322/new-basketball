@@ -14,17 +14,24 @@ import { useAppDispatch } from '../hooks/useAppDispatch'
 import { loginUserThunk } from '../../api/users/userThunks'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { useAuth } from '../hooks/useAuth'
+import { resetUserState } from '../../core/redux/userSlice'
 
 const schemaSignIn = yup.object().shape({
 	loginSignin: yup.string().required('Login is required!'),
-	passwordSignin: yup.string().required('Password is required!'),
+	passwordSignin: yup
+		.string()
+		.required('Password is required!')
+		.matches(
+			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+			'Valid password ex.: Pass123!'
+		),
 })
 
 export const SignIn: FC = () => {
 	const navigate = useNavigate()
 	const dispatch = useAppDispatch()
 	const { setToken } = useAuth()
-	const { userName, status, error } = useAppSelector(state => state.user)
+	const { status, error } = useAppSelector(state => state.user)
 
 	const {
 		register,
@@ -43,7 +50,10 @@ export const SignIn: FC = () => {
 		if (status === 'error' && error) {
 			showToast({ type: 'error', message: error })
 		}
-	}, [userName, status, error, navigate])
+		return () => {
+			dispatch(resetUserState())
+		}
+	}, [status, error, navigate, dispatch])
 
 	const onSubmit: SubmitHandler<ISigninFormFields> = (
 		body: ISigninFormFields

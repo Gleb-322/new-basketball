@@ -5,7 +5,7 @@ import { IToastNotificationProps } from '../common/interfaces/types'
 
 export const showToast = ({ type, message }: IToastNotificationProps) => {
 	toast[type](message, {
-		autoClose: type === 'success' ? 6000 : false,
+		autoClose: type === 'success' ? 6000 : 8000,
 	})
 }
 

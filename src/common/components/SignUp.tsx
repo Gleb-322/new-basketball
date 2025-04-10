@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { ReactComponent as SignUpSVG } from '../../assets/images/signup.svg'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect } from 'react'
 import { InputComponent } from '../../ui/Input'
 import { LinkComponent } from '../../ui/Link'
 import { ButtonComponent } from '../../ui/Button'
@@ -9,22 +9,29 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { ISignupFormFields } from '../interfaces/types'
 import { useNavigate } from 'react-router'
-import { setAuthCookie } from '../helpers/setAuthToken'
 import { useAuth } from '../hooks/useAuth'
-import { createUser } from '../../api/users/usersService'
 import { showToast } from '../../ui/ToastrNotification'
+import { useAppDispatch } from '../hooks/useAppDispatch'
+import { useAppSelector } from '../hooks/useAppSelector'
+import { createUserThunk } from '../../api/users/userThunks'
+import { resetUserState } from '../../core/redux/userSlice'
 
 const schemaSignUp = yup.object().shape({
-	nameSignup: yup.string().required('Name is required!'),
+	nameSignup: yup
+		.string()
+		.required('Name is required!')
+		.matches(/^[A-Za-zА-Яа-яЁё\s-]+$/, 'Invalid Name!'),
 	loginSignup: yup.string().required('Login is required!'),
-	passwordSignup: yup.string().required('Password is required!'),
-	// .matches(
-	// 	/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-	// 	'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and one special case Character'
-	// ),
+	passwordSignup: yup
+		.string()
+		.required('Password is required!')
+		.matches(
+			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+			'Valid password ex.: Pass123!'
+		),
 	passwordAgainSignup: yup
 		.string()
-		.oneOf([yup.ref('passwordSignup')], 'Passwords must match')
+		.oneOf([yup.ref('passwordSignup')], 'Passwords must match!')
 		.required('Confirm password is required!'),
 	checkboxSignUp: yup
 		.boolean()
@@ -34,8 +41,8 @@ const schemaSignUp = yup.object().shape({
 export const SignUp: FC = () => {
 	const { setToken } = useAuth()
 	const navigate = useNavigate()
-	const [signUpData, setSignUpData] = useState<ISignupFormFields | null>(null)
-	const [sendSignUpData, allowSendSignUpData] = useState<boolean>(false)
+	const dispatch = useAppDispatch()
+	const { error, status } = useAppSelector(state => state.user)
 
 	const {
 		register,
@@ -47,44 +54,26 @@ export const SignUp: FC = () => {
 	})
 
 	useEffect(() => {
-		if (!signUpData && !sendSignUpData) return
-
-		if (signUpData && sendSignUpData) {
-			createUser(JSON.stringify(signUpData))
-				.then(result => {
-					console.log('Sign Up', result)
-					if (result.success) {
-						if (result.message instanceof Object) {
-							setAuthCookie(result.message.token)
-							setToken(result.message.token)
-							localStorage.setItem('name', result.message.user.name)
-							navigate('/teams')
-							showToast({
-								type: 'success',
-								message: 'You succesfully sign up!',
-							})
-						}
-					}
-
-					if (!result.success) {
-						if (typeof result.message === 'string') {
-							showToast({ type: 'error', message: result.message })
-						}
-					}
-				})
-				.catch(error => {
-					console.log('error', error)
-				})
-				.finally(() => allowSendSignUpData(false))
+		if (status === 'success') {
+			navigate('/teams')
+			showToast({
+				type: 'success',
+				message: 'You succesfully sign up!',
+			})
 		}
-	}, [sendSignUpData, signUpData, navigate, setToken])
+		if (status === 'error' && error) {
+			showToast({ type: 'error', message: error })
+		}
+		return () => {
+			dispatch(resetUserState())
+		}
+	}, [dispatch, error, navigate, status])
 
 	const onSubmit: SubmitHandler<ISignupFormFields> = (
-		data: ISignupFormFields
+		body: ISignupFormFields
 	) => {
-		console.log('Sign up', data)
-		setSignUpData(data)
-		allowSendSignUpData(true)
+		console.log('Sign up', body)
+		dispatch(createUserThunk({ body, setToken }))
 	}
 
 	return (

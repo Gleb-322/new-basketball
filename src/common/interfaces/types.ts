@@ -175,6 +175,7 @@ export type CustomError = {
 
 export interface IUserSliceState {
 	userName: string | null
+	logoutMessage: string | null
 	error: string | null
 	status: 'idle' | 'loading' | 'success' | 'error'
 }
