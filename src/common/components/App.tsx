@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { ThemeProvider } from 'styled-components'
 import { SignIn } from './SignIn'
 import { SignUp } from './SignUp'
@@ -13,9 +13,16 @@ import { PlayerDashboard } from '../../modules/players/components/PlayerDashboar
 import { PlayerDetail } from '../../modules/players/components/PlayerDetail'
 import { PlayerCreateAndUpdate } from '../../modules/players/components/PlayerAddAndUpdate'
 import { ToastNotification } from '../../ui/ToastrNotification'
+import { useAppSelector } from '../hooks/useAppSelector'
+import { useEffect } from 'react'
+import { useAppDispatch } from '../hooks/useAppDispatch'
+import { resetToken } from '../../core/redux/userSlice'
+import { getAuthCookie } from '../helpers/setAuthToken'
+import { LoaderComponent } from '../../ui/Loader'
 
 const theme = {
 	colors: {
+		overlay: '#414141',
 		darkGrey: '#303030',
 		grey: '#707070',
 		gradientCard: 'linear-gradient(118deg, #303030 2%, #707070 82%)',
@@ -37,29 +44,49 @@ const theme = {
 }
 
 export const App = () => {
+	const { token } = useAppSelector(state => state.user)
+	const location = useLocation()
+	const navigate = useNavigate()
+	const dispatch = useAppDispatch()
+
+	useEffect(() => {
+		const cookieToken = getAuthCookie()
+
+		if (!cookieToken && token) {
+			dispatch(resetToken())
+		}
+
+		if (!token && !['signin', 'signup'].includes(location.pathname)) {
+			navigate('/signin')
+		}
+	}, [dispatch, location.pathname, navigate, token])
+
 	return (
-		<ThemeProvider theme={theme}>
-			<Routes>
-				<Route path="/" element={<MainLayout />}>
-					<Route path="/" element={<Navigate to="/teams" />} />
-					<Route path="teams" element={<TeamLayout />}>
-						<Route index element={<TeamDashboard />} />
-						<Route path="add" element={<TeamCreateAndUpdate />} />
-						<Route path=":_id" element={<TeamDetail />} />
+		<>
+			<ThemeProvider theme={theme}>
+				<LoaderComponent />
+				<Routes>
+					<Route path="/" element={<MainLayout />}>
+						<Route path="/" element={<Navigate to="/teams" />} />
+						<Route path="teams" element={<TeamLayout />}>
+							<Route index element={<TeamDashboard />} />
+							<Route path="add" element={<TeamCreateAndUpdate />} />
+							<Route path=":_id" element={<TeamDetail />} />
+						</Route>
+
+						<Route path="players" element={<PlayerLayout />}>
+							<Route index element={<PlayerDashboard />} />
+							<Route path="add" element={<PlayerCreateAndUpdate />} />
+							<Route path=":_id" element={<PlayerDetail />} />
+						</Route>
 					</Route>
 
-					<Route path="players" element={<PlayerLayout />}>
-						<Route index element={<PlayerDashboard />} />
-						<Route path="add" element={<PlayerCreateAndUpdate />} />
-						<Route path=":_id" element={<PlayerDetail />} />
-					</Route>
-				</Route>
-
-				<Route path="signin" element={<SignIn />} />
-				<Route path="signup" element={<SignUp />} />
-				<Route path="*" element={<NotFound />} />
-			</Routes>
-			<ToastNotification />
-		</ThemeProvider>
+					<Route path="signin" element={<SignIn />} />
+					<Route path="signup" element={<SignUp />} />
+					<Route path="*" element={<NotFound />} />
+				</Routes>
+				<ToastNotification />
+			</ThemeProvider>
+		</>
 	)
 }

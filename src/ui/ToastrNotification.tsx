@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { IToastNotificationProps } from '../common/interfaces/types'
+import { device } from '../common/helpers/breakpoint'
 
 export const showToast = ({ type, message }: IToastNotificationProps) => {
 	toast[type](message, {
@@ -31,9 +32,9 @@ const StyledToastContainer = styled(ToastContainer).attrs({
 		line-height: 24px;
 		--toastify-toast-min-height: 40px;
 		display: inline-block;
-		width: auto;
-		max-width: 80vw;
-		white-space: nowrap;
+		width: fit-content;
+		max-width: 90vw;
+		white-space: normal;
 	}
 
 	.Toastify__toast--success {
@@ -50,5 +51,10 @@ const StyledToastContainer = styled(ToastContainer).attrs({
 		&:hover {
 			background-color: ${({ theme }) => theme.colors.lightestRed};
 		}
+	}
+
+	@media ${device.tablet} {
+		max-width: 95vw;
+		margin-top: 12px;
 	}
 `

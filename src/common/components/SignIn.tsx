@@ -13,8 +13,8 @@ import { showToast } from '../../ui/ToastrNotification'
 import { useAppDispatch } from '../hooks/useAppDispatch'
 import { loginUserThunk } from '../../api/users/userThunks'
 import { useAppSelector } from '../hooks/useAppSelector'
-import { useAuth } from '../hooks/useAuth'
 import { resetUserState } from '../../core/redux/userSlice'
+import { device } from '../helpers/breakpoint'
 
 const schemaSignIn = yup.object().shape({
 	loginSignin: yup.string().required('Login is required!'),
@@ -22,7 +22,7 @@ const schemaSignIn = yup.object().shape({
 		.string()
 		.required('Password is required!')
 		.matches(
-			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+			/^(?=.*[a-zA-Zа-яА-Я])(?=.*[a-zа-я])(?=.*[A-ZА-Я])(?=.*\d)(?=.*[^\w\s]).{8,}$/,
 			'Valid password ex.: Pass123!'
 		),
 })
@@ -30,7 +30,7 @@ const schemaSignIn = yup.object().shape({
 export const SignIn: FC = () => {
 	const navigate = useNavigate()
 	const dispatch = useAppDispatch()
-	const { setToken } = useAuth()
+	// const { setToken } = useAuth()
 	const { status, error } = useAppSelector(state => state.user)
 
 	const {
@@ -56,10 +56,10 @@ export const SignIn: FC = () => {
 	}, [status, error, navigate, dispatch])
 
 	const onSubmit: SubmitHandler<ISigninFormFields> = (
-		body: ISigninFormFields
+		payload: ISigninFormFields
 	): void => {
-		console.log('Sign in', body)
-		dispatch(loginUserThunk({ body, setToken }))
+		console.log('Sign in', payload)
+		dispatch(loginUserThunk(payload))
 	}
 
 	return (
@@ -105,9 +105,13 @@ export const SignIn: FC = () => {
 }
 
 const Conatiner = styled.section`
-	width: 100wh;
+	width: 100vw;
 	height: 100vh;
 	display: flex;
+	overflow-y: auto;
+	@media ${device.mobileL} {
+		padding: 0px 24px;
+	}
 `
 const Left = styled.div`
 	width: 40%;
@@ -115,9 +119,17 @@ const Left = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	@media ${device.laptop} {
+		width: 100%;
+	}
 `
 const Form = styled.form`
 	width: 365px;
+	max-height: 100%;
+
+	@media ${device.mobileL} {
+		width: 100%;
+	}
 `
 const Title = styled.div`
 	font-family: 'Avenir Book';
@@ -125,6 +137,9 @@ const Title = styled.div`
 	font-weight: 500;
 	color: ${({ theme }) => theme.colors.blue};
 	margin-bottom: 32px;
+	@media ${device.laptop} {
+		text-align: center;
+	}
 `
 
 const Right = styled.div`
@@ -133,6 +148,9 @@ const Right = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	@media ${device.laptop} {
+		display: none;
+	}
 `
 const Links = styled.div`
 	text-align: center;

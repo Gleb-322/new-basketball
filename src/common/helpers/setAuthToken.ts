@@ -1,14 +1,14 @@
 import Cookies from 'js-cookie'
 
-export const setAuthCookie = (token?: string) => {
-	if (token) {
-		Cookies.set('token', token, { expires: 7 }) // 7 дней
-		localStorage.setItem('token', token)
-	} else {
-		Cookies.remove('token')
-		localStorage.removeItem('token')
-	}
+export const setAuthCookie = (token: string) => {
+	// Cookies.set('token', token, { expires: 7 }) // 7 дней
+	Cookies.set('token', token, { expires: 0.000694 })
+}
 
-	// Генерируем событие изменения в `localStorage`
-	window.dispatchEvent(new StorageEvent('storage', { key: 'token' }))
+export const removeAuthCookie = () => {
+	Cookies.remove('token')
+}
+
+export const getAuthCookie = () => {
+	return Cookies.get('token')
 }

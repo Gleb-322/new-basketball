@@ -9,12 +9,12 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { ISignupFormFields } from '../interfaces/types'
 import { useNavigate } from 'react-router'
-import { useAuth } from '../hooks/useAuth'
 import { showToast } from '../../ui/ToastrNotification'
 import { useAppDispatch } from '../hooks/useAppDispatch'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { createUserThunk } from '../../api/users/userThunks'
 import { resetUserState } from '../../core/redux/userSlice'
+import { device } from '../helpers/breakpoint'
 
 const schemaSignUp = yup.object().shape({
 	nameSignup: yup
@@ -26,7 +26,7 @@ const schemaSignUp = yup.object().shape({
 		.string()
 		.required('Password is required!')
 		.matches(
-			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+			/^(?=.*[a-zA-Zа-яА-Я])(?=.*[a-zа-я])(?=.*[A-ZА-Я])(?=.*\d)(?=.*[^\w\s]).{8,}$/,
 			'Valid password ex.: Pass123!'
 		),
 	passwordAgainSignup: yup
@@ -39,7 +39,6 @@ const schemaSignUp = yup.object().shape({
 })
 
 export const SignUp: FC = () => {
-	const { setToken } = useAuth()
 	const navigate = useNavigate()
 	const dispatch = useAppDispatch()
 	const { error, status } = useAppSelector(state => state.user)
@@ -70,10 +69,10 @@ export const SignUp: FC = () => {
 	}, [dispatch, error, navigate, status])
 
 	const onSubmit: SubmitHandler<ISignupFormFields> = (
-		body: ISignupFormFields
+		payload: ISignupFormFields
 	) => {
-		console.log('Sign up', body)
-		dispatch(createUserThunk({ body, setToken }))
+		console.log('Sign up', payload)
+		dispatch(createUserThunk(payload))
 	}
 
 	return (
@@ -152,11 +151,13 @@ export const SignUp: FC = () => {
 }
 
 const Conatiner = styled.section`
-	position: relative;
-	z-index: 20;
-	width: 100wh;
+	width: 100vw;
 	height: 100vh;
 	display: flex;
+	overflow-y: auto;
+	@media ${device.mobileL} {
+		padding: 0px 24px;
+	}
 `
 const Left = styled.div`
 	width: 40%;
@@ -164,9 +165,17 @@ const Left = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	@media ${device.laptop} {
+		width: 100%;
+	}
 `
 const Form = styled.form`
 	width: 365px;
+	max-height: 100%;
+
+	@media ${device.mobileL} {
+		width: 100%;
+	}
 `
 const Title = styled.div`
 	font-family: 'Avenir Book';
@@ -174,6 +183,9 @@ const Title = styled.div`
 	font-weight: 500;
 	color: ${({ theme }) => theme.colors.blue};
 	margin-bottom: 32px;
+	@media ${device.laptop} {
+		text-align: center;
+	}
 `
 
 const Right = styled.div`
@@ -182,6 +194,9 @@ const Right = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	@media ${device.laptop} {
+		display: none;
+	}
 `
 const Links = styled.div`
 	text-align: center;

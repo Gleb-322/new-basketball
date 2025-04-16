@@ -4,24 +4,21 @@ import {
 	ISigninFormFields,
 	ISignupFormFields,
 } from '../../common/interfaces/types'
-import { setAuthCookie } from '../../common/helpers/setAuthToken'
+import {
+	setAuthCookie,
+	removeAuthCookie,
+} from '../../common/helpers/setAuthToken'
+import { closeLoader, showLoader } from '../../core/redux/loaderSlice'
 
 export const loginUserThunk = createAsyncThunk(
 	'users/login',
-	async (
-		payload: {
-			body: ISigninFormFields
-			setToken: (token: string | undefined) => void
-		},
-		{ rejectWithValue }
-	) => {
-		const { body, setToken } = payload
+	async (payload: ISigninFormFields, { dispatch, rejectWithValue }) => {
 		try {
-			const response = await loginUser(JSON.stringify(body))
+			dispatch(showLoader())
+			const response = await loginUser(JSON.stringify(payload))
 			console.log('loginUserThunk', response)
 			if (response.success && response.message instanceof Object) {
 				setAuthCookie(response.message.token)
-				setToken(response.message.token)
 				return response.message
 			} else {
 				return rejectWithValue(
@@ -32,26 +29,20 @@ export const loginUserThunk = createAsyncThunk(
 			}
 		} catch (error: any) {
 			return rejectWithValue(error.message || 'Failed to login!')
+		} finally {
+			dispatch(closeLoader())
 		}
 	}
 )
 
 export const createUserThunk = createAsyncThunk(
 	'users/create',
-	async (
-		payload: {
-			body: ISignupFormFields
-			setToken: (token: string | undefined) => void
-		},
-		{ rejectWithValue }
-	) => {
-		const { body, setToken } = payload
+	async (payload: ISignupFormFields, { rejectWithValue }) => {
 		try {
-			const response = await createUser(JSON.stringify(body))
+			const response = await createUser(JSON.stringify(payload))
 			console.log('createUserThunk', response)
 			if (response.success && response.message instanceof Object) {
 				setAuthCookie(response.message.token)
-				setToken(response.message.token)
 				return response.message
 			} else {
 				return rejectWithValue(
@@ -68,23 +59,17 @@ export const createUserThunk = createAsyncThunk(
 
 export const logoutUserThunk = createAsyncThunk(
 	'users/logout',
-	async (
-		payload: {
-			token: string | undefined
-			setToken: (token: string | undefined) => void
-		},
-		{ rejectWithValue }
-	) => {
-		const { token, setToken } = payload
+	async (token: string | null, { rejectWithValue }) => {
 		try {
-			const response = await logoutUser(token)
-			console.log('logoutUserThunk', response)
-			if (response.success) {
-				setAuthCookie(undefined)
-				setToken(undefined)
-				return response.message
-			} else {
-				return rejectWithValue(response.message || 'Failed to logout User!')
+			if (token) {
+				const response = await logoutUser(token)
+				console.log('logoutUserThunk', response)
+				if (response.success) {
+					removeAuthCookie()
+					return response.message
+				} else {
+					return rejectWithValue(response.message || 'Failed to logout User!')
+				}
 			}
 		} catch (error: any) {
 			return rejectWithValue(error.message || 'Failed to logout User!')

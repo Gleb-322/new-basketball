@@ -12,6 +12,7 @@ export const PlayerLayout: FC = () => {
 
 const Section = styled.section`
 	width: 100%;
+	height: 100%;
 	padding: 30px 80px;
 	display: flex;
 	flex-direction: column;
