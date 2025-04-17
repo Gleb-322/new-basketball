@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import { IButton } from '../common/interfaces/types'
 import styled from 'styled-components'
+import { device } from '../common/helpers/breakpoint'
 
 export const ButtonComponent: FC<IButton> = ({
 	type,
@@ -76,5 +77,10 @@ const Button = styled.button<{
 		&:hover {
 			background-color: ${({ theme }) => theme.colors.mostLightGrey};
 		}
+	}
+
+	@media ${device.customForTeamHeader} {
+		width: ${({ $variant }) =>
+			$variant === 'addPlayer' || $variant === 'addTeam' ? '100%' : null};
 	}
 `

@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import { Outlet } from 'react-router'
 import styled from 'styled-components'
+import { device } from '../../../common/helpers/breakpoint'
 
 export const TeamLayout: FC = () => {
 	return (
@@ -18,4 +19,14 @@ const Section = styled.section`
 	flex-direction: column;
 	justify-content: space-between;
 	background-color: ${({ theme }) => theme.colors.mostLightGrey};
+
+	@media ${device.laptop} {
+		width: 100vw;
+		height: calc(100vh - 80px);
+		z-index: 5;
+	}
+	@media ${device.tablet} {
+		padding: 16px 12px 0px 12px;
+		height: calc(100vh - 62px);
+	}
 `

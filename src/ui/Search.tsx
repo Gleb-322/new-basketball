@@ -2,6 +2,7 @@ import { ChangeEvent, FC } from 'react'
 import styled from 'styled-components'
 import { ReactComponent as SearchSVG } from '../assets/icons/search.svg'
 import { ISearch } from '../common/interfaces/types'
+import { device } from '../common/helpers/breakpoint'
 
 export const SearchComponent: FC<ISearch> = ({
 	type,
@@ -18,27 +19,36 @@ export const SearchComponent: FC<ISearch> = ({
 		}
 	}
 	return (
-		<SearchBar>
-			<Search
-				type={type}
-				id={id}
-				name={name}
-				value={search}
-				placeholder="Search..."
-				autoComplete="off"
-				onChange={handleOnChange}
-			/>
-			<StyledSearchSVG />
-		</SearchBar>
+		<Container>
+			<SearchBar>
+				<Search
+					type={type}
+					id={id}
+					name={name}
+					value={search}
+					placeholder="Search..."
+					autoComplete="off"
+					onChange={handleOnChange}
+				/>
+				<StyledSearchSVG />
+			</SearchBar>
+		</Container>
 	)
 }
+
+const Container = styled.div`
+	width: 365px;
+	@media ${device.customForTeamHeader} {
+		width: 100%;
+	}
+`
 
 const SearchBar = styled.div`
 	position: relative;
 `
 
 const Search = styled.input`
-	width: 365px;
+	width: 100%;
 	height: 40px;
 	border-radius: 4px;
 	background-color: ${({ theme }) => theme.colors.white};

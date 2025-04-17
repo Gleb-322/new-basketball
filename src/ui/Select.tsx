@@ -2,6 +2,7 @@ import { FC } from 'react'
 import Select, { SingleValue } from 'react-select'
 import styled from 'styled-components'
 import { IOption, ISelect } from '../common/interfaces/types'
+import { device } from '../common/helpers/breakpoint'
 
 export const SelectComponent: FC<ISelect> = ({
 	options,
@@ -93,8 +94,15 @@ const StyledSelect = styled(Select<IOption>)<{
 		margin-top: ${({ $variant }) => ($variant === 'player' ? '8px' : '0px')};
 		border-radius: 4px;
 		height: 40px;
+		align-items: center;
 		width: ${({ $variant }) => ($variant === 'player' ? '100%' : '88px')};
 		cursor: pointer;
+		@media ${device.customForTeamHeader} {
+			min-height: 28px;
+			height: 28px;
+			align-items: flex-start;
+			width: 60px;
+		}
 	}
 
 	.react-select__control:hover {
@@ -144,12 +152,38 @@ const StyledSelect = styled(Select<IOption>)<{
 
 	.css-15lsz6c-indicatorContainer {
 		color: ${({ theme }) => theme.colors.lightestGrey} !important;
+		@media ${device.customForTeamHeader} {
+			padding: 0px;
+		}
 	}
 
 	.css-hlgwow {
 		justify-content: ${({ $variant }) =>
 			$variant === 'player' ? 'flex-start' : 'center'} !important;
 		padding-left: ${({ $variant }) => ($variant === 'player' ? '12px' : '0px')};
+		@media ${device.customForTeamHeader} {
+			padding: 2px 0px 0px 0px;
+		}
+	}
+
+	.react-select__value-container {
+		@media ${device.customForTeamHeader} {
+			width: 35px;
+		}
+	}
+
+	.react-select__indicator {
+		min-height: 36px;
+		height: 36px;
+		@media ${device.customForTeamHeader} {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			min-height: 28px;
+			height: 28px;
+			width: 25px;
+			align-items: center;
+		}
 	}
 
 	.css-15lsz6c-indicatorContainer:hover {
@@ -158,17 +192,30 @@ const StyledSelect = styled(Select<IOption>)<{
 
 	.css-1xc3v61-indicatorContainer {
 		color: ${({ theme }) => theme.colors.lightestGrey} !important;
+		@media ${device.customForTeamHeader} {
+			padding: 0px;
+			justify-content: center;
+		}
 	}
 
 	.css-1xc3v61-indicatorContainer:hover {
 		color: ${({ theme }) => theme.colors.lightestGrey} !important;
 	}
 
+	.css-1u9des2-indicatorSeparator {
+		margin-top: 8px;
+		margin-bottom: 8px;
+		@media ${device.customForTeamHeader} {
+			margin-top: 4px;
+			margin-bottom: 4px;
+		}
+	}
+
 	.css-t3ipsp-control {
 		box-shadow: none !important;
 	}
 	.css-t3ipsp-control:hover {
-		border-color: ${({ theme, $variant }) =>
+		border: ${({ theme, $variant }) =>
 			$variant === 'player'
 				? `0.5px solid ${theme.colors.mostLightGrey}`
 				: `0.5px solid ${theme.colors.lightestGrey}`} !important;

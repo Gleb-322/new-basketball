@@ -1,8 +1,7 @@
 import Cookies from 'js-cookie'
 
 export const setAuthCookie = (token: string) => {
-	// Cookies.set('token', token, { expires: 7 }) // 7 дней
-	Cookies.set('token', token, { expires: 0.000694 })
+	Cookies.set('token', token, { expires: 7 })
 }
 
 export const removeAuthCookie = () => {

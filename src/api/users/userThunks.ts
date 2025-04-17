@@ -37,8 +37,9 @@ export const loginUserThunk = createAsyncThunk(
 
 export const createUserThunk = createAsyncThunk(
 	'users/create',
-	async (payload: ISignupFormFields, { rejectWithValue }) => {
+	async (payload: ISignupFormFields, { dispatch, rejectWithValue }) => {
 		try {
+			dispatch(showLoader())
 			const response = await createUser(JSON.stringify(payload))
 			console.log('createUserThunk', response)
 			if (response.success && response.message instanceof Object) {
@@ -53,14 +54,17 @@ export const createUserThunk = createAsyncThunk(
 			}
 		} catch (error: any) {
 			return rejectWithValue(error.message || 'Failed to create User!')
+		} finally {
+			dispatch(closeLoader())
 		}
 	}
 )
 
 export const logoutUserThunk = createAsyncThunk(
 	'users/logout',
-	async (token: string | null, { rejectWithValue }) => {
+	async (token: string | null, { dispatch, rejectWithValue }) => {
 		try {
+			dispatch(showLoader())
 			if (token) {
 				const response = await logoutUser(token)
 				console.log('logoutUserThunk', response)
@@ -73,6 +77,8 @@ export const logoutUserThunk = createAsyncThunk(
 			}
 		} catch (error: any) {
 			return rejectWithValue(error.message || 'Failed to logout User!')
+		} finally {
+			dispatch(closeLoader())
 		}
 	}
 )

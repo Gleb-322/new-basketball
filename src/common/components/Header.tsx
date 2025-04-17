@@ -20,13 +20,13 @@ export const Header: FC = () => {
 					<BurgerIconSVG />
 				</BurgerMenu>
 
-				<AppLogoSVG />
+				<StyledAppLogo />
 			</>
 			<User>
 				{isNavbarOpen && windowSize >= 1024 ? (
 					<>
 						<UserName>{userName ? userName : null}</UserName>
-						<UserIconStyled />
+						<StyledUserIcon />
 					</>
 				) : null}
 			</User>
@@ -47,17 +47,24 @@ const Container = styled.header`
 	top: 0;
 	z-index: 20;
 	@media ${device.laptop} {
-		padding: 0 12px;
+		padding: 0px 12px;
 	}
 	@media ${device.tablet} {
 		height: 62px;
 	}
 `
+const StyledAppLogo = styled(AppLogoSVG)`
+	@media ${device.tablet} {
+		height: 34px;
+		width: 137px;
+	}
+`
+
 const User = styled.div`
 	display: flex;
 	align-items: center;
 `
-const UserIconStyled = styled(UserIconSVG)`
+const StyledUserIcon = styled(UserIconSVG)`
 	width: 36px;
 	height: 36px;
 	margin-left: 16px;

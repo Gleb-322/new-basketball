@@ -17,11 +17,11 @@ export const PlayerEmptyList: FC = () => {
 const EmptyPlayers = styled.div`
 	width: 100%;
 	height: 100%;
-	display: grid;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 `
 const EmptyBlock = styled.div`
-	align-self: center;
-	justify-self: center;
 	width: 550px;
 	height: 550px;
 	display: flex;

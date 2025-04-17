@@ -11,6 +11,7 @@ import { IOption, paginateOptions } from '../../../common/interfaces/types'
 import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
 import { getTeams } from '../../../api/teams/teamsService'
 import { showToast } from '../../../ui/ToastrNotification'
+import { device } from '../../../common/helpers/breakpoint'
 
 export const TeamDashboard: FC = () => {
 	const [loading, setLoading] = useState<boolean>(false)
@@ -74,27 +75,23 @@ export const TeamDashboard: FC = () => {
 			<Main $loading={loading}>
 				{loading ? (
 					<LoadingComponent />
-				) : teams.length > 0 ? (
+				) : teams.length === 0 ? (
 					<TeamList teams={teams} avatars={decodedAvatars} />
 				) : (
 					<TeamEmptyList />
 				)}
 			</Main>
 			<Footer>
-				{teams.length > 0 ? (
-					<>
-						<PaginationComponent
-							pageClick={handlePageClick}
-							countPage={pageCount}
-						/>
-						<SelectComponent
-							variant={'pagination'}
-							options={paginateOptions}
-							selected={selectedOption}
-							onChange={setSelectedOption}
-						/>
-					</>
-				) : null}
+				<PaginationComponent
+					pageClick={handlePageClick}
+					countPage={pageCount}
+				/>
+				<SelectComponent
+					variant={'pagination'}
+					options={paginateOptions}
+					selected={selectedOption}
+					onChange={setSelectedOption}
+				/>
 			</Footer>
 		</>
 	)
@@ -104,10 +101,8 @@ const Main = styled.div<{
 	$loading: boolean
 }>`
 	width: 100%;
-	display: ${({ $loading }) => ($loading ? 'flex' : 'grid')};
-	justify-content: ${({ $loading }) => ($loading ? 'center' : 'none')};
-	align-items: ${({ $loading }) => ($loading ? 'center' : 'none')};
-	margin: 32px 0;
+	overflow: auto;
+	display: flex;
 `
 
 const Footer = styled.footer`
@@ -121,4 +116,11 @@ const Footer = styled.footer`
 	align-items: center;
 	background-color: inherit;
 	color: white;
+	margin-top: 32px;
+	@media ${device.tablet} {
+		margin-top: 0px;
+	}
+	@media ${device.customForTeamHeader} {
+		height: 32px;
+	}
 `

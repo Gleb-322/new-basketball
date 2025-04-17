@@ -23,9 +23,11 @@ import { LoaderComponent } from '../../ui/Loader'
 const theme = {
 	colors: {
 		overlay: '#414141',
+		lightOverlay: '#6d6666',
 		darkGrey: '#303030',
 		grey: '#707070',
 		gradientCard: 'linear-gradient(118deg, #303030 2%, #707070 82%)',
+		gradientCardTablet: 'linear-gradient(121deg, #303030 2%, #707070 79%)',
 		gradientTeamDetail: ' linear-gradient(109deg, #707070 0%, #393939 100%);',
 		lightGrey: '#9c9c9c',
 		lightestGrey: '#d1d1d1',
@@ -62,31 +64,29 @@ export const App = () => {
 	}, [dispatch, location.pathname, navigate, token])
 
 	return (
-		<>
-			<ThemeProvider theme={theme}>
-				<LoaderComponent />
-				<Routes>
-					<Route path="/" element={<MainLayout />}>
-						<Route path="/" element={<Navigate to="/teams" />} />
-						<Route path="teams" element={<TeamLayout />}>
-							<Route index element={<TeamDashboard />} />
-							<Route path="add" element={<TeamCreateAndUpdate />} />
-							<Route path=":_id" element={<TeamDetail />} />
-						</Route>
-
-						<Route path="players" element={<PlayerLayout />}>
-							<Route index element={<PlayerDashboard />} />
-							<Route path="add" element={<PlayerCreateAndUpdate />} />
-							<Route path=":_id" element={<PlayerDetail />} />
-						</Route>
+		<ThemeProvider theme={theme}>
+			<LoaderComponent />
+			<Routes>
+				<Route path="/" element={<MainLayout />}>
+					<Route path="/" element={<Navigate to="/teams" />} />
+					<Route path="teams" element={<TeamLayout />}>
+						<Route index element={<TeamDashboard />} />
+						<Route path="add" element={<TeamCreateAndUpdate />} />
+						<Route path=":_id" element={<TeamDetail />} />
 					</Route>
 
-					<Route path="signin" element={<SignIn />} />
-					<Route path="signup" element={<SignUp />} />
-					<Route path="*" element={<NotFound />} />
-				</Routes>
-				<ToastNotification />
-			</ThemeProvider>
-		</>
+					<Route path="players" element={<PlayerLayout />}>
+						<Route index element={<PlayerDashboard />} />
+						<Route path="add" element={<PlayerCreateAndUpdate />} />
+						<Route path=":_id" element={<PlayerDetail />} />
+					</Route>
+				</Route>
+
+				<Route path="signin" element={<SignIn />} />
+				<Route path="signup" element={<SignUp />} />
+				<Route path="*" element={<NotFound />} />
+			</Routes>
+			<ToastNotification />
+		</ThemeProvider>
 	)
 }

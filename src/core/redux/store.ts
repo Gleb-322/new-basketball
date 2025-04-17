@@ -10,7 +10,7 @@ import loaderReducer from './loaderSlice'
 const persistConfig = {
 	key: 'root',
 	storage,
-	whitelist: ['ui', 'user'],
+	whitelist: ['user'],
 }
 
 // rootReducer

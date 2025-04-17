@@ -24,7 +24,7 @@ const Overlay = styled.div`
 	left: 0px;
 	width: 100vw;
 	height: 100vh;
-	background-color: ${({ theme }) => theme.colors.overlay};
+	background-color: ${({ theme }) => theme.colors.lightOverlay};
 	opacity: 0.6;
 	z-index: 1000;
 `

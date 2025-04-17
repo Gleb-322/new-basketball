@@ -4,11 +4,14 @@ import { ReactComponent as ChevronLeft } from '../assets/icons/chevron-left.svg'
 import { ReactComponent as ChevronRight } from '../assets/icons/chevron-right.svg'
 import styled from 'styled-components'
 import { IPagination } from '../common/interfaces/types'
+import { device } from '../common/helpers/breakpoint'
+import { useAppSelector } from '../common/hooks/useAppSelector'
 
 export const PaginationComponent: FC<IPagination> = ({
 	pageClick,
 	countPage,
 }) => {
+	const { windowSize } = useAppSelector(state => state.ui)
 	return (
 		<StyledReactPaginate
 			previousLabel={<ChevronLeft />}
@@ -17,7 +20,7 @@ export const PaginationComponent: FC<IPagination> = ({
 			disabledClassName="disabled"
 			activeClassName="active"
 			pageCount={countPage}
-			pageRangeDisplayed={4}
+			pageRangeDisplayed={windowSize <= 768 ? 2 : 4}
 			marginPagesDisplayed={1}
 			onPageChange={pageClick}
 		/>
@@ -25,12 +28,15 @@ export const PaginationComponent: FC<IPagination> = ({
 }
 
 const StyledReactPaginate = styled(ReactPaginate)`
-	width: 430px;
+	width: 360px;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	list-style: none;
 	background-color: inherit;
+	@media ${device.customForTeamHeader} {
+		width: 60%;
+	}
 	& li {
 		width: 40px;
 		height: 40px;
@@ -40,6 +46,10 @@ const StyledReactPaginate = styled(ReactPaginate)`
 		&.active {
 			background-color: ${({ theme }) => theme.colors.red};
 			color: ${({ theme }) => theme.colors.white};
+		}
+		@media ${device.customForTeamHeader} {
+			width: 28px;
+			height: 28px;
 		}
 	}
 	& a {
@@ -53,5 +63,8 @@ const StyledReactPaginate = styled(ReactPaginate)`
 		font-weight: 500;
 		font-size: 14px;
 		line-height: 24px;
+		@media ${device.customForTeamHeader} {
+			font-size: 15px;
+		}
 	}
 `
