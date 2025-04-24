@@ -7,17 +7,21 @@ import * as yup from 'yup'
 import {
 	IAddAndUpdateTeamLocationState,
 	IAddAndUpdateTeamFormFields,
-	IUpdateTeamData,
 } from '../interfaces/types'
 import { FC, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { ImgUpload } from '../../../ui/ImageUpload'
-import { useAuth } from '../../../common/hooks/useAuth'
 import { convertFileToList } from '../../../common/helpers/converterFileToFileList'
-import { convertBufferToFile } from '../helpers/converterBufferToFile'
+
 import { convertFileToBase64 } from '../../../common/helpers/converterFileToBase64'
-import { createTeams, patchTeam } from '../../../api/teams/teamsService'
 import { showToast } from '../../../ui/ToastrNotification'
+import { useAppSelector } from '../../../common/hooks/useAppSelector'
+import { RootState } from '../../../core/redux/store'
+import { useAppDispatch } from '../../../common/hooks/useAppDispatch'
+import { createTeamThunk, updateTeamThunk } from '../../../api/teams/teamThunks'
+import { LinkComponent } from '../../../ui/Link'
+import { resetTeamState } from '../teamSlice'
+import { convertBufferToFile } from '../../../common/helpers/converterBufferToFile'
 
 const schemaCreateAndUpdateTeam = yup.object().shape({
 	teamName: yup.string().required('Team Name is required!'),
@@ -50,24 +54,19 @@ const schemaCreateAndUpdateTeam = yup.object().shape({
 })
 
 export const TeamCreateAndUpdate: FC = () => {
-	const { token } = useAuth()
-
 	const navigate = useNavigate()
 	const location = useLocation() as unknown as Location &
 		IAddAndUpdateTeamLocationState
 
-	const [createData, setCreateData] = useState<
-		IAddAndUpdateTeamFormFields | undefined
-	>(undefined)
-	const [updateData, setUpdateData] = useState<IUpdateTeamData | undefined>(
-		undefined
-	)
-	const [updateFormValues, setUpdateFormValues] = useState<
-		IUpdateTeamData | undefined
-	>(undefined)
-	const [createTeam, setCreateTeam] = useState<boolean>(false)
-	const [updateTeam, setUpdateTeam] = useState<boolean>(false)
+	const dispatch = useAppDispatch()
 
+	const { token } = useAppSelector((state: RootState) => state.user)
+
+	const { status, error, lastCreatedTeam, lastUpdatedTeam } = useAppSelector(
+		(state: RootState) => state.team
+	)
+
+	const [fileList, setFileList] = useState<FileList>()
 	const [previewImage, setPreviewImage] = useState<string | undefined>()
 
 	const {
@@ -87,60 +86,43 @@ export const TeamCreateAndUpdate: FC = () => {
 		mode: 'onTouched',
 	})
 
-	// create new team
+	// create or update team
 	useEffect(() => {
-		if (!createTeam && !createData) return
+		if (status === 'success' && lastCreatedTeam) {
+			navigate('/teams')
+			showToast({
+				type: 'success',
+				message: `Team: ${lastCreatedTeam} successful created!`,
+			})
+		}
 
-		if (createTeam && createData) {
-			const createTeamFormData = new FormData()
-			createTeamFormData.append('teamName', createData.teamName)
-			createTeamFormData.append('teamDivision', createData.teamDivision)
-			createTeamFormData.append('teamConference', createData.teamConference)
-			createTeamFormData.append('teamYear', createData.teamYear)
+		if (status === 'success' && lastUpdatedTeam) {
+			navigate('/teams')
+			showToast({
+				type: 'success',
+				message: `Team: ${lastUpdatedTeam} successful updated!`,
+			})
+		}
 
-			if (createData.teamImage && createData.teamImage.length > 0) {
-				createTeamFormData.append('teamImage', createData.teamImage[0])
-			}
-
-			createTeams(createTeamFormData, token)
-				.then(result => {
-					console.log('team create res', result)
-					if (result.success) {
-						if (result.message instanceof Object) {
-							navigate('/teams')
-							showToast({
-								type: 'success',
-								message: `Team: ${result.message.team.name} successful created!`,
-							})
-						}
-					}
-
-					if (!result.success) {
-						if (typeof result.message === 'string') {
-							showToast({
-								type: 'error',
-								message: `${result.message}`,
-							})
-						}
-					}
-				})
-				.catch(error => {
-					console.log('team create res error', error)
-				})
+		if (status === 'error' && error) {
+			showToast({
+				type: 'error',
+				message: `${error}`,
+			})
 		}
 
 		return () => {
-			setCreateTeam(false)
+			dispatch(resetTeamState())
 		}
-	}, [createData, createTeam, navigate, token])
+	}, [dispatch, error, lastCreatedTeam, lastUpdatedTeam, navigate, status])
 
-	// catch one team data for update team
+	// catch update team data from team detail for update team and set update team data in form values
 	useEffect(() => {
 		if (!location.state?.team) return
 
-		const locationState = location.state?.team
+		const { name, division, conference, year } = location.state?.team
 
-		const file = convertBufferToFile(locationState)
+		const file = convertBufferToFile({ team: location.state?.team })
 
 		const fileList = convertFileToList([file!])
 
@@ -153,105 +135,55 @@ export const TeamCreateAndUpdate: FC = () => {
 				})
 			)
 
-		const data: IUpdateTeamData = {
-			teamName: locationState.name,
-			teamDivision: locationState.division,
-			teamConference: locationState.conference,
-			teamYear: locationState.year,
+		reset({
+			teamName: name,
+			teamDivision: division,
+			teamConference: conference,
+			teamYear: year,
 			teamImage: fileList,
-			teamId: locationState._id,
-		}
+		})
+		setValue('teamImage', fileList || undefined)
+		setFileList(fileList)
+	}, [location, reset, setValue])
 
-		setUpdateFormValues(data)
-	}, [location])
-
-	// set update data in form values
-	useEffect(() => {
-		if (!updateFormValues) return
-		console.log(updateFormValues)
-		if (updateFormValues) {
-			reset(updateFormValues)
-			setValue('teamImage', updateFormValues.teamImage || undefined)
-		}
-	}, [updateFormValues, reset, setValue])
-
-	// update team by updateData
-	useEffect(() => {
-		if (!updateTeam && !updateData) return
-
-		if (updateTeam && updateData) {
-			const updateTeamFormData = new FormData()
-			updateTeamFormData.append('teamName', updateData.teamName)
-			updateTeamFormData.append('teamDivision', updateData.teamDivision)
-			updateTeamFormData.append('teamConference', updateData.teamConference)
-			updateTeamFormData.append('teamYear', updateData.teamYear)
-
-			if (updateFormValues?.teamId) {
-				updateTeamFormData.append('teamId', updateFormValues.teamId)
-			}
-
-			if (updateFormValues?.teamImage !== updateData.teamImage) {
-				if (updateData.teamImage && updateData.teamImage.length > 0) {
-					updateTeamFormData.append('teamImage', updateData.teamImage[0])
-				}
-			}
-
-			patchTeam(updateTeamFormData, token)
-				.then(result => {
-					console.log('res update team', result)
-					if (result.success) {
-						if (result.message instanceof Object) {
-							navigate('/teams')
-							showToast({
-								type: 'success',
-								message: `Team: ${result.message.name} successful updated!`,
-							})
-						}
-					}
-					if (!result.success) {
-						if (typeof result.message === 'string') {
-							showToast({
-								type: 'error',
-								message: `${result.message}`,
-							})
-						}
-					}
-				})
-				.catch(error => {
-					console.log('error update team', error)
-				})
-		}
-
-		return () => {
-			setUpdateTeam(false)
-		}
-	}, [
-		updateTeam,
-		updateData,
-		updateFormValues?.teamImage,
-		token,
-		navigate,
-		updateFormValues?.teamId,
-	])
-
+	// submit form
 	const onSubmit: SubmitHandler<IAddAndUpdateTeamFormFields> = (
-		data: IAddAndUpdateTeamFormFields
+		body: IAddAndUpdateTeamFormFields
 	): void => {
-		console.log('add team or update', data)
+		console.log('add team or update', body)
+
+		const formData = new FormData()
+		formData.append('teamName', body.teamName)
+		formData.append('teamDivision', body.teamDivision)
+		formData.append('teamConference', body.teamConference)
+		formData.append('teamYear', body.teamYear)
 
 		if (location.state?.team) {
-			setUpdateData(data)
-			setUpdateTeam(true)
+			if (location.state.team._id) {
+				formData.append('teamId', location.state?.team._id)
+			}
+
+			if (
+				fileList !== body.teamImage &&
+				body.teamImage &&
+				body.teamImage.length > 0
+			) {
+				formData.append('teamImage', body.teamImage[0])
+			}
+			dispatch(updateTeamThunk({ body: formData, token }))
 		} else {
-			setCreateData(data)
-			setCreateTeam(true)
+			if (body.teamImage && body.teamImage.length > 0) {
+				formData.append('teamImage', body.teamImage[0])
+			}
+			dispatch(createTeamThunk({ body: formData, token }))
 		}
 	}
 
 	return (
 		<Section>
 			<Header>
-				Teams <Slash>/</Slash> Add new team
+				<LinkComponent text={'Teams'} route={'/teams'} /> <Slash>/</Slash>{' '}
+				{location.state?.team ? 'Update team' : 'Add new team'}
 			</Header>
 			<MainForm encType="multipart/form-data" onSubmit={handleSubmit(onSubmit)}>
 				<Left>

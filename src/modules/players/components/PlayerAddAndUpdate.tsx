@@ -21,12 +21,13 @@ import { IOption } from '../../../common/interfaces/types'
 import dayjs from 'dayjs'
 import { useAuth } from '../../../common/hooks/useAuth'
 import { ITeams } from '../../teams/interfaces/types'
-import { convertBufferToFile } from '../helpers/converterBufferToFile'
+
 import { convertFileToList } from '../../../common/helpers/converterFileToFileList'
 import { convertFileToBase64 } from '../../../common/helpers/converterFileToBase64'
 import { getTeams } from '../../../api/teams/teamsService'
 import { createPlayers, patchPlayer } from '../../../api/players/playerService'
 import { showToast } from '../../../ui/ToastrNotification'
+import { convertBufferToFile } from '../../../common/helpers/converterBufferToFile'
 
 const schemaCreateAndUpdatePlayer = yup.object().shape(
 	{
@@ -403,7 +404,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 		<Section>
 			<Header>
 				<LinkComponent text={'Players'} route={'/players'} /> <Slash>/</Slash>{' '}
-				Add new player
+				{location.state?.player ? 'Update player' : 'Add new player'}
 			</Header>
 			<MainForm encType="multipart/form-data" onSubmit={handleSubmit(onSubmit)}>
 				<Left>

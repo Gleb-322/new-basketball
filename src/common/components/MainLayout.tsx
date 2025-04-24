@@ -6,10 +6,13 @@ import { FC, useEffect } from 'react'
 import { useAppDispatch } from '../hooks/useAppDispatch'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { closeNavbar, setWindowSize } from '../../core/redux/uiSlice'
+import { RootState } from '../../core/redux/store'
 
 export const MainLayout: FC = () => {
 	const dispatch = useAppDispatch()
-	const { isNavbarOpen, windowSize } = useAppSelector(state => state.ui)
+	const { isNavbarOpen, windowSize } = useAppSelector(
+		(state: RootState) => state.ui
+	)
 
 	// add handler to get current screen width
 	useEffect(() => {

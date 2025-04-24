@@ -1,5 +1,4 @@
 import { Dayjs } from 'dayjs'
-import { SetStateAction } from 'react'
 import {
 	FieldValues,
 	Path,
@@ -74,8 +73,9 @@ export interface IRequestBaseBody {
 }
 
 export interface IPagination {
-	pageClick: (data: { selected: SetStateAction<number> }) => void
+	pageClick: (data: { selected: number }) => void
 	countPage: number
+	forcePage: number
 }
 
 export interface IAuthContext {

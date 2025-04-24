@@ -46,7 +46,6 @@ const userSlice = createSlice({
 			state.status = 'loading'
 		})
 		builder.addCase(createUserThunk.fulfilled, (state, action) => {
-			console.log('action createUserThunk.fulfilled', action)
 			state.userName = action.payload.user.name
 			state.token = action.payload.token
 			state.status = 'success'

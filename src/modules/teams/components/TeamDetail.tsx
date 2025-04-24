@@ -2,233 +2,191 @@ import styled from 'styled-components'
 import { useNavigate, useParams } from 'react-router'
 import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
-import { FC, useEffect, useState } from 'react'
-import { ITeams } from '../interfaces/types'
-import { LoadingComponent } from '../../../ui/Loading'
+import { FC, useEffect } from 'react'
 import { LinkComponent } from '../../../ui/Link'
-import { useAuth } from '../../../common/hooks/useAuth'
-import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
-import { convertBufferToUrl as convertBufferToUrlForPlayers } from '../../players/helpers/converterBufferToUrl'
+
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
-import { getTeam, removeTeam } from '../../../api/teams/teamsService'
 import { showToast } from '../../../ui/ToastrNotification'
+import { useAppSelector } from '../../../common/hooks/useAppSelector'
+import { RootState } from '../../../core/redux/store'
+import { useAppDispatch } from '../../../common/hooks/useAppDispatch'
+import { getTeamThunk, removeTeamThunk } from '../../../api/teams/teamThunks'
+import { selectTeamById } from '../teamSlice'
 
 dayjs.extend(utc)
 
 export const TeamDetail: FC = () => {
-	const { token } = useAuth()
-	const [team, setTeam] = useState<ITeams>()
-	const [deleteTeam, setDeleteTeam] = useState<boolean>(false)
-	const [decodedTeamAvatar, setDecodedTeamAvatar] = useState<{
-		[key: string]: string
-	}>({})
-	const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<{
-		[key: string]: string
-	}>({})
-
-	const [loading, setLoading] = useState<boolean>(false)
+	const { token } = useAppSelector((state: RootState) => state.user)
+	const dispatch = useAppDispatch()
 	const params = useParams()
 	const navigate = useNavigate()
 
+	const { teamsAvatars, playersAvatars, status, error, lastRemovedTeam } =
+		useAppSelector((state: RootState) => state.team)
+
+	const team = useAppSelector((state: RootState) =>
+		params._id ? selectTeamById(state, params._id) : undefined
+	)
+
 	// get team by id
 	useEffect(() => {
-		setLoading(true)
-
 		if (params._id) {
-			getTeam(params._id)
-				.then(result => {
-					console.log('get team by id', result)
-					if (result.success) {
-						if (result.message instanceof Object) {
-							setTeam(result.message)
-							const teamAvatar = convertBufferToUrl(result.message)
-							if (teamAvatar) {
-								setDecodedTeamAvatar(teamAvatar)
-							}
-							const playerAvatar = convertBufferToUrlForPlayers(
-								result.message.players
-							)
-							if (playerAvatar) {
-								setDecodedPlayerAvatar(playerAvatar)
-							}
-						}
-					}
-					if (!result.success) {
-						if (typeof result.message === 'string') {
-							showToast({
-								type: 'error',
-								message: `${result.message}`,
-							})
-						}
-					}
-				})
-				.catch(error => {
-					console.log('error', error)
-				})
-				.finally(() => setLoading(false))
+			dispatch(getTeamThunk(params._id))
 		}
-	}, [params])
+	}, [dispatch, params._id])
 
-	// delete one team by id
+	// show error
 	useEffect(() => {
-		if (!deleteTeam && !team?._id) return
-
-		setLoading(true)
-
-		if (deleteTeam && team?._id) {
-			removeTeam(team._id, token)
-				.then(result => {
-					console.log('delete team by id', result)
-					if (result.success) {
-						navigate('/teams')
-						showToast({
-							type: 'success',
-							message: `${result.message}`,
-						})
-					}
-					if (!result.success) {
-						showToast({
-							type: 'error',
-							message: `${result.message}`,
-						})
-					}
-				})
-				.catch(error => {
-					console.log('error', error)
-				})
-				.finally(() => setLoading(false))
+		if (status === 'error' && error) {
+			showToast({
+				type: 'error',
+				message: error,
+			})
 		}
-		return () => {
-			setDeleteTeam(false)
+	}, [status, error])
+
+	// delete team
+	useEffect(() => {
+		if (status === 'success' && lastRemovedTeam) {
+			navigate('/teams')
+			showToast({
+				type: 'success',
+				message: `${lastRemovedTeam}`,
+			})
 		}
-	}, [deleteTeam, navigate, team?._id, token])
+
+		if (status === 'error' && error) {
+			showToast({
+				type: 'error',
+				message: `${error}`,
+			})
+		}
+	}, [status, error, navigate, lastRemovedTeam])
 
 	return (
 		<Container>
-			{loading ? (
-				<LoadingComponent />
-			) : (
-				<>
-					{team ? (
-						<>
-							<DetailBlock>
-								<HeaderDetail>
-									<HeaderText>
-										<LinkComponent route={'/teams'} text={'Teams'} />{' '}
-										<Slash>/</Slash> {team.name}
-									</HeaderText>
+			<>
+				{team && (
+					<DetailBlock>
+						<HeaderDetail>
+							<HeaderText>
+								<LinkComponent route={'/teams'} text={'Teams'} />{' '}
+								<Slash>/</Slash> {team.name}
+							</HeaderText>
 
-									<div>
-										<ButtonEdit
-											type="button"
-											onClick={() =>
-												navigate('/teams/add', { state: { team } })
-											}
-										>
-											<EditSVG />
-										</ButtonEdit>
-										<ButtonDelete
-											type="button"
-											onClick={() => setDeleteTeam(true)}
-										>
-											<DeleteSVG />
-										</ButtonDelete>
-									</div>
-								</HeaderDetail>
+							<div>
+								<ButtonEdit
+									type="button"
+									onClick={() => navigate('/teams/add', { state: { team } })}
+								>
+									<EditSVG />
+								</ButtonEdit>
+								<ButtonDelete
+									type="button"
+									onClick={() =>
+										dispatch(
+											removeTeamThunk({
+												teamId: params._id ?? undefined,
+												token,
+											})
+										)
+									}
+								>
+									<DeleteSVG />
+								</ButtonDelete>
+							</div>
+						</HeaderDetail>
 
-								<MainDetail>
-									<Left>
-										{decodedTeamAvatar && decodedTeamAvatar[team._id] ? (
-											<Img src={decodedTeamAvatar[team._id]} alt={team.name} />
-										) : (
-											<div>Loading image...</div>
-										)}
-									</Left>
-									<Right>
-										<Name>{team.name}</Name>
-										<TextBlock>
-											<TextColumn>
-												<Key>Year of foundation</Key>
-												<Value>{team.year}</Value>
-											</TextColumn>
-											<TextColumn>
-												<Key>Division</Key>
-												<Value>{team.division}</Value>
-											</TextColumn>
-											<TextColumn>
-												<Key>Conference</Key>
-												<Value>{team.conference}</Value>
-											</TextColumn>
-										</TextBlock>
-									</Right>
-								</MainDetail>
-							</DetailBlock>
-						</>
-					) : null}
+						<MainDetail>
+							<Left>
+								{teamsAvatars && teamsAvatars[team._id] ? (
+									<Img src={teamsAvatars[team._id]} alt={team.name} />
+								) : (
+									<div>Loading image...</div>
+								)}
+							</Left>
+							<Right>
+								<Name>{team.name}</Name>
+								<TextBlock>
+									<TextColumn>
+										<Key>Year of foundation</Key>
+										<Value>{team.year}</Value>
+									</TextColumn>
+									<TextColumn>
+										<Key>Division</Key>
+										<Value>{team.division}</Value>
+									</TextColumn>
+									<TextColumn>
+										<Key>Conference</Key>
+										<Value>{team.conference}</Value>
+									</TextColumn>
+								</TextBlock>
+							</Right>
+						</MainDetail>
+					</DetailBlock>
+				)}
 
-					<RosterBlock>
-						<RoosterTitle>Roster</RoosterTitle>
-						<RosterTable>
-							<PlayerHeader>
-								<PlayerHeaderLeft>
-									<MarginRight>
-										<PlayerNumber>#</PlayerNumber>
-									</MarginRight>
-									<div>Player</div>
-								</PlayerHeaderLeft>
-								<PlayerHeaderRight>
-									<div>Height</div> <div>Weight</div> <div>Age</div>
-								</PlayerHeaderRight>
-							</PlayerHeader>
+				<RosterBlock>
+					<RoosterTitle>Roster</RoosterTitle>
+					<RosterTable>
+						<PlayerHeader>
+							<PlayerHeaderLeft>
+								<MarginRight>
+									<PlayerNumber>#</PlayerNumber>
+								</MarginRight>
+								<div>Player</div>
+							</PlayerHeaderLeft>
+							<PlayerHeaderRight>
+								<div>Height</div> <div>Weight</div> <div>Age</div>
+							</PlayerHeaderRight>
+						</PlayerHeader>
 
-							{team?.players.length ? (
-								<>
-									{team?.players.map(player => (
-										<Player
-											key={player._id}
-											onClick={() => navigate(`/players/${player._id}`)}
-										>
-											<PlayerLeft>
-												<MarginRight>
-													<PlayerNumber>
-														{player.number ? player.number : '-'}
-													</PlayerNumber>
-												</MarginRight>
+						{team && team.players.length ? (
+							<>
+								{team?.players.map(player => (
+									<Player
+										key={player._id}
+										onClick={() => navigate(`/players/${player._id}`)}
+									>
+										<PlayerLeft>
+											<MarginRight>
+												<PlayerNumber>
+													{player.number ? player.number : '-'}
+												</PlayerNumber>
+											</MarginRight>
 
-												<PlayerInfo>
-													{decodedPlayerAvatar &&
-													decodedPlayerAvatar[player._id] ? (
-														<PlayerImg
-															src={decodedPlayerAvatar[player._id]}
-															alt={player.name}
-														/>
-													) : (
-														<NoImage />
-													)}
-													<PlayerNameAndPosition>
-														<div>{player.name}</div>
-														<PlayerPosition>{player.position}</PlayerPosition>
-													</PlayerNameAndPosition>
-												</PlayerInfo>
-											</PlayerLeft>
-											<PlayerRight>
-												<div>{player.height} cm</div>
-												<div>{player.weight} kg</div>
-												<div>
-													{dayjs.utc().diff(dayjs.utc(player.birthday), 'year')}
-												</div>
-											</PlayerRight>
-										</Player>
-									))}
-								</>
-							) : (
-								<EmptyPlayers>Team has no players...</EmptyPlayers>
-							)}
-						</RosterTable>
-					</RosterBlock>
-				</>
-			)}
+											<PlayerInfo>
+												{playersAvatars && playersAvatars[player._id] ? (
+													<PlayerImg
+														src={playersAvatars[player._id]}
+														alt={player.name}
+													/>
+												) : (
+													<NoImage />
+												)}
+												<PlayerNameAndPosition>
+													<div>{player.name}</div>
+													<PlayerPosition>{player.position}</PlayerPosition>
+												</PlayerNameAndPosition>
+											</PlayerInfo>
+										</PlayerLeft>
+										<PlayerRight>
+											<div>{player.height} cm</div>
+											<div>{player.weight} kg</div>
+											<div>
+												{dayjs.utc().diff(dayjs.utc(player.birthday), 'year')}
+											</div>
+										</PlayerRight>
+									</Player>
+								))}
+							</>
+						) : (
+							<EmptyPlayers>Team has no players...</EmptyPlayers>
+						)}
+					</RosterTable>
+				</RosterBlock>
+			</>
 		</Container>
 	)
 }

@@ -10,6 +10,7 @@ import { useAppSelector } from '../common/hooks/useAppSelector'
 export const PaginationComponent: FC<IPagination> = ({
 	pageClick,
 	countPage,
+	forcePage,
 }) => {
 	const { windowSize } = useAppSelector(state => state.ui)
 	return (
@@ -20,6 +21,7 @@ export const PaginationComponent: FC<IPagination> = ({
 			disabledClassName="disabled"
 			activeClassName="active"
 			pageCount={countPage}
+			forcePage={forcePage}
 			pageRangeDisplayed={windowSize <= 768 ? 2 : 4}
 			marginPagesDisplayed={1}
 			onPageChange={pageClick}

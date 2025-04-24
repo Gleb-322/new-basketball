@@ -15,6 +15,7 @@ import { loginUserThunk } from '../../api/users/userThunks'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { resetUserState } from '../../core/redux/userSlice'
 import { device } from '../helpers/breakpoint'
+import { RootState } from '../../core/redux/store'
 
 const schemaSignIn = yup.object().shape({
 	loginSignin: yup.string().required('Login is required!'),
@@ -30,8 +31,7 @@ const schemaSignIn = yup.object().shape({
 export const SignIn: FC = () => {
 	const navigate = useNavigate()
 	const dispatch = useAppDispatch()
-	// const { setToken } = useAuth()
-	const { status, error } = useAppSelector(state => state.user)
+	const { status, error } = useAppSelector((state: RootState) => state.user)
 
 	const {
 		register,

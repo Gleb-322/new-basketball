@@ -9,10 +9,11 @@ import { PlayerList } from './PlayerList'
 import { PlayerEmptyList } from './PlayerEmptyList'
 import { LoadingComponent } from '../../../ui/Loading'
 import { ITeams } from '../../teams/interfaces/types'
-import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
+
 import { getTeams } from '../../../api/teams/teamsService'
 import { getPlayers } from '../../../api/players/playerService'
 import { showToast } from '../../../ui/ToastrNotification'
+import { convertBufferToUrl } from '../../../common/helpers/converterBufferToUrl'
 
 export const PlayerDashboard: FC = () => {
 	const [players, setPlayers] = useState<IPlayers[]>([])
@@ -95,10 +96,10 @@ export const PlayerDashboard: FC = () => {
 							)
 						)
 						setPlayers(result.message.players)
-						const avatars = convertBufferToUrl(result.message.players)
-						if (avatars) {
-							setDecodedAvatars(avatars)
-						}
+						// const avatars = convertBufferToUrl(result.message.players)
+						// if (avatars) {
+						// 	setDecodedAvatars(avatars)
+						// }
 					}
 				}
 				if (!result.success) {
@@ -144,6 +145,7 @@ export const PlayerDashboard: FC = () => {
 						<PaginationComponent
 							pageClick={handlePageClick}
 							countPage={pageCount}
+							forcePage={0}
 						/>
 						<SelectComponent
 							variant={'pagination'}

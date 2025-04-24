@@ -12,15 +12,18 @@ import { useAppDispatch } from '../hooks/useAppDispatch'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { logoutUserThunk } from '../../api/users/userThunks'
 import { resetUserState } from '../../core/redux/userSlice'
+import { RootState } from '../../core/redux/store'
 import { device } from '../helpers/breakpoint'
 
 export const Navbar: FC = () => {
 	const dispatch = useAppDispatch()
 	const { logoutMessage, error, status, token } = useAppSelector(
-		state => state.user
+		(state: RootState) => state.user
 	)
-	const { userName } = useAppSelector(state => state.user)
-	const { isNavbarOpen, windowSize } = useAppSelector(state => state.ui)
+	const { userName } = useAppSelector((state: RootState) => state.user)
+	const { isNavbarOpen, windowSize } = useAppSelector(
+		(state: RootState) => state.ui
+	)
 	const location = useLocation()
 	const navigate = useNavigate()
 

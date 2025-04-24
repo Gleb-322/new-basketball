@@ -14,6 +14,7 @@ import { useAppDispatch } from '../hooks/useAppDispatch'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { createUserThunk } from '../../api/users/userThunks'
 import { resetUserState } from '../../core/redux/userSlice'
+import { RootState } from '../../core/redux/store'
 import { device } from '../helpers/breakpoint'
 
 const schemaSignUp = yup.object().shape({
@@ -41,7 +42,7 @@ const schemaSignUp = yup.object().shape({
 export const SignUp: FC = () => {
 	const navigate = useNavigate()
 	const dispatch = useAppDispatch()
-	const { error, status } = useAppSelector(state => state.user)
+	const { error, status } = useAppSelector((state: RootState) => state.user)
 
 	const {
 		register,

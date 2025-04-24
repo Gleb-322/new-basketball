@@ -6,11 +6,14 @@ import { FC } from 'react'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { toggleNavbar } from '../../core/redux/uiSlice'
 import { useAppDispatch } from '../hooks/useAppDispatch'
+import { RootState } from '../../core/redux/store'
 import { device } from '../helpers/breakpoint'
 
 export const Header: FC = () => {
-	const { userName } = useAppSelector(state => state.user)
-	const { isNavbarOpen, windowSize } = useAppSelector(state => state.ui)
+	const { userName } = useAppSelector((state: RootState) => state.user)
+	const { isNavbarOpen, windowSize } = useAppSelector(
+		(state: RootState) => state.ui
+	)
 	const dispatch = useAppDispatch()
 
 	return (

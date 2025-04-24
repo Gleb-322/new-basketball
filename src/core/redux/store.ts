@@ -5,6 +5,7 @@ import { persistReducer, persistStore } from 'redux-persist'
 import userReducer from './userSlice'
 import uiReducer from './uiSlice'
 import loaderReducer from './loaderSlice'
+import teamReducer from '../../modules/teams/teamSlice'
 
 // persistConfig
 const persistConfig = {
@@ -16,6 +17,7 @@ const persistConfig = {
 // rootReducer
 const rootReducer = combineReducers({
 	user: userReducer,
+	team: teamReducer,
 	ui: uiReducer,
 	loader: loaderReducer,
 })

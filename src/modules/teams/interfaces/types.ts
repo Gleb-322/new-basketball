@@ -1,3 +1,4 @@
+import { IOption } from '../../../common/interfaces/types'
 import { IPlayers } from '../../players/interfaces/types'
 
 export interface ITeams {
@@ -70,4 +71,22 @@ export interface IRemoveTeamResponse {
 	errorCode: string
 	success: boolean
 	message: string
+}
+
+export interface ITeamSliceState {
+	error: string | null
+	status: 'idle' | 'loading' | 'success' | 'error'
+	teamsAvatars: {
+		[key: string]: string
+	}
+	playersAvatars: {
+		[key: string]: string
+	}
+	keyword: string
+	pageCount: number
+	currentPage: number
+	selectedOption: IOption
+	lastCreatedTeam: string | undefined
+	lastUpdatedTeam: string | undefined
+	lastRemovedTeam: string | undefined
 }

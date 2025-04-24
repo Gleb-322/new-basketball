@@ -5,7 +5,7 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
 import { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { convertBufferToUrl } from '../helpers/converterBufferToUrl'
+
 import { useAuth } from '../../../common/hooks/useAuth'
 import { IPlayers } from '../interfaces/types'
 import { LinkComponent } from '../../../ui/Link'
@@ -40,10 +40,10 @@ export const PlayerDetail: FC = () => {
 					if (result.success) {
 						if (result.message instanceof Object) {
 							setPlayer(result.message)
-							const avatar = convertBufferToUrl(result.message)
-							if (avatar) {
-								setDecodedPlayerAvatar(avatar)
-							}
+							// const avatar = convertBufferToUrl(result.message)
+							// if (avatar) {
+							// 	setDecodedPlayerAvatar(avatar)
+							// }
 						}
 					}
 					if (!result.success) {
