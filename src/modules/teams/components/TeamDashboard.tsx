@@ -80,11 +80,13 @@ export const TeamDashboard: FC = () => {
 				)}
 			</Main>
 			<Footer>
-				<PaginationComponent
-					pageClick={page => dispatch(setCurrentPage(page.selected))}
-					countPage={pageCount}
-					forcePage={currentPage}
-				/>
+				{pageCount > 0 && (
+					<PaginationComponent
+						pageClick={page => dispatch(setCurrentPage(page.selected))}
+						countPage={pageCount}
+						forcePage={currentPage}
+					/>
+				)}
 
 				<SelectComponent
 					variant={'pagination'}

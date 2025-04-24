@@ -1,4 +1,5 @@
-import { ChangeEvent, FC } from 'react'
+import { ChangeEvent, FC, useEffect, useRef, useState } from 'react'
+import { debounce } from 'lodash'
 import styled from 'styled-components'
 import { ReactComponent as SearchSVG } from '../assets/icons/search.svg'
 import { ISearch } from '../common/interfaces/types'
@@ -11,13 +12,39 @@ export const SearchComponent: FC<ISearch> = ({
 	onSearch,
 	search,
 }) => {
-	const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
-		if (e.target.value) {
-			onSearch(e.target.value)
-		} else {
-			onSearch('')
+	// Локальное состояние для немедленного отображения ввода пользователя
+	const [localSearch, setLocalSearch] = useState(search)
+	// Дебаунсированная функция поиска
+	const debouncedSearch = useRef(
+		debounce((value: string) => {
+			if (value) {
+				onSearch(value)
+			} else {
+				onSearch('')
+			}
+		}, 500)
+	).current
+
+	// Обновление локального состояния при изменении search пропса
+	useEffect(() => {
+		setLocalSearch(search)
+	}, [search])
+
+	// Очистка при размонтировании
+	useEffect(() => {
+		return () => {
+			debouncedSearch.cancel()
 		}
+	}, [debouncedSearch])
+
+	const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value
+		// Немедленно обновляем локальное состояние для UI
+		setLocalSearch(value)
+		// Отправляем значение через дебаунс для фактического поиска
+		debouncedSearch(value)
 	}
+
 	return (
 		<Container>
 			<SearchBar>
@@ -25,7 +52,7 @@ export const SearchComponent: FC<ISearch> = ({
 					type={type}
 					id={id}
 					name={name}
-					value={search}
+					value={localSearch}
 					placeholder="Search..."
 					autoComplete="off"
 					onChange={handleOnChange}
