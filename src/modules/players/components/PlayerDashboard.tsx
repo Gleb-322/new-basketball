@@ -16,113 +16,113 @@ import { showToast } from '../../../ui/ToastrNotification'
 import { convertBufferToUrl } from '../../../common/helpers/converterBufferToUrl'
 
 export const PlayerDashboard: FC = () => {
-	const [players, setPlayers] = useState<IPlayers[]>([])
-	const [teamsOption, setTeamsOption] = useState<IOption[]>([])
-	const [isTeamOptions, setIsTeamOption] = useState<boolean>(false)
-	const [loading, setLoading] = useState<boolean>(false)
-	const [decodedAvatars, setDecodedAvatars] = useState<{
-		[key: string]: string
-	}>({})
-	const [selectedOption, setSelectedOption] = useState<IOption>(
-		paginateOptions[0]
-	)
-	const [currentPage, setCurrentPage] = useState<number>(0)
-	const [pageCount, setPageCount] = useState<number>(0)
-	const [keyword, setKeyword] = useState<string>('')
-	const [teamsFilter, setTeamsFilter] = useState<readonly IOption[]>([])
+	// const [players, setPlayers] = useState<IPlayers[]>([])
+	// const [teamsOption, setTeamsOption] = useState<IOption[]>([])
+	// const [isTeamOptions, setIsTeamOption] = useState<boolean>(false)
+	// const [loading, setLoading] = useState<boolean>(false)
+	// const [decodedAvatars, setDecodedAvatars] = useState<{
+	// 	[key: string]: string
+	// }>({})
+	// const [selectedOption, setSelectedOption] = useState<IOption>(
+	// 	paginateOptions[0]
+	// )
+	// const [currentPage, setCurrentPage] = useState<number>(0)
+	// const [pageCount, setPageCount] = useState<number>(0)
+	// const [keyword, setKeyword] = useState<string>('')
+	// const [teamsFilter, setTeamsFilter] = useState<readonly IOption[]>([])
 
-	// check if we have teams or not
-	useEffect(() => {
-		setLoading(true)
-		getTeams()
-			.then(result => {
-				console.log('get all teams', result)
-				if (result.success) {
-					if (result.message instanceof Object) {
-						const teamsCopy = JSON.parse(
-							JSON.stringify(result.message.teams)
-						) as ITeams[]
-						const teamOptions = teamsCopy.map(team => ({
-							value: team.name,
-							label: team.name,
-							teamId: team._id,
-						}))
-						setTeamsOption(teamOptions)
-						setIsTeamOption(true)
-					} else setIsTeamOption(false)
-				}
-				if (!result.success) {
-					if (typeof result.message === 'string') {
-						showToast({
-							type: 'error',
-							message: `${result.message}`,
-						})
-					}
-				}
-			})
-			.catch(error => {
-				console.log('error get teams', error)
-			})
-			.finally(() => setLoading(false))
-	}, [])
+	// // check if we have teams or not
+	// useEffect(() => {
+	// 	setLoading(true)
+	// 	getTeams()
+	// 		.then(result => {
+	// 			console.log('get all teams', result)
+	// 			if (result.success) {
+	// 				if (result.message instanceof Object) {
+	// 					const teamsCopy = JSON.parse(
+	// 						JSON.stringify(result.message.teams)
+	// 					) as ITeams[]
+	// 					const teamOptions = teamsCopy.map(team => ({
+	// 						value: team.name,
+	// 						label: team.name,
+	// 						teamId: team._id,
+	// 					}))
+	// 					setTeamsOption(teamOptions)
+	// 					setIsTeamOption(true)
+	// 				} else setIsTeamOption(false)
+	// 			}
+	// 			if (!result.success) {
+	// 				if (typeof result.message === 'string') {
+	// 					showToast({
+	// 						type: 'error',
+	// 						message: `${result.message}`,
+	// 					})
+	// 				}
+	// 			}
+	// 		})
+	// 		.catch(error => {
+	// 			console.log('error get teams', error)
+	// 		})
+	// 		.finally(() => setLoading(false))
+	// }, [])
 
-	// get all players
-	useEffect(() => {
-		setLoading(true)
+	// // get all players
+	// useEffect(() => {
+	// 	setLoading(true)
 
-		const query = new URLSearchParams()
-		query.append('page', (currentPage + 1).toString())
-		query.append('limit', selectedOption.value)
-		query.append('keyword', keyword)
+	// 	const query = new URLSearchParams()
+	// 	query.append('page', (currentPage + 1).toString())
+	// 	query.append('limit', selectedOption.value)
+	// 	query.append('keyword', keyword)
 
-		const filters = [...teamsFilter]
-			.filter(team => team.teamId)
-			.map(team => team.teamId)
+	// 	const filters = [...teamsFilter]
+	// 		.filter(team => team.teamId)
+	// 		.map(team => team.teamId)
 
-		filters.forEach(teamId => {
-			if (teamId) {
-				query.append('filters', teamId)
-			}
-		})
+	// 	filters.forEach(teamId => {
+	// 		if (teamId) {
+	// 			query.append('filters', teamId)
+	// 		}
+	// 	})
 
-		getPlayers(query)
-			.then(result => {
-				console.log('res get players', result)
-				if (result.success) {
-					if (result.message instanceof Object) {
-						setPageCount(
-							Math.ceil(
-								result.message.countPlayers / parseInt(selectedOption.value)
-							)
-						)
-						setPlayers(result.message.players)
-						// const avatars = convertBufferToUrl(result.message.players)
-						// if (avatars) {
-						// 	setDecodedAvatars(avatars)
-						// }
-					}
-				}
-				if (!result.success) {
-					if (typeof result.message === 'string') {
-						showToast({
-							type: 'error',
-							message: `${result.message}`,
-						})
-					}
-				}
-			})
-			.catch(error => {
-				console.log('error', error)
-			})
-			.finally(() => setLoading(false))
-	}, [currentPage, keyword, selectedOption.value, teamsFilter])
+	// 	getPlayers(query)
+	// 		.then(result => {
+	// 			console.log('res get players', result)
+	// 			if (result.success) {
+	// 				if (result.message instanceof Object) {
+	// 					setPageCount(
+	// 						Math.ceil(
+	// 							result.message.countPlayers / parseInt(selectedOption.value)
+	// 						)
+	// 					)
+	// 					setPlayers(result.message.players)
+	// 					// const avatars = convertBufferToUrl(result.message.players)
+	// 					// if (avatars) {
+	// 					// 	setDecodedAvatars(avatars)
+	// 					// }
+	// 				}
+	// 			}
+	// 			if (!result.success) {
+	// 				if (typeof result.message === 'string') {
+	// 					showToast({
+	// 						type: 'error',
+	// 						message: `${result.message}`,
+	// 					})
+	// 				}
+	// 			}
+	// 		})
+	// 		.catch(error => {
+	// 			console.log('error', error)
+	// 		})
+	// 		.finally(() => setLoading(false))
+	// }, [currentPage, keyword, selectedOption.value, teamsFilter])
 
-	const handlePageClick = (data: { selected: SetStateAction<number> }) =>
-		setCurrentPage(data.selected)
+	// const handlePageClick = (data: { selected: SetStateAction<number> }) =>
+	// 	setCurrentPage(data.selected)
 
 	return (
 		<>
-			<PlayerHeader
+			{/* <PlayerHeader
 				search={keyword}
 				onSearch={setKeyword}
 				isTeamOptions={isTeamOptions}
@@ -155,7 +155,7 @@ export const PlayerDashboard: FC = () => {
 						/>
 					</>
 				) : null}
-			</Footer>
+			</Footer> */}
 		</>
 	)
 }

@@ -17,188 +17,188 @@ import { showToast } from '../../../ui/ToastrNotification'
 dayjs.extend(utc)
 
 export const PlayerDetail: FC = () => {
-	const params = useParams()
-	const navigate = useNavigate()
-	const { token } = useAuth()
-	const [player, setPlayer] = useState<IPlayers>()
-	const [deletePlayer, setDeletePlayer] = useState<boolean>(false)
-	const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<{
-		[key: string]: string
-	}>()
+	// const params = useParams()
+	// const navigate = useNavigate()
+	// const { token } = useAuth()
+	// const [player, setPlayer] = useState<IPlayers>()
+	// const [deletePlayer, setDeletePlayer] = useState<boolean>(false)
+	// const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<{
+	// 	[key: string]: string
+	// }>()
 
-	const [loading, setLoading] = useState<boolean>(false)
+	// const [loading, setLoading] = useState<boolean>(false)
 
-	// get player by id
-	useEffect(() => {
-		setLoading(true)
+	// // get player by id
+	// useEffect(() => {
+	// 	setLoading(true)
 
-		if (params._id) {
-			getPlayer(params._id)
-				.then(result => {
-					console.log('get player by id', result)
+	// 	if (params._id) {
+	// 		getPlayer(params._id)
+	// 			.then(result => {
+	// 				console.log('get player by id', result)
 
-					if (result.success) {
-						if (result.message instanceof Object) {
-							setPlayer(result.message)
-							// const avatar = convertBufferToUrl(result.message)
-							// if (avatar) {
-							// 	setDecodedPlayerAvatar(avatar)
-							// }
-						}
-					}
-					if (!result.success) {
-						if (typeof result.message === 'string') {
-							showToast({
-								type: 'error',
-								message: `${result.message}`,
-							})
-						}
-					}
-				})
-				.catch(error => {
-					console.log('error', error)
-				})
-				.finally(() => setLoading(false))
-		}
-	}, [params])
+	// 				if (result.success) {
+	// 					if (result.message instanceof Object) {
+	// 						setPlayer(result.message)
+	// 						// const avatar = convertBufferToUrl(result.message)
+	// 						// if (avatar) {
+	// 						// 	setDecodedPlayerAvatar(avatar)
+	// 						// }
+	// 					}
+	// 				}
+	// 				if (!result.success) {
+	// 					if (typeof result.message === 'string') {
+	// 						showToast({
+	// 							type: 'error',
+	// 							message: `${result.message}`,
+	// 						})
+	// 					}
+	// 				}
+	// 			})
+	// 			.catch(error => {
+	// 				console.log('error', error)
+	// 			})
+	// 			.finally(() => setLoading(false))
+	// 	}
+	// }, [params])
 
 	// delete one player by id
-	useEffect(() => {
-		if (!deletePlayer && !player?._id && !player?.team._id && !player?.name)
-			return
+	// useEffect(() => {
+	// 	if (!deletePlayer && !player?._id && !player?.team._id && !player?.name)
+	// 		return
 
-		setLoading(true)
+	// 	setLoading(true)
 
-		if (deletePlayer && player?._id && player?.team._id && player?.name) {
-			const query = new URLSearchParams()
-			query.append('playerId', player._id)
-			query.append('teamId', player.team._id)
-			query.append('playerName', player.name)
+	// 	if (deletePlayer && player?._id && player?.team._id && player?.name) {
+	// 		const query = new URLSearchParams()
+	// 		query.append('playerId', player._id)
+	// 		query.append('teamId', player.team._id)
+	// 		query.append('playerName', player.name)
 
-			removePlayer(query, token)
-				.then(result => {
-					console.log('res delete player', result)
-					if (result.success) {
-						navigate('/players')
-						showToast({
-							type: 'success',
-							message: `${result.message}`,
-						})
-					}
-					if (!result.success) {
-						showToast({
-							type: 'error',
-							message: `${result.message}`,
-						})
-					}
-				})
-				.catch(error => {
-					console.log('error', error)
-				})
-				.finally(() => setLoading(false))
-		}
+	// 		removePlayer(query, token)
+	// 			.then(result => {
+	// 				console.log('res delete player', result)
+	// 				if (result.success) {
+	// 					navigate('/players')
+	// 					showToast({
+	// 						type: 'success',
+	// 						message: `${result.message}`,
+	// 					})
+	// 				}
+	// 				if (!result.success) {
+	// 					showToast({
+	// 						type: 'error',
+	// 						message: `${result.message}`,
+	// 					})
+	// 				}
+	// 			})
+	// 			.catch(error => {
+	// 				console.log('error', error)
+	// 			})
+	// 			.finally(() => setLoading(false))
+	// 	}
 
-		return () => {
-			setDeletePlayer(false)
-		}
-	}, [
-		deletePlayer,
-		navigate,
-		player?._id,
-		player?.name,
-		player?.team._id,
-		token,
-	])
+	// 	return () => {
+	// 		setDeletePlayer(false)
+	// 	}
+	// }, [
+	// 	deletePlayer,
+	// 	navigate,
+	// 	player?._id,
+	// 	player?.name,
+	// 	player?.team._id,
+	// 	token,
+	// ])
 
-	return (
-		<Container>
-			{loading ? (
-				<LoadingComponent />
-			) : (
-				<>
-					{player ? (
-						<>
-							<DetailBlock>
-								<HeaderDetail>
-									<HeaderText>
-										<LinkComponent route={'/players'} text={'Players'} />{' '}
-										<Slash>/</Slash> {player.name}
-									</HeaderText>
+	return <></>
+	// <Container>
+	// 	{loading ? (
+	// 		<LoadingComponent />
+	// 	) : (
+	// 		<>
+	// 			{player ? (
+	// 				<>
+	// 					<DetailBlock>
+	// 						<HeaderDetail>
+	// 							<HeaderText>
+	// 								<LinkComponent route={'/players'} text={'Players'} />{' '}
+	// 								<Slash>/</Slash> {player.name}
+	// 							</HeaderText>
 
-									<div>
-										<ButtonEdit
-											type="button"
-											onClick={() =>
-												navigate('/players/add', { state: { player } })
-											}
-										>
-											<EditSVG />
-										</ButtonEdit>
-										<ButtonDelete
-											type="button"
-											onClick={() => setDeletePlayer(true)}
-										>
-											<DeleteSVG />
-										</ButtonDelete>
-									</div>
-								</HeaderDetail>
+	// 							<div>
+	// 								<ButtonEdit
+	// 									type="button"
+	// 									onClick={() =>
+	// 										navigate('/players/add', { state: { player } })
+	// 									}
+	// 								>
+	// 									<EditSVG />
+	// 								</ButtonEdit>
+	// 								<ButtonDelete
+	// 									type="button"
+	// 									onClick={() => setDeletePlayer(true)}
+	// 								>
+	// 									<DeleteSVG />
+	// 								</ButtonDelete>
+	// 							</div>
+	// 						</HeaderDetail>
 
-								<MainDetail>
-									<Left>
-										{decodedPlayerAvatar && decodedPlayerAvatar[player._id] ? (
-											<>
-												<Img
-													src={decodedPlayerAvatar[player._id]}
-													alt={player.name}
-												/>
-											</>
-										) : (
-											<StyledNoImageSVG />
-										)}
-									</Left>
-									<Right>
-										<Name>
-											{player.name}
-											<Number>#{player?.number}</Number>{' '}
-										</Name>
-										<TextBlock>
-											<TextColumn>
-												<Key>Position</Key>
-												<Value>{player.position}</Value>
-											</TextColumn>
+	// 						<MainDetail>
+	// 							<Left>
+	// 								{decodedPlayerAvatar && decodedPlayerAvatar[player._id] ? (
+	// 									<>
+	// 										<Img
+	// 											src={decodedPlayerAvatar[player._id]}
+	// 											alt={player.name}
+	// 										/>
+	// 									</>
+	// 								) : (
+	// 									<StyledNoImageSVG />
+	// 								)}
+	// 							</Left>
+	// 							<Right>
+	// 								<Name>
+	// 									{player.name}
+	// 									<Number>#{player?.number}</Number>{' '}
+	// 								</Name>
+	// 								<TextBlock>
+	// 									<TextColumn>
+	// 										<Key>Position</Key>
+	// 										<Value>{player.position}</Value>
+	// 									</TextColumn>
 
-											<TextColumn>
-												<Key>Team</Key>
-												<Value>{player.team.name}</Value>
-											</TextColumn>
+	// 									<TextColumn>
+	// 										<Key>Team</Key>
+	// 										{/* <Value>{player.team.name}</Value> */}
+	// 									</TextColumn>
 
-											<TextColumn>
-												<Key>Height</Key>
-												<Value>{player.height} cm</Value>
-											</TextColumn>
+	// 									<TextColumn>
+	// 										<Key>Height</Key>
+	// 										<Value>{player.height} cm</Value>
+	// 									</TextColumn>
 
-											<TextColumn>
-												<Key>Weight</Key>
-												<Value>{player.weight} kg</Value>
-											</TextColumn>
+	// 									<TextColumn>
+	// 										<Key>Weight</Key>
+	// 										<Value>{player.weight} kg</Value>
+	// 									</TextColumn>
 
-											<TextColumn>
-												<Key>Age</Key>
+	// 									<TextColumn>
+	// 										<Key>Age</Key>
 
-												<Value>
-													{dayjs.utc().diff(dayjs.utc(player.birthday), 'year')}
-												</Value>
-											</TextColumn>
-										</TextBlock>
-									</Right>
-								</MainDetail>
-							</DetailBlock>
-						</>
-					) : null}
-				</>
-			)}
-		</Container>
-	)
+	// 										<Value>
+	// 											{dayjs.utc().diff(dayjs.utc(player.birthday), 'year')}
+	// 										</Value>
+	// 									</TextColumn>
+	// 								</TextBlock>
+	// 							</Right>
+	// 						</MainDetail>
+	// 					</DetailBlock>
+	// 				</>
+	// 			) : null}
+	// 		</>
+	// 	)}
+	// </Container>
+	// )
 }
 const Container = styled.div`
 	position: relative;

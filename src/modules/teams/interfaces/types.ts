@@ -1,5 +1,16 @@
 import { IOption } from '../../../common/interfaces/types'
-import { IPlayers } from '../../players/interfaces/types'
+import { IPlayers, IServerPlayers } from '../../players/interfaces/types'
+
+export interface IServerTeams {
+	__v: number
+	_id: string
+	name: string
+	division: string
+	conference: string
+	year: string
+	teamImg: { type: string; data: number[] }
+	players: IServerPlayers[]
+}
 
 export interface ITeams {
 	__v: number
@@ -8,7 +19,7 @@ export interface ITeams {
 	division: string
 	conference: string
 	year: string
-	teamImg: { type: string; data: number[] }
+	teamImg: string
 	players: IPlayers[]
 }
 
@@ -41,7 +52,7 @@ export interface IAddAndUpdateTeamLocationState {
 export interface ICreateTeamResponse {
 	errorCode: string
 	success: boolean
-	message: { team: ITeams } | string
+	message: { team: IServerTeams } | string
 }
 
 export interface IGetTeamsResponse {
@@ -49,7 +60,7 @@ export interface IGetTeamsResponse {
 	success: boolean
 	message:
 		| {
-				teams: ITeams[]
+				teams: IServerTeams[]
 				countTeams: number
 		  }
 		| string
@@ -58,13 +69,13 @@ export interface IGetTeamsResponse {
 export interface IGetTeamResponse {
 	errorCode: string
 	success: boolean
-	message: ITeams | string
+	message: IServerTeams | string
 }
 
 export interface IPatchTeamResponse {
 	errorCode: string
 	success: boolean
-	message: ITeams | string
+	message: IServerTeams | string
 }
 
 export interface IRemoveTeamResponse {

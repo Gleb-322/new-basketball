@@ -32,6 +32,7 @@ export const TeamDashboard: FC = () => {
 	} = useAppSelector((state: RootState) => state.team)
 
 	const teams = useAppSelector(selectAllTeams)
+	console.log(teams)
 
 	// get all teams
 	useEffect(() => {

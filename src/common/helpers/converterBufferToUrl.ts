@@ -1,15 +1,14 @@
-import { IPlayers } from '../../modules/players/interfaces/types'
-import { ITeams } from '../../modules/teams/interfaces/types'
+import { IServerPlayers } from '../../modules/players/interfaces/types'
+import { IServerTeams } from '../../modules/teams/interfaces/types'
 
 export const convertBufferToUrl = (payload: {
-	team?: ITeams[]
-	player?: IPlayers[]
+	team?: IServerTeams[]
+	player?: IServerPlayers[]
 }) => {
 	const avatars: { [key: string]: string } = {}
 
 	if (payload.team) {
-		const teamsCopy = JSON.parse(JSON.stringify(payload.team)) as ITeams[]
-		teamsCopy.forEach((t: ITeams) => {
+		payload.team.forEach(t => {
 			if (t.teamImg && t.teamImg.data) {
 				// Декодируем Buffer
 				const byteArray = new Uint8Array(t.teamImg.data)
@@ -22,9 +21,7 @@ export const convertBufferToUrl = (payload: {
 	}
 
 	if (payload.player) {
-		const playersCopy = JSON.parse(JSON.stringify(payload.player)) as IPlayers[]
-
-		playersCopy.forEach((p: IPlayers) => {
+		payload.player.forEach(p => {
 			if (p.playerImg && p.playerImg.data) {
 				// Декодируем Buffer
 				const byteArray = new Uint8Array(p.playerImg.data)

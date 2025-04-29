@@ -1,19 +1,32 @@
 import { IOption } from '../../../common/interfaces/types'
 import * as yup from 'yup'
-import { ITeams } from '../../teams/interfaces/types'
+import { IServerTeams, ITeams } from '../../teams/interfaces/types'
 import { OnChangeValue } from 'react-select'
+
+export interface IServerPlayers {
+	__v: number
+	_id: string
+	name: string
+	position: string
+	team: IServerTeams
+	height: string
+	weight: string
+	birthday: Date
+	number: string
+	playerImg: { type: string; data: number[] }
+}
 
 export interface IPlayers {
 	__v: number
 	_id: string
 	name: string
 	position: string
-	team: ITeams
+	team: ITeams | null
 	height: string
 	weight: string
 	birthday: Date
 	number: string
-	playerImg: { type: string; data: number[] }
+	playerImg: string
 }
 
 export interface IAddAndUpdatePlayerFormFields {

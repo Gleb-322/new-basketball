@@ -8,10 +8,10 @@ import { TeamDashboard } from '../../modules/teams/components/TeamDashboard'
 import { TeamLayout } from '../../modules/teams/components/TeamLayout'
 import { TeamCreateAndUpdate } from '../../modules/teams/components/TeamAddAndUpdate'
 import { TeamDetail } from '../../modules/teams/components/TeamDetail'
-import { PlayerLayout } from '../../modules/players/components/PlayerLayout'
-import { PlayerDashboard } from '../../modules/players/components/PlayerDashboard'
-import { PlayerDetail } from '../../modules/players/components/PlayerDetail'
-import { PlayerCreateAndUpdate } from '../../modules/players/components/PlayerAddAndUpdate'
+// import { PlayerLayout } from '../../modules/players/components/PlayerLayout'
+// import { PlayerDashboard } from '../../modules/players/components/PlayerDashboard'
+// import { PlayerDetail } from '../../modules/players/components/PlayerDetail'
+// import { PlayerCreateAndUpdate } from '../../modules/players/components/PlayerAddAndUpdate'
 import { ToastNotification } from '../../ui/ToastrNotification'
 import { useAppSelector } from '../hooks/useAppSelector'
 import { useEffect } from 'react'
@@ -75,11 +75,11 @@ export const App = () => {
 						<Route path=":_id" element={<TeamDetail />} />
 					</Route>
 
-					<Route path="players" element={<PlayerLayout />}>
+					{/* <Route path="players" element={<PlayerLayout />}>
 						<Route index element={<PlayerDashboard />} />
 						<Route path="add" element={<PlayerCreateAndUpdate />} />
 						<Route path=":_id" element={<PlayerDetail />} />
-					</Route>
+					</Route> */}
 				</Route>
 
 				<Route path="signin" element={<SignIn />} />

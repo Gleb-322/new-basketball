@@ -9,7 +9,7 @@ export const PlayerList: FC<IPlayerList> = ({ players, avatars }) => {
 
 	return (
 		<Players>
-			{players.map(player => (
+			{/* {players.map(player => (
 				<Card
 					onClick={() => navigate(`/players/${player._id}`)}
 					key={player._id}
@@ -25,10 +25,10 @@ export const PlayerList: FC<IPlayerList> = ({ players, avatars }) => {
 						<Name>
 							{player.name} <Number>#{player?.number}</Number>
 						</Name>
-						<Team>{player.team.name}</Team>
-					</TextBlock>
+						{/* <Team>{player.team.name}</Team> */}
+			{/* </TextBlock>
 				</Card>
-			))}
+			))} */}
 		</Players>
 	)
 }

@@ -18,7 +18,7 @@ export const PlayerHeader: FC<IPlayerHeader> = ({
 
 	return (
 		<Header>
-			<FilterBlock>
+			{/* <FilterBlock>
 				<SearchComponent
 					type={'text'}
 					id={'searchTeam'}
@@ -38,7 +38,7 @@ export const PlayerHeader: FC<IPlayerHeader> = ({
 				onClick={() => navigate('/players/add')}
 				variant={'addPlayer'}
 				disabled={isTeamOptions ? true : false}
-			/>
+			/> */}
 		</Header>
 	)
 }

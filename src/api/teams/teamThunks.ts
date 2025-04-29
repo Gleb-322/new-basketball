@@ -8,6 +8,8 @@ import {
 	removeTeam,
 } from './teamsService'
 import { convertBufferToUrl } from '../../common/helpers/converterBufferToUrl'
+import { IServerTeams, ITeams } from '../../modules/teams/interfaces/types'
+import { IPlayers } from '../../modules/players/interfaces/types'
 
 // create team
 export const createTeamThunk = createAsyncThunk(
@@ -24,9 +26,38 @@ export const createTeamThunk = createAsyncThunk(
 				return rejectWithValue('Failed to create a Team! Token is Null!')
 			}
 
+			if (!body) {
+				return rejectWithValue('Failed to create a Team! Body is Undefined!')
+			}
+
 			const response = await createTeams(body, token)
 			if (response.success && response.message instanceof Object) {
-				return response.message
+				const serverTeam = response.message.team as IServerTeams
+				const avatarsTeam = convertBufferToUrl({ team: [serverTeam] })
+				const players = serverTeam.players || []
+				const avatarsPlayer = convertBufferToUrl({ player: players })
+
+				const convertedPlayers: IPlayers[] = players.map(player => {
+					return {
+						...player,
+						team: null,
+						playerImg:
+							player._id in avatarsPlayer ? avatarsPlayer[player._id] : '',
+					}
+				})
+
+				const convertedTeam: ITeams = {
+					...serverTeam,
+					teamImg:
+						serverTeam._id in avatarsTeam ? avatarsTeam[serverTeam._id] : '',
+					players: convertedPlayers,
+				}
+
+				convertedPlayers.forEach(player => {
+					player.team = convertedTeam
+				})
+
+				return { createdTeam: convertedTeam }
 			} else {
 				return rejectWithValue(
 					typeof response.message === 'string'
@@ -51,10 +82,54 @@ export const getTeamsThunk = createAsyncThunk(
 
 			const response = await getTeams(query)
 
+			console.log('response', response)
+
 			if (response.success && response.message instanceof Object) {
-				const avatarsTeam = convertBufferToUrl({ team: response.message.teams })
+				console.log('s servera', response.message.teams)
+				// Преобразуем данные из серверного формата
+				const serverTeams = response.message.teams as IServerTeams[]
+
+				console.log('serverTeams', serverTeams)
+
+				const avatarsTeam = convertBufferToUrl({ team: serverTeams })
+
+				const allPlayers =
+					serverTeams && serverTeams.length > 0
+						? serverTeams.flatMap(team => team.players)
+						: []
+
+				const avatarsPlayer = convertBufferToUrl({ player: allPlayers })
+
+				// Преобразуем команды в формат с URL-строками
+				const teams: ITeams[] = serverTeams.map(team => {
+					// Преобразуем игроков
+					const convertedPlayers: IPlayers[] = team.players.map(player => {
+						return {
+							...player,
+							team: null, // Временно устанавливаем null, т.к. circular reference
+							playerImg:
+								player._id in avatarsPlayer ? avatarsPlayer[player._id] : '', // Пустая строка, если нет URL
+						}
+					})
+
+					// Преобразуем команду
+					const convertedTeam: ITeams = {
+						...team,
+						teamImg: team._id in avatarsTeam ? avatarsTeam[team._id] : '', // Пустая строка, если нет URL
+						players: convertedPlayers,
+					}
+
+					// Устанавливаем правильную ссылку на команду для игроков
+					convertedPlayers.forEach(player => {
+						player.team = convertedTeam
+					})
+
+					return convertedTeam
+				})
+
+				console.log('v redux', teams)
 				return {
-					teams: response.message.teams,
+					teams,
 					countTeams: response.message.countTeams,
 					avatarsTeam,
 				}
@@ -87,12 +162,35 @@ export const getTeamThunk = createAsyncThunk(
 			const response = await getTeam(teamId)
 
 			if (response.success && response.message instanceof Object) {
-				const avatarsTeam = convertBufferToUrl({ team: [response.message] })
+				const serverTeam = response.message as IServerTeams
+				const avatarsTeam = convertBufferToUrl({ team: [serverTeam] })
+				const players = serverTeam.players || []
 				const avatarsPlayer = convertBufferToUrl({
-					player: [...response.message.players],
+					player: players,
 				})
+
+				const convertedPlayers: IPlayers[] = players.map(player => {
+					return {
+						...player,
+						team: null,
+						playerImg:
+							player._id in avatarsPlayer ? avatarsPlayer[player._id] : '',
+					}
+				})
+
+				const convertedTeam: ITeams = {
+					...serverTeam,
+					teamImg:
+						serverTeam._id in avatarsTeam ? avatarsTeam[serverTeam._id] : '',
+					players: convertedPlayers,
+				}
+
+				convertedPlayers.forEach(player => {
+					player.team = convertedTeam
+				})
+
 				return {
-					team: response.message,
+					team: convertedTeam,
 					avatarsTeam,
 					avatarsPlayer,
 				}
@@ -126,9 +224,38 @@ export const updateTeamThunk = createAsyncThunk(
 				return rejectWithValue('Failed to update a Team! Token is Null!')
 			}
 
+			if (!body) {
+				return rejectWithValue('Failed to update a Team! Body is Undefined!')
+			}
+
 			const response = await patchTeam(body, token)
 			if (response.success && response.message instanceof Object) {
-				return response.message
+				const serverTeam = response.message as IServerTeams
+				const avatarsTeam = convertBufferToUrl({ team: [serverTeam] })
+				const players = serverTeam.players || []
+				const avatarsPlayer = convertBufferToUrl({ player: players })
+
+				const convertedPlayers: IPlayers[] = players.map(player => {
+					return {
+						...player,
+						team: null,
+						playerImg:
+							player._id in avatarsPlayer ? avatarsPlayer[player._id] : '',
+					}
+				})
+
+				const convertedTeam: ITeams = {
+					...serverTeam,
+					teamImg:
+						serverTeam._id in avatarsTeam ? avatarsTeam[serverTeam._id] : '',
+					players: convertedPlayers,
+				}
+
+				convertedPlayers.forEach(player => {
+					player.team = convertedTeam
+				})
+
+				return { updatedTeam: convertedTeam }
 			} else {
 				return rejectWithValue(
 					typeof response.message === 'string'
@@ -166,7 +293,7 @@ export const removeTeamThunk = createAsyncThunk(
 
 			const response = await removeTeam(teamId, token)
 			if (response.success) {
-				return { message: response.message, teamId }
+				return { removedTeam: response.message, teamId }
 			} else {
 				return rejectWithValue(response.message || 'Failed to remove a Team!')
 			}
