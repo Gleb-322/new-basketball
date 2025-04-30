@@ -1,6 +1,6 @@
 import { IOption } from '../../../common/interfaces/types'
 import * as yup from 'yup'
-import { IServerTeams, ITeams } from '../../teams/interfaces/types'
+import { IServerTeams } from '../../teams/interfaces/types'
 import { OnChangeValue } from 'react-select'
 
 export interface IServerPlayers {
@@ -13,7 +13,7 @@ export interface IServerPlayers {
 	weight: string
 	birthday: Date
 	number: string
-	playerImg: { type: string; data: number[] }
+	playerImg: { data: number[] }
 }
 
 export interface IPlayers {
@@ -21,12 +21,13 @@ export interface IPlayers {
 	_id: string
 	name: string
 	position: string
-	team: ITeams | null
+	team: string
 	height: string
 	weight: string
 	birthday: Date
 	number: string
 	playerImg: string
+	file: File | null
 }
 
 export interface IAddAndUpdatePlayerFormFields {
@@ -75,7 +76,7 @@ export interface IAddAndUpdatePlayerLocationState {
 export interface ICreatePlayersResponse {
 	errorCode: string
 	success: boolean
-	message: { player: IPlayers } | string
+	message: { player: IServerPlayers } | string
 }
 
 export interface IGetPlayersResponse {
@@ -83,7 +84,7 @@ export interface IGetPlayersResponse {
 	success: boolean
 	message:
 		| {
-				players: IPlayers[]
+				players: IServerPlayers[]
 				countPlayers: number
 		  }
 		| string
@@ -92,13 +93,13 @@ export interface IGetPlayersResponse {
 export interface IGetPlayerResponse {
 	errorCode: string
 	success: boolean
-	message: IPlayers | string
+	message: IServerPlayers | string
 }
 
 export interface IPatchPlayerResponse {
 	errorCode: string
 	success: boolean
-	message: IPlayers | string
+	message: IServerPlayers | string
 }
 
 export interface IRemovePlayerResponse {

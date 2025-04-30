@@ -8,7 +8,7 @@ export interface IServerTeams {
 	division: string
 	conference: string
 	year: string
-	teamImg: { type: string; data: number[] }
+	teamImg: { data: number[] }
 	players: IServerPlayers[]
 }
 
@@ -21,11 +21,14 @@ export interface ITeams {
 	year: string
 	teamImg: string
 	players: IPlayers[]
+	file: File | null
 }
 
 export interface ITeamList {
 	teams: ITeams[]
-	avatars: { [key: string]: string }
+}
+export interface ITeamCard {
+	team: ITeams
 }
 
 export interface IAddAndUpdateTeamFormFields {
@@ -87,12 +90,6 @@ export interface IRemoveTeamResponse {
 export interface ITeamSliceState {
 	error: string | null
 	status: 'idle' | 'loading' | 'success' | 'error'
-	teamsAvatars: {
-		[key: string]: string
-	}
-	playersAvatars: {
-		[key: string]: string
-	}
 	keyword: string
 	pageCount: number
 	currentPage: number

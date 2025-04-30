@@ -7,9 +7,13 @@ import {
 	patchTeam,
 	removeTeam,
 } from './teamsService'
-import { convertBufferToUrl } from '../../common/helpers/converterBufferToUrl'
+
 import { IServerTeams, ITeams } from '../../modules/teams/interfaces/types'
-import { IPlayers } from '../../modules/players/interfaces/types'
+import {
+	IPlayers,
+	IServerPlayers,
+} from '../../modules/players/interfaces/types'
+import { convertBufferToBase64AndFile } from '../../common/helpers/converterBufferToUrlAndFile'
 
 // create team
 export const createTeamThunk = createAsyncThunk(
@@ -32,32 +36,28 @@ export const createTeamThunk = createAsyncThunk(
 
 			const response = await createTeams(body, token)
 			if (response.success && response.message instanceof Object) {
-				const serverTeam = response.message.team as IServerTeams
-				const avatarsTeam = convertBufferToUrl({ team: [serverTeam] })
-				const players = serverTeam.players || []
-				const avatarsPlayer = convertBufferToUrl({ player: players })
-
-				const convertedPlayers: IPlayers[] = players.map(player => {
-					return {
-						...player,
-						team: null,
-						playerImg:
-							player._id in avatarsPlayer ? avatarsPlayer[player._id] : '',
-					}
-				})
-
-				const convertedTeam: ITeams = {
-					...serverTeam,
-					teamImg:
-						serverTeam._id in avatarsTeam ? avatarsTeam[serverTeam._id] : '',
-					players: convertedPlayers,
-				}
-
-				convertedPlayers.forEach(player => {
-					player.team = convertedTeam
-				})
-
-				return { createdTeam: convertedTeam }
+				// const serverTeam = response.message.team as IServerTeams
+				// const avatarsTeam = convertBufferToUrl({ team: [serverTeam] })
+				// const players = serverTeam.players || []
+				// const avatarsPlayer = convertBufferToUrl({ player: players })
+				// const convertedPlayers: IPlayers[] = players.map(player => {
+				// 	return {
+				// 		...player,
+				// 		team: null,
+				// 		playerImg:
+				// 			player._id in avatarsPlayer ? avatarsPlayer[player._id] : '',
+				// 	}
+				// })
+				// const convertedTeam: ITeams = {
+				// 	...serverTeam,
+				// 	teamImg:
+				// 		serverTeam._id in avatarsTeam ? avatarsTeam[serverTeam._id] : '',
+				// 	players: convertedPlayers,
+				// }
+				// convertedPlayers.forEach(player => {
+				// 	player.team = convertedTeam
+				// })
+				// return { createdTeam: convertedTeam }
 			} else {
 				return rejectWithValue(
 					typeof response.message === 'string'
@@ -82,56 +82,59 @@ export const getTeamsThunk = createAsyncThunk(
 
 			const response = await getTeams(query)
 
-			console.log('response', response)
-
 			if (response.success && response.message instanceof Object) {
-				console.log('s servera', response.message.teams)
-				// Преобразуем данные из серверного формата
 				const serverTeams = response.message.teams as IServerTeams[]
 
 				console.log('serverTeams', serverTeams)
 
-				const avatarsTeam = convertBufferToUrl({ team: serverTeams })
-
-				const allPlayers =
-					serverTeams && serverTeams.length > 0
-						? serverTeams.flatMap(team => team.players)
-						: []
-
-				const avatarsPlayer = convertBufferToUrl({ player: allPlayers })
-
-				// Преобразуем команды в формат с URL-строками
 				const teams: ITeams[] = serverTeams.map(team => {
-					// Преобразуем игроков
-					const convertedPlayers: IPlayers[] = team.players.map(player => {
+					const players = (team.players as IServerPlayers[]) || []
+
+					const convertedTeamPlayers: IPlayers[] = players.map(player => {
+						let playerImgUrl = ''
+						let playerImgBase64 = ''
+						let playerImgFile = null
+
+						if (player.playerImg) {
+							const playerImageConverted = convertBufferToBase64AndFile(
+								player.playerImg
+							)
+							// playerImgUrl = playerImageConverted.objectUrl ?? ''
+							playerImgBase64 = playerImageConverted.base64String
+							playerImgFile = playerImageConverted.file
+						}
+
+						// const teamImageConvertedForPlayer = convertBufferToUrlAndFile(
+						// 	player.team.teamImg
+						// )
+						// const convertedTeam: ITeams = {
+						// 	...player.team,
+						// 	teamImg: teamImageConvertedForPlayer.objectUrl ?? '',
+						// 	file: teamImageConvertedForPlayer.file ?? null,
+						// 	players: [],
+						// }
+
 						return {
 							...player,
-							team: null, // Временно устанавливаем null, т.к. circular reference
-							playerImg:
-								player._id in avatarsPlayer ? avatarsPlayer[player._id] : '', // Пустая строка, если нет URL
+							team: team._id,
+							playerImg: playerImgBase64,
+							file: playerImgFile,
 						}
 					})
 
-					// Преобразуем команду
-					const convertedTeam: ITeams = {
+					const teamImageConverted = convertBufferToBase64AndFile(team.teamImg)
+
+					return {
 						...team,
-						teamImg: team._id in avatarsTeam ? avatarsTeam[team._id] : '', // Пустая строка, если нет URL
-						players: convertedPlayers,
+						players: convertedTeamPlayers,
+						teamImg: teamImageConverted.base64String ?? '',
+						file: teamImageConverted.file ?? null,
 					}
-
-					// Устанавливаем правильную ссылку на команду для игроков
-					convertedPlayers.forEach(player => {
-						player.team = convertedTeam
-					})
-
-					return convertedTeam
 				})
 
-				console.log('v redux', teams)
 				return {
 					teams,
 					countTeams: response.message.countTeams,
-					avatarsTeam,
 				}
 			} else {
 				return rejectWithValue(
@@ -162,38 +165,34 @@ export const getTeamThunk = createAsyncThunk(
 			const response = await getTeam(teamId)
 
 			if (response.success && response.message instanceof Object) {
-				const serverTeam = response.message as IServerTeams
-				const avatarsTeam = convertBufferToUrl({ team: [serverTeam] })
-				const players = serverTeam.players || []
-				const avatarsPlayer = convertBufferToUrl({
-					player: players,
-				})
-
-				const convertedPlayers: IPlayers[] = players.map(player => {
-					return {
-						...player,
-						team: null,
-						playerImg:
-							player._id in avatarsPlayer ? avatarsPlayer[player._id] : '',
-					}
-				})
-
-				const convertedTeam: ITeams = {
-					...serverTeam,
-					teamImg:
-						serverTeam._id in avatarsTeam ? avatarsTeam[serverTeam._id] : '',
-					players: convertedPlayers,
-				}
-
-				convertedPlayers.forEach(player => {
-					player.team = convertedTeam
-				})
-
-				return {
-					team: convertedTeam,
-					avatarsTeam,
-					avatarsPlayer,
-				}
+				// const serverTeam = response.message as IServerTeams
+				// const avatarsTeam = convertBufferToUrl({ team: [serverTeam] })
+				// const players = serverTeam.players || []
+				// const avatarsPlayer = convertBufferToUrl({
+				// 	player: players,
+				// })
+				// const convertedPlayers: IPlayers[] = players.map(player => {
+				// 	return {
+				// 		...player,
+				// 		team: null,
+				// 		playerImg:
+				// 			player._id in avatarsPlayer ? avatarsPlayer[player._id] : '',
+				// 	}
+				// })
+				// const convertedTeam: ITeams = {
+				// 	...serverTeam,
+				// 	teamImg:
+				// 		serverTeam._id in avatarsTeam ? avatarsTeam[serverTeam._id] : '',
+				// 	players: convertedPlayers,
+				// }
+				// convertedPlayers.forEach(player => {
+				// 	player.team = convertedTeam
+				// })
+				// return {
+				// 	team: convertedTeam,
+				// 	avatarsTeam,
+				// 	avatarsPlayer,
+				// }
 			} else {
 				return rejectWithValue(
 					typeof response.message === 'string'
@@ -230,32 +229,28 @@ export const updateTeamThunk = createAsyncThunk(
 
 			const response = await patchTeam(body, token)
 			if (response.success && response.message instanceof Object) {
-				const serverTeam = response.message as IServerTeams
-				const avatarsTeam = convertBufferToUrl({ team: [serverTeam] })
-				const players = serverTeam.players || []
-				const avatarsPlayer = convertBufferToUrl({ player: players })
-
-				const convertedPlayers: IPlayers[] = players.map(player => {
-					return {
-						...player,
-						team: null,
-						playerImg:
-							player._id in avatarsPlayer ? avatarsPlayer[player._id] : '',
-					}
-				})
-
-				const convertedTeam: ITeams = {
-					...serverTeam,
-					teamImg:
-						serverTeam._id in avatarsTeam ? avatarsTeam[serverTeam._id] : '',
-					players: convertedPlayers,
-				}
-
-				convertedPlayers.forEach(player => {
-					player.team = convertedTeam
-				})
-
-				return { updatedTeam: convertedTeam }
+				// const serverTeam = response.message as IServerTeams
+				// const avatarsTeam = convertBufferToUrl({ team: [serverTeam] })
+				// const players = serverTeam.players || []
+				// const avatarsPlayer = convertBufferToUrl({ player: players })
+				// const convertedPlayers: IPlayers[] = players.map(player => {
+				// 	return {
+				// 		...player,
+				// 		team: null,
+				// 		playerImg:
+				// 			player._id in avatarsPlayer ? avatarsPlayer[player._id] : '',
+				// 	}
+				// })
+				// const convertedTeam: ITeams = {
+				// 	...serverTeam,
+				// 	teamImg:
+				// 		serverTeam._id in avatarsTeam ? avatarsTeam[serverTeam._id] : '',
+				// 	players: convertedPlayers,
+				// }
+				// convertedPlayers.forEach(player => {
+				// 	player.team = convertedTeam
+				// })
+				// return { updatedTeam: convertedTeam }
 			} else {
 				return rejectWithValue(
 					typeof response.message === 'string'
@@ -272,7 +267,6 @@ export const updateTeamThunk = createAsyncThunk(
 )
 
 // remove team
-
 export const removeTeamThunk = createAsyncThunk(
 	'teams/removeOne',
 	async (

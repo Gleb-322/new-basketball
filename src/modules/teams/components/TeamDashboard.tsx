@@ -21,15 +21,8 @@ import { getTeamsThunk } from '../../../api/teams/teamThunks'
 
 export const TeamDashboard: FC = () => {
 	const dispatch = useAppDispatch()
-	const {
-		teamsAvatars,
-		status,
-		error,
-		keyword,
-		pageCount,
-		currentPage,
-		selectedOption,
-	} = useAppSelector((state: RootState) => state.team)
+	const { status, error, keyword, pageCount, currentPage, selectedOption } =
+		useAppSelector((state: RootState) => state.team)
 
 	const teams = useAppSelector(selectAllTeams)
 	console.log(teams)
@@ -74,11 +67,7 @@ export const TeamDashboard: FC = () => {
 		<>
 			<TeamHeader search={keyword} onSearch={handleSearch} />
 			<Main>
-				{teams.length > 0 ? (
-					<TeamList teams={teams} avatars={teamsAvatars} />
-				) : (
-					<TeamEmptyList />
-				)}
+				{teams.length > 0 ? <TeamList teams={teams} /> : <TeamEmptyList />}
 			</Main>
 			<Footer>
 				{pageCount > 0 && (
