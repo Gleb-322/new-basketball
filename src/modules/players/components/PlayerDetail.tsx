@@ -73,7 +73,6 @@ export const PlayerDetail: FC = () => {
 	// 		const query = new URLSearchParams()
 	// 		query.append('playerId', player._id)
 	// 		query.append('teamId', player.team._id)
-	// 		query.append('playerName', player.name)
 
 	// 		removePlayer(query, token)
 	// 			.then(result => {

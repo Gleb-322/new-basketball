@@ -70,12 +70,14 @@ export const TeamDashboard: FC = () => {
 				{teams.length > 0 ? <TeamList teams={teams} /> : <TeamEmptyList />}
 			</Main>
 			<Footer>
-				{pageCount > 0 && (
+				{pageCount > 0 ? (
 					<PaginationComponent
 						pageClick={page => dispatch(setCurrentPage(page.selected))}
 						countPage={pageCount}
 						forcePage={currentPage}
 					/>
+				) : (
+					<div></div>
 				)}
 
 				<SelectComponent

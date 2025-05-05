@@ -36,7 +36,7 @@ const Teams = styled.div`
 	@media ${device.tablet} {
 		grid-template-columns: repeat(2, minmax(200px, 1fr));
 		grid-template-rows: repeat(2, minmax(170px, 1fr));
-		grid-auto-rows: minmax(200px, 1fr);
+		grid-auto-rows: minmax(170px, 1fr);
 		gap: 12px;
 	}
 `

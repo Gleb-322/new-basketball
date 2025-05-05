@@ -1,33 +1,33 @@
 import { IOption } from '../../../common/interfaces/types'
 import * as yup from 'yup'
-import { IServerTeams } from '../../teams/interfaces/types'
+import { ITeams } from '../../teams/interfaces/types'
 import { OnChangeValue } from 'react-select'
 
-export interface IServerPlayers {
-	__v: number
-	_id: string
-	name: string
-	position: string
-	team: IServerTeams
-	height: string
-	weight: string
-	birthday: Date
-	number: string
-	playerImg: { data: number[] }
-}
+// export interface IServerPlayers {
+// 	__v: number
+// 	_id: string
+// 	name: string
+// 	position: string
+// 	team: IServerTeams
+// 	height: string
+// 	weight: string
+// 	birthday: Date
+// 	number: string
+// 	playerImg: { data: number[] }
+// }
 
 export interface IPlayers {
 	__v: number
 	_id: string
 	name: string
 	position: string
-	team: string
+	team: ITeams
 	height: string
 	weight: string
 	birthday: Date
 	number: string
 	playerImg: string
-	file: File | null
+	file?: File
 }
 
 export interface IAddAndUpdatePlayerFormFields {
@@ -76,7 +76,7 @@ export interface IAddAndUpdatePlayerLocationState {
 export interface ICreatePlayersResponse {
 	errorCode: string
 	success: boolean
-	message: { player: IServerPlayers } | string
+	message: { player: IPlayers } | string
 }
 
 export interface IGetPlayersResponse {
@@ -84,7 +84,7 @@ export interface IGetPlayersResponse {
 	success: boolean
 	message:
 		| {
-				players: IServerPlayers[]
+				players: IPlayers[]
 				countPlayers: number
 		  }
 		| string
@@ -93,13 +93,13 @@ export interface IGetPlayersResponse {
 export interface IGetPlayerResponse {
 	errorCode: string
 	success: boolean
-	message: IServerPlayers | string
+	message: IPlayers | string
 }
 
 export interface IPatchPlayerResponse {
 	errorCode: string
 	success: boolean
-	message: IServerPlayers | string
+	message: IPlayers | string
 }
 
 export interface IRemovePlayerResponse {

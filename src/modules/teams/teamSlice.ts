@@ -57,8 +57,8 @@ const teamSlice = createSlice({
 			state.status = 'loading'
 		})
 		builder.addCase(createTeamThunk.fulfilled, (state, action) => {
-			// teamsAdapter.addOne(state, action.payload.createdTeam)
-			// state.lastCreatedTeam = action.payload.createdTeam.name
+			teamsAdapter.addOne(state, action.payload.createdTeam)
+			state.lastCreatedTeam = action.payload.createdTeam.name
 			state.status = 'success'
 		})
 		builder.addCase(createTeamThunk.rejected, (state, action) => {
@@ -87,9 +87,7 @@ const teamSlice = createSlice({
 			state.status = 'loading'
 		})
 		builder.addCase(getTeamThunk.fulfilled, (state, action) => {
-			// teamsAdapter.upsertOne(state, action.payload.team)
-			// state.teamsAvatars = action.payload.avatarsTeam
-			// state.playersAvatars = action.payload.avatarsPlayer
+			teamsAdapter.upsertOne(state, action.payload.team)
 			state.status = 'success'
 		})
 		builder.addCase(getTeamThunk.rejected, (state, action) => {
@@ -101,11 +99,11 @@ const teamSlice = createSlice({
 			state.status = 'loading'
 		})
 		builder.addCase(updateTeamThunk.fulfilled, (state, action) => {
-			// teamsAdapter.updateOne(state, {
-			// 	id: action.payload.updatedTeam._id,
-			// 	changes: action.payload.updatedTeam,
-			// })
-			// state.lastUpdatedTeam = action.payload.updatedTeam.name
+			teamsAdapter.updateOne(state, {
+				id: action.payload.updatedTeam._id,
+				changes: action.payload.updatedTeam,
+			})
+			state.lastUpdatedTeam = action.payload.updatedTeam.name
 			state.status = 'success'
 		})
 		builder.addCase(updateTeamThunk.rejected, (state, action) => {

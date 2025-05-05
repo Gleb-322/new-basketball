@@ -22,8 +22,9 @@ export const TeamDetail: FC = () => {
 	const params = useParams()
 	const navigate = useNavigate()
 
-	const { teamsAvatars, playersAvatars, status, error, lastRemovedTeam } =
-		useAppSelector((state: RootState) => state.team)
+	const { status, error, lastRemovedTeam } = useAppSelector(
+		(state: RootState) => state.team
+	)
 
 	const team = useAppSelector((state: RootState) =>
 		params._id ? selectTeamById(state, params._id) : undefined
@@ -100,8 +101,11 @@ export const TeamDetail: FC = () => {
 
 						<MainDetail>
 							<Left>
-								{teamsAvatars && teamsAvatars[team._id] ? (
-									<Img src={teamsAvatars[team._id]} alt={team.name} />
+								{team.teamImg ? (
+									<Img
+										src={`${process.env.REACT_APP_BASE_URL_IMAGE}${team.teamImg}`}
+										alt={team.name}
+									/>
 								) : (
 									<div>Loading image...</div>
 								)}
@@ -157,9 +161,9 @@ export const TeamDetail: FC = () => {
 											</MarginRight>
 
 											<PlayerInfo>
-												{playersAvatars && playersAvatars[player._id] ? (
+												{player.playerImg ? (
 													<PlayerImg
-														src={playersAvatars[player._id]}
+														src={`${process.env.REACT_APP_BASE_URL_IMAGE}${player.playerImg}`}
 														alt={player.name}
 													/>
 												) : (

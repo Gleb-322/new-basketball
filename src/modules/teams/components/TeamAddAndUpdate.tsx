@@ -11,9 +11,7 @@ import {
 import { FC, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { ImgUpload } from '../../../ui/ImageUpload'
-import { convertFileToList } from '../../../common/helpers/converterFileToFileList'
 
-import { convertFileToBase64 } from '../../../common/helpers/converterFileToBase64'
 import { showToast } from '../../../ui/ToastrNotification'
 import { useAppSelector } from '../../../common/hooks/useAppSelector'
 import { RootState } from '../../../core/redux/store'
@@ -21,7 +19,7 @@ import { useAppDispatch } from '../../../common/hooks/useAppDispatch'
 import { createTeamThunk, updateTeamThunk } from '../../../api/teams/teamThunks'
 import { LinkComponent } from '../../../ui/Link'
 import { resetTeamState } from '../teamSlice'
-import { convertObjectUrlToFile } from '../../../common/helpers/converterObjectUrlToFile'
+import { loadImageData } from '../../../common/helpers/transformImageData'
 
 const schemaCreateAndUpdateTeam = yup.object().shape({
 	teamName: yup.string().required('Team Name is required!'),
@@ -66,7 +64,6 @@ export const TeamCreateAndUpdate: FC = () => {
 		(state: RootState) => state.team
 	)
 
-	const [file, setFile] = useState<File>()
 	const [fileList, setFileList] = useState<FileList>()
 	const [previewImage, setPreviewImage] = useState<string | undefined>()
 
@@ -117,36 +114,33 @@ export const TeamCreateAndUpdate: FC = () => {
 		}
 	}, [dispatch, error, lastCreatedTeam, lastUpdatedTeam, navigate, status])
 
-	// catch update team data from team detail for update team and set update team data in form values
+	// catch update team data from team detail for update team
+	useEffect(() => {
+		if (!location.state?.team) return
 
-	// useEffect(() => {
-	// 	if (!location.state?.team) return
+		const { name, division, conference, year, teamImg } = location.state?.team
 
-	// 	const { name, division, conference, year } = location.state?.team
+		const loadImage = async () => {
+			const imageData = await loadImageData(teamImg)
 
-	// 	// const file = convertBufferToFile({ team: location.state?.team })
+			setPreviewImage(imageData.previewImage)
 
-	// 	// const fileList = convertFileToList([file!])
+			if (imageData.fileList) {
+				setValue('teamImage', imageData.fileList, { shouldValidate: true })
+				setFileList(imageData.fileList)
+			}
 
-	// 	convertFileToBase64(file)
-	// 		.then(result => setPreviewImage(result))
-	// 		.catch(error =>
-	// 			showToast({
-	// 				type: 'error',
-	// 				message: `${error.message}`,
-	// 			})
-	// 		)
+			reset({
+				teamName: name,
+				teamDivision: division,
+				teamConference: conference,
+				teamYear: year,
+				teamImage: imageData.fileList,
+			})
+		}
 
-	// 	// reset({
-	// 	// 	teamName: name,
-	// 	// 	teamDivision: division,
-	// 	// 	teamConference: conference,
-	// 	// 	teamYear: year,
-	// 	// 	teamImage: fileList,
-	// 	// })
-	// 	// setValue('teamImage', fileList || undefined)
-	// 	// setFileList(fileList)
-	// }, [location, reset, setValue])
+		loadImage()
+	}, [location, reset, setValue])
 
 	// submit form
 	const onSubmit: SubmitHandler<IAddAndUpdateTeamFormFields> = (
@@ -168,11 +162,13 @@ export const TeamCreateAndUpdate: FC = () => {
 			if (
 				body.teamImage &&
 				body.teamImage.length > 0 &&
-				(fileList?.[0]?.name !== body.teamImage[0].name ||
-					fileList?.[0]?.size !== body.teamImage[0].size)
+				(!fileList ||
+					body.teamImage[0].name !== fileList[0].name ||
+					body.teamImage[0].size !== fileList[0].size)
 			) {
 				formData.append('teamImage', body.teamImage[0])
 			}
+
 			dispatch(updateTeamThunk({ body: formData, token }))
 		} else {
 			if (body.teamImage && body.teamImage.length > 0) {

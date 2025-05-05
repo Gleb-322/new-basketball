@@ -11,7 +11,10 @@ export const TeamCard: FC<ITeamCard> = ({ team }) => {
 		<Card onClick={() => navigate(`/teams/${team._id}`)} key={team._id}>
 			<ImageBlock>
 				{team.teamImg ? (
-					<Img src={team.teamImg} alt={team.name} />
+					<Img
+						src={`${process.env.REACT_APP_BASE_URL_IMAGE}${team.teamImg}`}
+						alt={team.name}
+					/>
 				) : (
 					<NoImg>Loading image...</NoImg>
 				)}

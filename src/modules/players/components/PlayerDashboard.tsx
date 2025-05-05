@@ -13,7 +13,6 @@ import { ITeams } from '../../teams/interfaces/types'
 import { getTeams } from '../../../api/teams/teamsService'
 import { getPlayers } from '../../../api/players/playerService'
 import { showToast } from '../../../ui/ToastrNotification'
-import { convertBufferToUrl } from '../../../common/helpers/converterBufferToUrlAndFile'
 
 export const PlayerDashboard: FC = () => {
 	// const [players, setPlayers] = useState<IPlayers[]>([])
