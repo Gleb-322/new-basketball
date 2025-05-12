@@ -1,172 +1,131 @@
-import { FC, SetStateAction, useEffect, useState } from 'react'
+import { FC, useEffect } from 'react'
 import styled from 'styled-components'
-import { IPlayers } from '../interfaces/types'
+import { OnChangeValue } from 'react-select'
 import { PlayerHeader } from './PlayerHeader'
 import { PaginationComponent } from '../../../ui/Pagination'
 import { SelectComponent } from '../../../ui/Select'
 import { IOption, paginateOptions } from '../../../common/interfaces/types'
 import { PlayerList } from './PlayerList'
 import { PlayerEmptyList } from './PlayerEmptyList'
-import { LoadingComponent } from '../../../ui/Loading'
-import { ITeams } from '../../teams/interfaces/types'
-
-import { getTeams } from '../../../api/teams/teamsService'
-import { getPlayers } from '../../../api/players/playerService'
 import { showToast } from '../../../ui/ToastrNotification'
+import { useAppDispatch } from '../../../common/hooks/useAppDispatch'
+import { useAppSelector } from '../../../common/hooks/useAppSelector'
+import { RootState } from '../../../core/redux/store'
+import {
+	selectAllPlayers,
+	setCurrentPage,
+	setKeyword,
+	setSelectedOption,
+	setTeamsFilter,
+} from '../playerSlice'
+import { getPlayersThunk } from '../../../api/players/playerThunks'
+import { device } from '../../../common/helpers/breakpoint'
 
 export const PlayerDashboard: FC = () => {
-	// const [players, setPlayers] = useState<IPlayers[]>([])
-	// const [teamsOption, setTeamsOption] = useState<IOption[]>([])
-	// const [isTeamOptions, setIsTeamOption] = useState<boolean>(false)
-	// const [loading, setLoading] = useState<boolean>(false)
-	// const [decodedAvatars, setDecodedAvatars] = useState<{
-	// 	[key: string]: string
-	// }>({})
-	// const [selectedOption, setSelectedOption] = useState<IOption>(
-	// 	paginateOptions[0]
-	// )
-	// const [currentPage, setCurrentPage] = useState<number>(0)
-	// const [pageCount, setPageCount] = useState<number>(0)
-	// const [keyword, setKeyword] = useState<string>('')
-	// const [teamsFilter, setTeamsFilter] = useState<readonly IOption[]>([])
+	const dispatch = useAppDispatch()
+	const {
+		status,
+		error,
+		keyword,
+		pageCount,
+		currentPage,
+		selectedOption,
+		teamsFilter,
+	} = useAppSelector((state: RootState) => state.player)
 
-	// // check if we have teams or not
-	// useEffect(() => {
-	// 	setLoading(true)
-	// 	getTeams()
-	// 		.then(result => {
-	// 			console.log('get all teams', result)
-	// 			if (result.success) {
-	// 				if (result.message instanceof Object) {
-	// 					const teamsCopy = JSON.parse(
-	// 						JSON.stringify(result.message.teams)
-	// 					) as ITeams[]
-	// 					const teamOptions = teamsCopy.map(team => ({
-	// 						value: team.name,
-	// 						label: team.name,
-	// 						teamId: team._id,
-	// 					}))
-	// 					setTeamsOption(teamOptions)
-	// 					setIsTeamOption(true)
-	// 				} else setIsTeamOption(false)
-	// 			}
-	// 			if (!result.success) {
-	// 				if (typeof result.message === 'string') {
-	// 					showToast({
-	// 						type: 'error',
-	// 						message: `${result.message}`,
-	// 					})
-	// 				}
-	// 			}
-	// 		})
-	// 		.catch(error => {
-	// 			console.log('error get teams', error)
-	// 		})
-	// 		.finally(() => setLoading(false))
-	// }, [])
+	const players = useAppSelector(selectAllPlayers)
 
-	// // get all players
-	// useEffect(() => {
-	// 	setLoading(true)
+	// get all players
+	useEffect(() => {
+		const query = new URLSearchParams()
+		query.append('page', (currentPage + 1).toString())
+		query.append('limit', selectedOption.value)
+		query.append('keyword', keyword)
 
-	// 	const query = new URLSearchParams()
-	// 	query.append('page', (currentPage + 1).toString())
-	// 	query.append('limit', selectedOption.value)
-	// 	query.append('keyword', keyword)
+		const filters = [...teamsFilter]
+			.filter(team => team.teamId)
+			.map(team => team.teamId)
 
-	// 	const filters = [...teamsFilter]
-	// 		.filter(team => team.teamId)
-	// 		.map(team => team.teamId)
+		filters.forEach(teamId => {
+			if (teamId) {
+				query.append('filters', teamId)
+			}
+		})
 
-	// 	filters.forEach(teamId => {
-	// 		if (teamId) {
-	// 			query.append('filters', teamId)
-	// 		}
-	// 	})
+		if (status !== 'loading') {
+			dispatch(getPlayersThunk(query))
+		}
 
-	// 	getPlayers(query)
-	// 		.then(result => {
-	// 			console.log('res get players', result)
-	// 			if (result.success) {
-	// 				if (result.message instanceof Object) {
-	// 					setPageCount(
-	// 						Math.ceil(
-	// 							result.message.countPlayers / parseInt(selectedOption.value)
-	// 						)
-	// 					)
-	// 					setPlayers(result.message.players)
-	// 					// const avatars = convertBufferToUrl(result.message.players)
-	// 					// if (avatars) {
-	// 					// 	setDecodedAvatars(avatars)
-	// 					// }
-	// 				}
-	// 			}
-	// 			if (!result.success) {
-	// 				if (typeof result.message === 'string') {
-	// 					showToast({
-	// 						type: 'error',
-	// 						message: `${result.message}`,
-	// 					})
-	// 				}
-	// 			}
-	// 		})
-	// 		.catch(error => {
-	// 			console.log('error', error)
-	// 		})
-	// 		.finally(() => setLoading(false))
-	// }, [currentPage, keyword, selectedOption.value, teamsFilter])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentPage, dispatch, keyword, selectedOption.value, teamsFilter])
 
-	// const handlePageClick = (data: { selected: SetStateAction<number> }) =>
-	// 	setCurrentPage(data.selected)
+	// show error
+	useEffect(() => {
+		if (status === 'error' && error) {
+			showToast({
+				type: 'error',
+				message: error,
+			})
+		}
+	}, [status, error])
+
+	// dispatch filter keyword and set first page in paginate component
+	const handleSearch = (value: string) => {
+		dispatch(setKeyword(value))
+		dispatch(setCurrentPage(0))
+	}
+
+	// dispatch limit players per page and set first page in paginate component
+	const handleLimitChange = (option: IOption) => {
+		dispatch(setSelectedOption(option))
+		dispatch(setCurrentPage(0))
+	}
+	// dispatch multi select value and set first page in paginate component
+	const handleMultiSelect = (option: OnChangeValue<IOption, true>) => {
+		console.log('handleMultiSelect', option)
+		dispatch(setTeamsFilter(option))
+		dispatch(setCurrentPage(0))
+	}
 
 	return (
 		<>
-			{/* <PlayerHeader
+			<PlayerHeader
 				search={keyword}
-				onSearch={setKeyword}
-				isTeamOptions={isTeamOptions}
-				teamsOption={teamsOption}
-				isLoading={loading}
-				onMultiValue={setTeamsFilter}
+				onSearch={handleSearch}
+				onMultiValue={handleMultiSelect}
 			/>
-			<Main $loading={loading}>
-				{loading ? (
-					<LoadingComponent />
-				) : players.length > 0 ? (
-					<PlayerList players={players} avatars={decodedAvatars} />
+			<Main>
+				{players.length > 0 ? (
+					<PlayerList players={players} />
 				) : (
 					<PlayerEmptyList />
 				)}
 			</Main>
 			<Footer>
-				{players.length > 0 ? (
-					<>
-						<PaginationComponent
-							pageClick={handlePageClick}
-							countPage={pageCount}
-							forcePage={0}
-						/>
-						<SelectComponent
-							variant={'pagination'}
-							options={paginateOptions}
-							selected={selectedOption}
-							onChange={setSelectedOption}
-						/>
-					</>
-				) : null}
-			</Footer> */}
+				{pageCount > 0 ? (
+					<PaginationComponent
+						pageClick={page => dispatch(setCurrentPage(page.selected))}
+						countPage={pageCount}
+						forcePage={currentPage}
+					/>
+				) : (
+					<div></div>
+				)}
+				<SelectComponent
+					variant={'pagination'}
+					options={paginateOptions}
+					selected={selectedOption}
+					onChange={handleLimitChange}
+				/>
+			</Footer>
 		</>
 	)
 }
 
-const Main = styled.div<{
-	$loading: boolean
-}>`
+const Main = styled.div`
 	width: 100%;
-	display: ${({ $loading }) => ($loading ? 'flex' : 'grid')};
-	justify-content: ${({ $loading }) => ($loading ? 'center' : 'none')};
-	align-items: ${({ $loading }) => ($loading ? 'center' : 'none')};
-	margin: 32px 0;
+	overflow: auto;
+	display: flex;
 `
 
 const Footer = styled.footer`
@@ -179,5 +138,12 @@ const Footer = styled.footer`
 	justify-content: space-between;
 	align-items: center;
 	background-color: inherit;
-	color: white;
+	color: ${({ theme }) => theme.colors.white};
+	margin-top: 32px;
+	@media ${device.tablet} {
+		margin-top: 0px;
+	}
+	@media ${device.custom510} {
+		height: 32px;
+	}
 `

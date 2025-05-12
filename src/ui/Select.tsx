@@ -97,7 +97,7 @@ const StyledSelect = styled(Select<IOption>)<{
 		align-items: center;
 		width: ${({ $variant }) => ($variant === 'player' ? '100%' : '88px')};
 		cursor: pointer;
-		@media ${device.customForTeamHeader} {
+		@media ${device.custom510} {
 			min-height: 28px;
 			height: 28px;
 			align-items: flex-start;
@@ -152,7 +152,7 @@ const StyledSelect = styled(Select<IOption>)<{
 
 	.css-15lsz6c-indicatorContainer {
 		color: ${({ theme }) => theme.colors.lightestGrey} !important;
-		@media ${device.customForTeamHeader} {
+		@media ${device.custom510} {
 			padding: 0px;
 		}
 	}
@@ -161,13 +161,13 @@ const StyledSelect = styled(Select<IOption>)<{
 		justify-content: ${({ $variant }) =>
 			$variant === 'player' ? 'flex-start' : 'center'} !important;
 		padding-left: ${({ $variant }) => ($variant === 'player' ? '12px' : '0px')};
-		@media ${device.customForTeamHeader} {
+		@media ${device.custom510} {
 			padding: 2px 0px 0px 0px;
 		}
 	}
 
 	.react-select__value-container {
-		@media ${device.customForTeamHeader} {
+		@media ${device.custom510} {
 			width: 35px;
 		}
 	}
@@ -175,7 +175,7 @@ const StyledSelect = styled(Select<IOption>)<{
 	.react-select__indicator {
 		min-height: 36px;
 		height: 36px;
-		@media ${device.customForTeamHeader} {
+		@media ${device.custom510} {
 			display: flex;
 			justify-content: center;
 			align-items: center;
@@ -192,7 +192,7 @@ const StyledSelect = styled(Select<IOption>)<{
 
 	.css-1xc3v61-indicatorContainer {
 		color: ${({ theme }) => theme.colors.lightestGrey} !important;
-		@media ${device.customForTeamHeader} {
+		@media ${device.custom510} {
 			padding: 0px;
 			justify-content: center;
 		}
@@ -205,7 +205,7 @@ const StyledSelect = styled(Select<IOption>)<{
 	.css-1u9des2-indicatorSeparator {
 		margin-top: 8px;
 		margin-bottom: 8px;
-		@media ${device.customForTeamHeader} {
+		@media ${device.custom510} {
 			margin-top: 4px;
 			margin-bottom: 4px;
 		}

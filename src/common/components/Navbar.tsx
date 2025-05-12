@@ -14,6 +14,7 @@ import { logoutUserThunk } from '../../api/users/userThunks'
 import { resetUserState } from '../../core/redux/userSlice'
 import { RootState } from '../../core/redux/store'
 import { device } from '../helpers/breakpoint'
+import { closeNavbar } from '../../core/redux/uiSlice'
 
 export const Navbar: FC = () => {
 	const dispatch = useAppDispatch()
@@ -40,6 +41,12 @@ export const Navbar: FC = () => {
 		}
 	}, [dispatch, error, logoutMessage, navigate, status])
 
+	const handleCloseNavbar = () => {
+		if (windowSize < 1024) {
+			dispatch(closeNavbar())
+		}
+	}
+
 	return (
 		<>
 			<Container $isOpen={isNavbarOpen}>
@@ -52,7 +59,7 @@ export const Navbar: FC = () => {
 						</User>
 					) : null}
 
-					<StyledNavLink to="/teams">
+					<StyledNavLink to="/teams" onClick={handleCloseNavbar}>
 						{location.pathname.includes('/teams') ? (
 							<TeamsSVGRed />
 						) : (
@@ -62,7 +69,7 @@ export const Navbar: FC = () => {
 						<Text>Teams</Text>
 					</StyledNavLink>
 
-					<StyledNavLink to="/players">
+					<StyledNavLink to="/players" onClick={handleCloseNavbar}>
 						{location.pathname.includes('/players') ? (
 							<PlayersSVGRed />
 						) : (

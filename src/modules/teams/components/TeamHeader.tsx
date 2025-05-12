@@ -40,7 +40,7 @@ const Header = styled.header`
 		margin-bottom: 16px;
 	}
 
-	@media ${device.customForTeamHeader} {
+	@media ${device.custom510} {
 		display: grid;
 		grid-template-columns: 1fr;
 		grid-template-rows: 1fr;

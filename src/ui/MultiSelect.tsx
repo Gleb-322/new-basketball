@@ -59,8 +59,8 @@ const CustomValueContainer = (props: ValueContainerProps<IOption, true>) => {
 }
 
 export const MultiSelectComponent: FC<IMultiSelect> = ({
-	options,
 	onMultiValue,
+	options,
 	isLoading,
 }) => {
 	const selectOnChange = (newValue: OnChangeValue<IOption, true>) =>
@@ -83,7 +83,7 @@ export const MultiSelectComponent: FC<IMultiSelect> = ({
 			classNamePrefix="react-multiselect"
 			isLoading={isLoading}
 			noOptionsMessage={() =>
-				isLoading ? 'Loading options...' : 'No positions found'
+				isLoading ? 'Loading teams...' : 'There are no teams'
 			}
 		/>
 	)

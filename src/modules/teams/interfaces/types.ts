@@ -1,17 +1,6 @@
 import { IOption } from '../../../common/interfaces/types'
 import { IPlayers } from '../../players/interfaces/types'
 
-// export interface IServerTeams {
-// 	__v: number
-// 	_id: string
-// 	name: string
-// 	division: string
-// 	conference: string
-// 	year: string
-// 	teamImg: string
-// 	players: IServerPlayers[]
-// }
-
 export interface ITeams {
 	__v: number
 	_id: string
@@ -21,7 +10,6 @@ export interface ITeams {
 	year: string
 	teamImg: string
 	players: IPlayers[]
-	file?: File
 }
 
 export interface ITeamList {

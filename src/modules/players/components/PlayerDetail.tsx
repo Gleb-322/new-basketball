@@ -3,201 +3,162 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
-
-import { useAuth } from '../../../common/hooks/useAuth'
-import { IPlayers } from '../interfaces/types'
 import { LinkComponent } from '../../../ui/Link'
 import { ReactComponent as NoImageSVG } from '../../../assets/images/noImage.svg'
-import { LoadingComponent } from '../../../ui/Loading'
-import { getPlayer, removePlayer } from '../../../api/players/playerService'
+
 import { showToast } from '../../../ui/ToastrNotification'
+import { useAppSelector } from '../../../common/hooks/useAppSelector'
+import { RootState } from '../../../core/redux/store'
+import { useAppDispatch } from '../../../common/hooks/useAppDispatch'
+import {
+	getPlayerThunk,
+	removePlayerThunk,
+} from '../../../api/players/playerThunks'
+import { selectPlayerById } from '../playerSlice'
 
 dayjs.extend(utc)
 
 export const PlayerDetail: FC = () => {
-	// const params = useParams()
-	// const navigate = useNavigate()
-	// const { token } = useAuth()
-	// const [player, setPlayer] = useState<IPlayers>()
-	// const [deletePlayer, setDeletePlayer] = useState<boolean>(false)
-	// const [decodedPlayerAvatar, setDecodedPlayerAvatar] = useState<{
-	// 	[key: string]: string
-	// }>()
+	const { token } = useAppSelector((state: RootState) => state.user)
+	const dispatch = useAppDispatch()
+	const params = useParams()
+	const navigate = useNavigate()
 
-	// const [loading, setLoading] = useState<boolean>(false)
+	const { status, error, lastRemovedPlayer } = useAppSelector(
+		(state: RootState) => state.player
+	)
 
-	// // get player by id
-	// useEffect(() => {
-	// 	setLoading(true)
+	const player = useAppSelector((state: RootState) =>
+		params._id ? selectPlayerById(state, params._id) : undefined
+	)
 
-	// 	if (params._id) {
-	// 		getPlayer(params._id)
-	// 			.then(result => {
-	// 				console.log('get player by id', result)
+	// get player by id
+	useEffect(() => {
+		if (params._id) {
+			dispatch(getPlayerThunk(params._id))
+		}
+	}, [dispatch, params._id])
 
-	// 				if (result.success) {
-	// 					if (result.message instanceof Object) {
-	// 						setPlayer(result.message)
-	// 						// const avatar = convertBufferToUrl(result.message)
-	// 						// if (avatar) {
-	// 						// 	setDecodedPlayerAvatar(avatar)
-	// 						// }
-	// 					}
-	// 				}
-	// 				if (!result.success) {
-	// 					if (typeof result.message === 'string') {
-	// 						showToast({
-	// 							type: 'error',
-	// 							message: `${result.message}`,
-	// 						})
-	// 					}
-	// 				}
-	// 			})
-	// 			.catch(error => {
-	// 				console.log('error', error)
-	// 			})
-	// 			.finally(() => setLoading(false))
-	// 	}
-	// }, [params])
+	// show error
+	useEffect(() => {
+		if (status === 'error' && error) {
+			showToast({
+				type: 'error',
+				message: error,
+			})
+		}
+	}, [status, error])
 
-	// delete one player by id
-	// useEffect(() => {
-	// 	if (!deletePlayer && !player?._id && !player?.team._id && !player?.name)
-	// 		return
+	// delete player
+	useEffect(() => {
+		if (status === 'success' && lastRemovedPlayer) {
+			navigate('/players')
+			showToast({
+				type: 'success',
+				message: `${lastRemovedPlayer}`,
+			})
+		}
 
-	// 	setLoading(true)
+		if (status === 'error' && error) {
+			showToast({
+				type: 'error',
+				message: `${error}`,
+			})
+		}
+	}, [status, error, navigate, lastRemovedPlayer])
 
-	// 	if (deletePlayer && player?._id && player?.team._id && player?.name) {
-	// 		const query = new URLSearchParams()
-	// 		query.append('playerId', player._id)
-	// 		query.append('teamId', player.team._id)
+	const removePlayer = () => {
+		if (player?._id && player?.team._id) {
+			const query = new URLSearchParams()
+			query.append('playerId', player._id)
+			query.append('teamId', player.team._id)
+			dispatch(
+				removePlayerThunk({
+					query,
+					token,
+				})
+			)
+		} else {
+			return
+		}
+	}
 
-	// 		removePlayer(query, token)
-	// 			.then(result => {
-	// 				console.log('res delete player', result)
-	// 				if (result.success) {
-	// 					navigate('/players')
-	// 					showToast({
-	// 						type: 'success',
-	// 						message: `${result.message}`,
-	// 					})
-	// 				}
-	// 				if (!result.success) {
-	// 					showToast({
-	// 						type: 'error',
-	// 						message: `${result.message}`,
-	// 					})
-	// 				}
-	// 			})
-	// 			.catch(error => {
-	// 				console.log('error', error)
-	// 			})
-	// 			.finally(() => setLoading(false))
-	// 	}
+	return (
+		<Container>
+			{player && (
+				<DetailBlock>
+					<HeaderDetail>
+						<HeaderText>
+							<LinkComponent route={'/players'} text={'Players'} />{' '}
+							<Slash>/</Slash> {player.name}
+						</HeaderText>
 
-	// 	return () => {
-	// 		setDeletePlayer(false)
-	// 	}
-	// }, [
-	// 	deletePlayer,
-	// 	navigate,
-	// 	player?._id,
-	// 	player?.name,
-	// 	player?.team._id,
-	// 	token,
-	// ])
+						<div>
+							<ButtonEdit
+								type="button"
+								onClick={() => navigate('/players/add', { state: { player } })}
+							>
+								<EditSVG />
+							</ButtonEdit>
+							<ButtonDelete type="button" onClick={removePlayer}>
+								<DeleteSVG />
+							</ButtonDelete>
+						</div>
+					</HeaderDetail>
 
-	return <></>
-	// <Container>
-	// 	{loading ? (
-	// 		<LoadingComponent />
-	// 	) : (
-	// 		<>
-	// 			{player ? (
-	// 				<>
-	// 					<DetailBlock>
-	// 						<HeaderDetail>
-	// 							<HeaderText>
-	// 								<LinkComponent route={'/players'} text={'Players'} />{' '}
-	// 								<Slash>/</Slash> {player.name}
-	// 							</HeaderText>
+					<MainDetail>
+						<Left>
+							{player.playerImg ? (
+								<Img
+									src={`${process.env.REACT_APP_BASE_URL_IMAGE}${player.playerImg}`}
+									alt={player.name}
+								/>
+							) : (
+								<StyledNoImageSVG />
+							)}
+						</Left>
+						<Right>
+							<Name>
+								{player.name}
+								<Number>#{player?.number}</Number>{' '}
+							</Name>
+							<TextBlock>
+								<TextColumn>
+									<Key>Position</Key>
+									<Value>{player.position}</Value>
+								</TextColumn>
 
-	// 							<div>
-	// 								<ButtonEdit
-	// 									type="button"
-	// 									onClick={() =>
-	// 										navigate('/players/add', { state: { player } })
-	// 									}
-	// 								>
-	// 									<EditSVG />
-	// 								</ButtonEdit>
-	// 								<ButtonDelete
-	// 									type="button"
-	// 									onClick={() => setDeletePlayer(true)}
-	// 								>
-	// 									<DeleteSVG />
-	// 								</ButtonDelete>
-	// 							</div>
-	// 						</HeaderDetail>
+								<TextColumn>
+									<Key>Team</Key>
+									<Value>{player.team.name}</Value>
+								</TextColumn>
 
-	// 						<MainDetail>
-	// 							<Left>
-	// 								{decodedPlayerAvatar && decodedPlayerAvatar[player._id] ? (
-	// 									<>
-	// 										<Img
-	// 											src={decodedPlayerAvatar[player._id]}
-	// 											alt={player.name}
-	// 										/>
-	// 									</>
-	// 								) : (
-	// 									<StyledNoImageSVG />
-	// 								)}
-	// 							</Left>
-	// 							<Right>
-	// 								<Name>
-	// 									{player.name}
-	// 									<Number>#{player?.number}</Number>{' '}
-	// 								</Name>
-	// 								<TextBlock>
-	// 									<TextColumn>
-	// 										<Key>Position</Key>
-	// 										<Value>{player.position}</Value>
-	// 									</TextColumn>
+								<TextColumn>
+									<Key>Height</Key>
+									<Value>{player.height} cm</Value>
+								</TextColumn>
 
-	// 									<TextColumn>
-	// 										<Key>Team</Key>
-	// 										{/* <Value>{player.team.name}</Value> */}
-	// 									</TextColumn>
+								<TextColumn>
+									<Key>Weight</Key>
+									<Value>{player.weight} kg</Value>
+								</TextColumn>
 
-	// 									<TextColumn>
-	// 										<Key>Height</Key>
-	// 										<Value>{player.height} cm</Value>
-	// 									</TextColumn>
+								<TextColumn>
+									<Key>Age</Key>
 
-	// 									<TextColumn>
-	// 										<Key>Weight</Key>
-	// 										<Value>{player.weight} kg</Value>
-	// 									</TextColumn>
-
-	// 									<TextColumn>
-	// 										<Key>Age</Key>
-
-	// 										<Value>
-	// 											{dayjs.utc().diff(dayjs.utc(player.birthday), 'year')}
-	// 										</Value>
-	// 									</TextColumn>
-	// 								</TextBlock>
-	// 							</Right>
-	// 						</MainDetail>
-	// 					</DetailBlock>
-	// 				</>
-	// 			) : null}
-	// 		</>
-	// 	)}
-	// </Container>
-	// )
+									<Value>
+										{dayjs.utc().diff(dayjs.utc(player.birthday), 'year')}
+									</Value>
+								</TextColumn>
+							</TextBlock>
+						</Right>
+					</MainDetail>
+				</DetailBlock>
+			)}
+		</Container>
+	)
 }
 const Container = styled.div`
 	position: relative;

@@ -29,8 +29,6 @@ export const createTeamThunk = createAsyncThunk(
 
 			const response = await createTeams(body, token)
 			if (response.success && response.message instanceof Object) {
-				console.log('createTeamThunk', response.message)
-
 				return { createdTeam: response.message.team }
 			} else {
 				return rejectWithValue(
@@ -57,10 +55,9 @@ export const getTeamsThunk = createAsyncThunk(
 			const response = await getTeams(query)
 
 			if (response.success && response.message instanceof Object) {
-				console.log('getTeamsThunk', response.message.teams)
-
 				return {
 					teams: response.message.teams,
+					// teams: [],
 					countTeams: response.message.countTeams,
 				}
 			} else {

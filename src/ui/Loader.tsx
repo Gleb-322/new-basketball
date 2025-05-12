@@ -1,9 +1,10 @@
 import { FC } from 'react'
 import styled from 'styled-components'
 import { useAppSelector } from '../common/hooks/useAppSelector'
+import { RootState } from '../core/redux/store'
 
 export const LoaderComponent: FC = () => {
-	const { isLoading } = useAppSelector(state => state.loader)
+	const { isLoading } = useAppSelector((state: RootState) => state.loader)
 	return (
 		<>
 			{isLoading ? (

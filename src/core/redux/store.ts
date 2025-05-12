@@ -6,6 +6,7 @@ import userReducer from './userSlice'
 import uiReducer from './uiSlice'
 import loaderReducer from './loaderSlice'
 import teamReducer from '../../modules/teams/teamSlice'
+import playerReducer from '../../modules/players/playerSlice'
 
 // persistConfig
 const persistConfig = {
@@ -18,6 +19,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
 	user: userReducer,
 	team: teamReducer,
+	player: playerReducer,
 	ui: uiReducer,
 	loader: loaderReducer,
 })

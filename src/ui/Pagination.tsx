@@ -36,7 +36,7 @@ const StyledReactPaginate = styled(ReactPaginate)`
 	align-items: center;
 	list-style: none;
 	background-color: inherit;
-	@media ${device.customForTeamHeader} {
+	@media ${device.custom510} {
 		width: 60%;
 	}
 	& li {
@@ -49,7 +49,7 @@ const StyledReactPaginate = styled(ReactPaginate)`
 			background-color: ${({ theme }) => theme.colors.red};
 			color: ${({ theme }) => theme.colors.white};
 		}
-		@media ${device.customForTeamHeader} {
+		@media ${device.custom510} {
 			width: 28px;
 			height: 28px;
 		}
@@ -65,7 +65,7 @@ const StyledReactPaginate = styled(ReactPaginate)`
 		font-weight: 500;
 		font-size: 14px;
 		line-height: 24px;
-		@media ${device.customForTeamHeader} {
+		@media ${device.custom510} {
 			font-size: 15px;
 		}
 	}

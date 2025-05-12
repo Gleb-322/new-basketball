@@ -1,34 +1,15 @@
 import { FC } from 'react'
 import styled from 'styled-components'
-import { ReactComponent as NoImageSVG } from '../../../assets/images/noImage.svg'
 import { IPlayerList } from '../interfaces/types'
-import { useNavigate } from 'react-router'
+import { device } from '../../../common/helpers/breakpoint'
+import { PlayerCard } from './PlayerCard'
 
-export const PlayerList: FC<IPlayerList> = ({ players, avatars }) => {
-	const navigate = useNavigate()
-
+export const PlayerList: FC<IPlayerList> = ({ players }) => {
 	return (
 		<Players>
-			{/* {players.map(player => (
-				<Card
-					onClick={() => navigate(`/players/${player._id}`)}
-					key={player._id}
-				>
-					<Image>
-						{avatars && avatars[player._id] ? (
-							<Img src={avatars[player._id]} alt={player.name} />
-						) : (
-							<StyledNoImageSVG />
-						)}
-					</Image>
-					<TextBlock>
-						<Name>
-							{player.name} <Number>#{player?.number}</Number>
-						</Name>
-						{/* <Team>{player.team.name}</Team> */}
-			{/* </TextBlock>
-				</Card>
-			))} */}
+			{players.map(player => (
+				<PlayerCard key={player._id} player={player} />
+			))}
 		</Players>
 	)
 }
@@ -36,62 +17,25 @@ export const PlayerList: FC<IPlayerList> = ({ players, avatars }) => {
 const Players = styled.div`
 	width: 100%;
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(365px, 1fr));
-	grid-template-rows: repeat(auto-fill, minmax(380px, 0.5fr));
-	grid-auto-rows: minmax(380px, 0.5fr);
 	gap: 24px;
-`
+	grid-template-columns: repeat(auto-fill, minmax(464px, 1fr));
+	grid-template-rows: repeat(auto-fill, minmax(480px, 1fr));
+	grid-auto-rows: minmax(480px, 1fr);
+	@media ${device.desktop} {
+		grid-template-columns: repeat(auto-fill, minmax(364px, 1fr));
+		grid-template-rows: repeat(auto-fill, minmax(380px, 1fr));
+		grid-auto-rows: minmax(380px, 1fr);
+	}
+	@media ${device.laptopL} {
+		grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+		grid-template-rows: repeat(auto-fill, minmax(340px, 1fr));
+		grid-auto-rows: minmax(340px, 1fr);
+	}
 
-const Card = styled.div`
-	cursor: pointer;
-	background-color: ${({ theme }) => theme.colors.darkGrey};
-	border-radius: 4px;
-`
-const Image = styled.div`
-	width: 100%;
-	height: 70%;
-	display: flex;
-	border-top-right-radius: 4px;
-	border-top-left-radius: 4px;
-	justify-content: center;
-	align-items: flex-end;
-	background: ${({ theme }) => theme.colors.gradientCard};
-`
-const TextBlock = styled.div`
-	width: 100%;
-	height: 30%;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-`
-const Img = styled.img`
-	width: 270px;
-	height: 210px;
-	background-position: center;
-	background-size: cover;
-	background-repeat: no-repeat;
-`
-
-const Name = styled.div`
-	font-family: 'Avenir Medium';
-	font-weight: 500;
-	font-size: 18px;
-	color: ${({ theme }) => theme.colors.white};
-`
-
-const Number = styled.span`
-	color: ${({ theme }) => theme.colors.lightRed};
-`
-
-const Team = styled.div`
-	margin-top: 7.5px;
-	font-family: 'Avenir Medium';
-	font-weight: 500;
-	font-size: 14px;
-	color: ${({ theme }) => theme.colors.lightGrey};
-`
-const StyledNoImageSVG = styled(NoImageSVG)`
-	width: 270px;
-	height: 210px;
+	@media ${device.tablet} {
+		grid-template-columns: repeat(2, minmax(200px, 1fr));
+		grid-template-rows: repeat(2, minmax(170px, 1fr));
+		grid-auto-rows: minmax(170px, 1fr);
+		gap: 12px;
+	}
 `

@@ -79,7 +79,7 @@ const Button = styled.button<{
 		}
 	}
 
-	@media ${device.customForTeamHeader} {
+	@media ${device.custom510} {
 		width: ${({ $variant }) =>
 			$variant === 'addPlayer' || $variant === 'addTeam' ? '100%' : null};
 	}

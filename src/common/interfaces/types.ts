@@ -4,7 +4,6 @@ import {
 	Path,
 	RefCallBack,
 	UseFormRegister,
-	UseFormResetField,
 	UseFormSetValue,
 	UseFormTrigger,
 } from 'react-hook-form'
@@ -33,9 +32,9 @@ export interface IInputProps<FormInputs extends FieldValues> {
 	label?: string
 	defaultImage?: string
 	register: UseFormRegister<FormInputs>
-	resetFieldPlayerImage?: UseFormResetField<IAddAndUpdatePlayerFormFields>
 	triggerTeamImage?: UseFormTrigger<IAddAndUpdateTeamFormFields>
 	triggerPlayerImage?: UseFormTrigger<IAddAndUpdatePlayerFormFields>
+	setPlayerImage?: UseFormSetValue<IAddAndUpdatePlayerFormFields>
 	setTeamImage?: UseFormSetValue<IAddAndUpdateTeamFormFields>
 	error?: string
 }
@@ -115,8 +114,8 @@ interface ISelectForPagination extends ISelectBase {
 export type ISelect = ISelectForPlayers | ISelectForPagination
 
 export interface IMultiSelect {
-	options: IOption[]
 	isLoading: boolean
+	options: readonly IOption[]
 	onMultiValue: (value: OnChangeValue<IOption, true>) => void
 }
 

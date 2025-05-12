@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { IInputProps } from '../common/interfaces/types'
 import { convertFileToBase64 } from '../common/helpers/converterFileToBase64'
 import { showToast } from './ToastrNotification'
+import { device } from '../common/helpers/breakpoint'
 
 export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	FormInputs extends Record<string, any>
@@ -15,7 +16,7 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	error,
 	defaultImage,
 	setTeamImage,
-	resetFieldPlayerImage,
+	setPlayerImage,
 	triggerTeamImage,
 	triggerPlayerImage,
 }: IInputProps<FormInputs> & { defaultImage?: string }) => {
@@ -28,8 +29,8 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 	const resetImage = () => {
 		setImage('')
 		if (id === 'playerImage') {
-			resetFieldPlayerImage &&
-				resetFieldPlayerImage('playerImage', { defaultValue: null })
+			setPlayerImage &&
+				setPlayerImage('playerImage', null, { shouldValidate: true })
 			triggerPlayerImage && triggerPlayerImage('playerImage')
 		}
 
@@ -47,11 +48,12 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 					{image ? (
 						<>
 							<Img src={image} alt="try again" />
+
 							<ResetButton type="button" onClick={resetImage}></ResetButton>
 						</>
 					) : (
 						<>
-							<AddPhotoSVG />
+							<StyledAddPhotoSVG />
 							<Input
 								{...register(name, {
 									onChange: e => {
@@ -87,6 +89,12 @@ export const ImgUpload: FC<IInputProps<any> & { defaultImage?: string }> = <
 
 const Conatiner = styled.div`
 	position: relative;
+	@media ${device.custom1140} {
+		width: 100%;
+	}
+	@media ${device.mobileL} {
+		width: 185px;
+	}
 `
 
 const Label = styled.label<{
@@ -95,13 +103,22 @@ const Label = styled.label<{
 	width: 365px;
 	height: 280px;
 	background-color: ${({ theme, $image }) =>
-		$image ? 'none' : theme.colors.lightGrey};
-	opacity: ${({ $image }) => ($image ? 'none' : '0.5')};
+		$image ? 'inherit' : theme.colors.lightGrey};
+	opacity: ${({ $image }) => ($image ? '1' : '0.5')};
 	border-radius: 10px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	cursor: pointer;
+	@media ${device.custom1140} {
+		width: 100%;
+	}
+	@media ${device.tablet} {
+		height: 190px;
+	}
+	@media ${device.custom510} {
+		height: 144px;
+	}
 `
 
 const Input = styled.input`
@@ -123,6 +140,15 @@ const Img = styled.img`
 	width: 100%;
 	height: 100%;
 	border-radius: 10px;
+	object-fit: contain;
+	object-position: center;
+`
+
+const StyledAddPhotoSVG = styled(AddPhotoSVG)`
+	@media ${device.tablet} {
+		height: 41px;
+		width: 40px;
+	}
 `
 
 const ResetButton = styled.button`

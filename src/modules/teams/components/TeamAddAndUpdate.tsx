@@ -20,6 +20,7 @@ import { createTeamThunk, updateTeamThunk } from '../../../api/teams/teamThunks'
 import { LinkComponent } from '../../../ui/Link'
 import { resetTeamState } from '../teamSlice'
 import { loadImageData } from '../../../common/helpers/transformImageData'
+import { device } from '../../../common/helpers/breakpoint'
 
 const schemaCreateAndUpdateTeam = yup.object().shape({
 	teamName: yup.string().required('Team Name is required!'),
@@ -149,16 +150,22 @@ export const TeamCreateAndUpdate: FC = () => {
 		console.log('add team or update', body)
 
 		const formData = new FormData()
+		// teamName
 		formData.append('teamName', body.teamName)
+		// teamDivision
 		formData.append('teamDivision', body.teamDivision)
+		// teamConference
 		formData.append('teamConference', body.teamConference)
+		// teamYear
 		formData.append('teamYear', body.teamYear)
 
 		if (location.state?.team) {
+			// teamId
 			if (location.state.team._id) {
-				formData.append('teamId', location.state?.team._id)
+				formData.append('teamId', location.state.team._id)
 			}
 
+			// teamImage
 			if (
 				body.teamImage &&
 				body.teamImage.length > 0 &&
@@ -168,9 +175,9 @@ export const TeamCreateAndUpdate: FC = () => {
 			) {
 				formData.append('teamImage', body.teamImage[0])
 			}
-
 			dispatch(updateTeamThunk({ body: formData, token }))
 		} else {
+			// teamImage
 			if (body.teamImage && body.teamImage.length > 0) {
 				formData.append('teamImage', body.teamImage[0])
 			}
@@ -179,7 +186,7 @@ export const TeamCreateAndUpdate: FC = () => {
 	}
 
 	return (
-		<Section>
+		<Container>
 			<Header>
 				<LinkComponent text={'Teams'} route={'/teams'} /> <Slash>/</Slash>{' '}
 				{location.state?.team ? 'Update team' : 'Add new team'}
@@ -248,15 +255,21 @@ export const TeamCreateAndUpdate: FC = () => {
 					</InputsBlock>
 				</Right>
 			</MainForm>
-		</Section>
+		</Container>
 	)
 }
 
-const Section = styled.section`
-	width: 100%;
+const Container = styled.div`
 	background-color: ${({ theme }) => theme.colors.white};
 	border-radius: 10px;
 	padding: 24px 32px;
+	@media ${device.custom1140} {
+		padding: 24px 20px;
+	}
+	@media ${device.tablet} {
+		padding: 16px;
+		border-radius: 0px;
+	}
 `
 const Header = styled.header`
 	font-family: 'Avenir Medium';
@@ -264,6 +277,10 @@ const Header = styled.header`
 	font-size: 14px;
 	line-height: 24px;
 	color: ${({ theme }) => theme.colors.red};
+	@media ${device.tablet} {
+		font-size: 13px;
+		line-height: 18px;
+	}
 `
 const Slash = styled.span`
 	color: ${({ theme }) => theme.colors.lightGrey};
@@ -271,20 +288,59 @@ const Slash = styled.span`
 
 const MainForm = styled.form`
 	display: flex;
+	width: 70%;
+	justify-content: space-around;
 	margin: 48px 0;
+	@media ${device.desktop} {
+		width: 100%;
+	}
+	@media ${device.tablet} {
+		flex-direction: column;
+		align-items: center;
+		justify-content: space-between;
+	}
 `
 const Left = styled.div`
-	width: 50%;
 	display: flex;
 	justify-content: center;
 	align-items: start;
+	@media ${device.custom1140} {
+		width: 45%;
+	}
+	@media ${device.tablet} {
+		/* width: 35%; */
+		align-items: center;
+	}
+	@media ${device.mobileL} {
+		width: 100%;
+	}
 `
 
 const Right = styled.div`
-	width: 50%;
+	@media ${device.custom1140} {
+		width: 45%;
+	}
+	@media ${device.tablet} {
+		width: 75%;
+	}
+	@media ${device.custom620} {
+		width: 85%;
+	}
+	@media ${device.custom620} {
+		width: 95%;
+	}
+	@media ${device.mobileL} {
+		width: 100%;
+	}
 `
 const InputsBlock = styled.div`
 	width: 365px;
+	@media ${device.custom1140} {
+		width: 100%;
+	}
+	@media ${device.tablet} {
+		margin-top: 48px;
+	}
 `
 
 const Buttons = styled.div`

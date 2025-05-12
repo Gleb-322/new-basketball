@@ -25,7 +25,6 @@ export const TeamDashboard: FC = () => {
 		useAppSelector((state: RootState) => state.team)
 
 	const teams = useAppSelector(selectAllTeams)
-	console.log(teams)
 
 	// get all teams
 	useEffect(() => {
@@ -106,13 +105,17 @@ const Footer = styled.footer`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background-color: inherit;
-	color: white;
+	background-color: ${({ theme }) => theme.colors.mostLightGrey};
+	color: ${({ theme }) => theme.colors.white};
 	margin-top: 32px;
+	@media ${device.laptop} {
+		margin-top: 20px;
+	}
+
 	@media ${device.tablet} {
 		margin-top: 0px;
 	}
-	@media ${device.customForTeamHeader} {
+	@media ${device.custom510} {
 		height: 32px;
 	}
 `

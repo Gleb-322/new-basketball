@@ -13,6 +13,7 @@ import { RootState } from '../../../core/redux/store'
 import { useAppDispatch } from '../../../common/hooks/useAppDispatch'
 import { getTeamThunk, removeTeamThunk } from '../../../api/teams/teamThunks'
 import { selectTeamById } from '../teamSlice'
+import { device } from '../../../common/helpers/breakpoint'
 
 dayjs.extend(utc)
 
@@ -113,18 +114,18 @@ export const TeamDetail: FC = () => {
 							<Right>
 								<Name>{team.name}</Name>
 								<TextBlock>
-									<TextColumn>
+									<TextColumnYear>
 										<Key>Year of foundation</Key>
 										<Value>{team.year}</Value>
-									</TextColumn>
-									<TextColumn>
+									</TextColumnYear>
+									<TextColumnDivision>
 										<Key>Division</Key>
 										<Value>{team.division}</Value>
-									</TextColumn>
-									<TextColumn>
+									</TextColumnDivision>
+									<TextColumnConference>
 										<Key>Conference</Key>
 										<Value>{team.conference}</Value>
-									</TextColumn>
+									</TextColumnConference>
 								</TextBlock>
 							</Right>
 						</MainDetail>
@@ -142,7 +143,9 @@ export const TeamDetail: FC = () => {
 								<div>Player</div>
 							</PlayerHeaderLeft>
 							<PlayerHeaderRight>
-								<div>Height</div> <div>Weight</div> <div>Age</div>
+								<PlayerHeaderRightHeight>Height</PlayerHeaderRightHeight>{' '}
+								<PlayerHeaderRightWeight>Weight</PlayerHeaderRightWeight>{' '}
+								<PlayerHeaderRightAge>Age</PlayerHeaderRightAge>
 							</PlayerHeaderRight>
 						</PlayerHeader>
 
@@ -170,17 +173,17 @@ export const TeamDetail: FC = () => {
 													<NoImage />
 												)}
 												<PlayerNameAndPosition>
-													<div>{player.name}</div>
+													<PlayerName>{player.name}</PlayerName>
 													<PlayerPosition>{player.position}</PlayerPosition>
 												</PlayerNameAndPosition>
 											</PlayerInfo>
 										</PlayerLeft>
 										<PlayerRight>
-											<div>{player.height} cm</div>
-											<div>{player.weight} kg</div>
-											<div>
+											<PlayerRightHeight>{player.height} cm</PlayerRightHeight>
+											<PlayerRightWeight>{player.weight} kg</PlayerRightWeight>
+											<PlayerRightbBirthday>
 												{dayjs.utc().diff(dayjs.utc(player.birthday), 'year')}
-											</div>
+											</PlayerRightbBirthday>
 										</PlayerRight>
 									</Player>
 								))}
@@ -201,14 +204,15 @@ const Container = styled.div`
 
 const DetailBlock = styled.div`
 	border-radius: 10px;
-	background-image: ${({ theme }) => theme.colors.gradientTeamDetail};
+	background: ${({ theme }) => theme.colors.gradientTeamDetail};
 	width: 100%;
-	height: 480px;
+	@media ${device.tablet} {
+		border-radius: 0px;
+	}
 `
 
 const HeaderDetail = styled.header`
 	padding: 18px 24px;
-	height: 15%;
 	width: 100%;
 	border-top-right-radius: 10px;
 	border-top-left-radius: 10px;
@@ -217,6 +221,13 @@ const HeaderDetail = styled.header`
 	align-items: center;
 	background-color: ${({ theme }) => theme.colors.white};
 	border: solid 0.5px ${({ theme }) => theme.colors.lightGrey};
+	@media ${device.tablet} {
+		border-top-right-radius: 0px;
+		border-top-left-radius: 0px;
+		border-left: none;
+		border-right: none;
+		padding: 16px;
+	}
 `
 const HeaderText = styled.span`
 	font-family: 'Avenir Medium';
@@ -224,6 +235,10 @@ const HeaderText = styled.span`
 	font-size: 14px;
 	line-height: 24px;
 	color: ${({ theme }) => theme.colors.red};
+	@media ${device.tablet} {
+		font-size: 13px;
+		line-height: 18px;
+	}
 `
 const Slash = styled.span`
 	color: ${({ theme }) => theme.colors.lightGrey};
@@ -243,8 +258,11 @@ const ButtonDelete = styled.button`
 
 const MainDetail = styled.div`
 	display: flex;
-	height: 85%;
+	align-items: center;
 	width: 100%;
+	@media ${device.tablet} {
+		flex-direction: column;
+	}
 `
 
 const Left = styled.div`
@@ -253,15 +271,33 @@ const Left = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	@media ${device.laptop} {
+		width: 35%;
+	}
+	@media ${device.tablet} {
+		margin-top: 48px;
+		width: 100%;
+	}
 `
 const Img = styled.img`
 	width: 210px;
 	height: 210px;
+	@media ${device.tablet} {
+		width: 90px;
+		height: 90px;
+	}
 `
 
 const Right = styled.div`
 	width: 60%;
 	padding: 65px 0;
+	@media ${device.laptop} {
+		width: 65%;
+	}
+	@media ${device.tablet} {
+		padding: 48px 0;
+		width: 100%;
+	}
 `
 
 const Name = styled.span`
@@ -269,6 +305,12 @@ const Name = styled.span`
 	font-size: 36px;
 	font-weight: 900;
 	color: ${({ theme }) => theme.colors.white};
+	@media ${device.tablet} {
+		display: block;
+		text-align: center;
+		font-size: 17px;
+		line-height: 25px;
+	}
 `
 const TextBlock = styled.div`
 	margin-top: 40px;
@@ -277,16 +319,46 @@ const TextBlock = styled.div`
 	grid-template-rows: repeat(2, 1fr);
 	grid-auto-rows: 1fr;
 	row-gap: 54px;
+	@media ${device.tablet} {
+		margin-top: 48px;
+		grid-template-columns: 1fr;
+		justify-items: center;
+		row-gap: 32px;
+	}
 `
-const TextColumn = styled.div`
+const TextColumnConference = styled.div`
 	display: flex;
 	flex-direction: column;
+	@media ${device.tablet} {
+		order: 2;
+		align-items: center;
+	}
+`
+const TextColumnYear = styled.div`
+	display: flex;
+	flex-direction: column;
+	@media ${device.tablet} {
+		order: 1;
+		align-items: center;
+	}
+`
+const TextColumnDivision = styled.div`
+	display: flex;
+	flex-direction: column;
+	@media ${device.tablet} {
+		order: 3;
+		align-items: center;
+	}
 `
 const Key = styled.span`
 	font-family: 'Avenir Black';
 	font-size: 24px;
 	font-weight: 900;
 	color: ${({ theme }) => theme.colors.white};
+	@media ${device.tablet} {
+		font-size: 17px;
+		line-height: 25px;
+	}
 `
 
 const Value = styled.span`
@@ -294,14 +366,22 @@ const Value = styled.span`
 	font-size: 18px;
 	font-weight: 500;
 	color: ${({ theme }) => theme.colors.white};
+	@media ${device.tablet} {
+		font-size: 15px;
+		line-height: 24px;
+	}
 `
 
 const RosterBlock = styled.div`
 	margin-top: 24px;
 	background: ${({ theme }) => theme.colors.white};
 	border-radius: 10px;
-
 	border: solid 0.5px ${({ theme }) => theme.colors.lightGrey};
+	@media ${device.tablet} {
+		border-radius: 0px;
+		border-left: none;
+		border-right: none;
+	}
 `
 
 const RoosterTitle = styled.div`
@@ -310,6 +390,11 @@ const RoosterTitle = styled.div`
 	font-size: 18px;
 	font-weight: 500;
 	color: ${({ theme }) => theme.colors.grey};
+	@media ${device.tablet} {
+		padding: 16px;
+		font-size: 15px;
+		line-height: 24px;
+	}
 `
 const RosterTable = styled.div`
 	width: 100%;
@@ -326,15 +411,24 @@ const PlayerHeader = styled.header`
 	font-weight: 500;
 	line-height: 24px;
 	color: ${({ theme }) => theme.colors.grey};
+	@media ${device.tablet} {
+		padding: 5px 16px;
+	}
 `
 const PlayerHeaderLeft = styled.div`
 	width: 70%;
 	display: flex;
 	align-items: center;
+	@media ${device.tablet} {
+		width: 100%;
+	}
 `
 
 const MarginRight = styled.div`
 	margin-right: 30px;
+	@media ${device.tablet} {
+		margin-right: 20px;
+	}
 `
 
 const PlayerHeaderRight = styled.div`
@@ -342,6 +436,24 @@ const PlayerHeaderRight = styled.div`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	@media ${device.tablet} {
+		width: 0%;
+	}
+`
+const PlayerHeaderRightHeight = styled.div`
+	@media ${device.tablet} {
+		display: none;
+	}
+`
+const PlayerHeaderRightWeight = styled.div`
+	@media ${device.tablet} {
+		display: none;
+	}
+`
+const PlayerHeaderRightAge = styled.div`
+	@media ${device.tablet} {
+		display: none;
+	}
 `
 
 const Player = styled.div`
@@ -362,11 +474,17 @@ const Player = styled.div`
 		border-bottom-left-radius: 10px;
 		border-bottom-right-radius: 10px;
 	}
+	@media ${device.tablet} {
+		padding: 5px 16px;
+	}
 `
 const PlayerLeft = styled.div`
 	width: 70%;
 	display: flex;
 	align-items: center;
+	@media ${device.tablet} {
+		width: 100%;
+	}
 `
 const PlayerInfo = styled.div`
 	display: flex;
@@ -374,7 +492,21 @@ const PlayerInfo = styled.div`
 const PlayerNameAndPosition = styled.div`
 	display: flex;
 	flex-direction: column;
+	width: 100%;
+	@media ${device.mobileL} {
+		max-width: 150px;
+	}
 `
+
+const PlayerName = styled.div`
+	@media ${device.mobileL} {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		max-width: 100%;
+	}
+`
+
 const PlayerNumber = styled.div`
 	width: 25px;
 	display: flex;
@@ -409,6 +541,25 @@ const PlayerRight = styled.div`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	@media ${device.tablet} {
+		width: 0%;
+	}
+`
+
+const PlayerRightHeight = styled.div`
+	@media ${device.tablet} {
+		display: none;
+	}
+`
+const PlayerRightWeight = styled.div`
+	@media ${device.tablet} {
+		display: none;
+	}
+`
+const PlayerRightbBirthday = styled.div`
+	@media ${device.tablet} {
+		display: none;
+	}
 `
 
 const EmptyPlayers = styled.div`

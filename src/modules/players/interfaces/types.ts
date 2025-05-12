@@ -3,19 +3,6 @@ import * as yup from 'yup'
 import { ITeams } from '../../teams/interfaces/types'
 import { OnChangeValue } from 'react-select'
 
-// export interface IServerPlayers {
-// 	__v: number
-// 	_id: string
-// 	name: string
-// 	position: string
-// 	team: IServerTeams
-// 	height: string
-// 	weight: string
-// 	birthday: Date
-// 	number: string
-// 	playerImg: { data: number[] }
-// }
-
 export interface IPlayers {
 	__v: number
 	_id: string
@@ -27,7 +14,6 @@ export interface IPlayers {
 	birthday: Date
 	number: string
 	playerImg: string
-	file?: File
 }
 
 export interface IAddAndUpdatePlayerFormFields {
@@ -49,13 +35,12 @@ export interface IUpdatePlayer extends IAddAndUpdatePlayerFormFields {
 
 export interface IPlayerList {
 	players: IPlayers[]
-	avatars: { [key: string]: string }
+}
+export interface IPlayerCard {
+	player: IPlayers
 }
 
 export interface IPlayerHeader {
-	teamsOption: IOption[]
-	isTeamOptions: boolean
-	isLoading: boolean
 	search: string
 	onSearch: (value: string) => void
 	onMultiValue: (value: OnChangeValue<IOption, true>) => void
@@ -106,4 +91,18 @@ export interface IRemovePlayerResponse {
 	errorCode: string
 	success: boolean
 	message: string
+}
+
+export interface IPlayerSliceState {
+	error: string | null
+	status: 'idle' | 'loading' | 'success' | 'error'
+	keyword: string
+	pageCount: number
+	currentPage: number
+	selectedOption: IOption
+	lastCreatedPlayer: string | undefined
+	lastUpdatedPlayer: string | undefined
+	lastRemovedPlayer: string | undefined
+	teamsFilter: IOption[]
+	teamOptions: IOption[]
 }

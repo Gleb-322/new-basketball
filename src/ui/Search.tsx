@@ -65,7 +65,7 @@ export const SearchComponent: FC<ISearch> = ({
 
 const Container = styled.div`
 	width: 365px;
-	@media ${device.customForTeamHeader} {
+	@media ${device.custom510} {
 		width: 100%;
 	}
 `

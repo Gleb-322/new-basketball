@@ -2,23 +2,48 @@ import styled from 'styled-components'
 import { useNavigate } from 'react-router'
 import { SearchComponent } from '../../../ui/Search'
 import { ButtonComponent } from '../../../ui/Button'
-import { FC } from 'react'
+import { FC, useEffect } from 'react'
 import { IPlayerHeader } from '../interfaces/types'
 import { MultiSelectComponent } from '../../../ui/MultiSelect'
+import { useAppSelector } from '../../../common/hooks/useAppSelector'
+import { RootState } from '../../../core/redux/store'
+import { showToast } from '../../../ui/ToastrNotification'
+import { useAppDispatch } from '../../../common/hooks/useAppDispatch'
+import { getMultiSelectOptionsThunk } from '../../../api/players/playerThunks'
 
 export const PlayerHeader: FC<IPlayerHeader> = ({
 	search,
 	onSearch,
-	isTeamOptions,
-	teamsOption,
 	onMultiValue,
-	isLoading,
 }) => {
 	const navigate = useNavigate()
+	const dispatch = useAppDispatch()
+	const { teamOptions, status, error } = useAppSelector(
+		(state: RootState) => state.player
+	)
+	const { isLoading } = useAppSelector((state: RootState) => state.loader)
+
+	// get multi select options
+	useEffect(() => {
+		if (status !== 'loading') {
+			dispatch(getMultiSelectOptionsThunk())
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
+
+	// show error
+	useEffect(() => {
+		if (status === 'error' && error) {
+			showToast({
+				type: 'error',
+				message: error,
+			})
+		}
+	}, [status, error])
 
 	return (
 		<Header>
-			{/* <FilterBlock>
+			<FilterBlock>
 				<SearchComponent
 					type={'text'}
 					id={'searchTeam'}
@@ -27,9 +52,9 @@ export const PlayerHeader: FC<IPlayerHeader> = ({
 					search={search}
 				/>
 				<MultiSelectComponent
-					options={teamsOption}
-					isLoading={isLoading}
 					onMultiValue={onMultiValue}
+					options={teamOptions}
+					isLoading={isLoading}
 				/>
 			</FilterBlock>
 			<ButtonComponent
@@ -37,8 +62,8 @@ export const PlayerHeader: FC<IPlayerHeader> = ({
 				text={'Add +'}
 				onClick={() => navigate('/players/add')}
 				variant={'addPlayer'}
-				disabled={isTeamOptions ? true : false}
-			/> */}
+				disabled={teamOptions && teamOptions.length > 0 ? true : false}
+			/>
 		</Header>
 	)
 }

@@ -10,8 +10,6 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import {
 	IAddAndUpdatePlayerFormFields,
 	IAddAndUpdatePlayerLocationState,
-	IPlayers,
-	IUpdatePlayer,
 	playerPositionOption,
 } from '../interfaces/types'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -19,14 +17,16 @@ import { DatePickerComponent } from '../../../ui/DatePicker'
 import { SelectComponent } from '../../../ui/Select'
 import { IOption } from '../../../common/interfaces/types'
 import dayjs from 'dayjs'
-import { useAuth } from '../../../common/hooks/useAuth'
-import { ITeams } from '../../teams/interfaces/types'
-
-import { convertFileToList } from '../../../common/helpers/converterFileToFileList'
-import { convertFileToBase64 } from '../../../common/helpers/converterFileToBase64'
-import { getTeams } from '../../../api/teams/teamsService'
-import { createPlayers, patchPlayer } from '../../../api/players/playerService'
 import { showToast } from '../../../ui/ToastrNotification'
+import { useAppSelector } from '../../../common/hooks/useAppSelector'
+import { RootState } from '../../../core/redux/store'
+import { useAppDispatch } from '../../../common/hooks/useAppDispatch'
+import { resetPlayerState } from '../playerSlice'
+import { loadImageData } from '../../../common/helpers/transformImageData'
+import {
+	createPlayerThunk,
+	updatePlayerThunk,
+} from '../../../api/players/playerThunks'
 
 const schemaCreateAndUpdatePlayer = yup.object().shape(
 	{
@@ -92,316 +92,188 @@ const schemaCreateAndUpdatePlayer = yup.object().shape(
 )
 
 export const PlayerCreateAndUpdate: FC = () => {
-	// const { token } = useAuth()
-	// const navigate = useNavigate()
-	// const location = useLocation() as unknown as Location &
-	// 	IAddAndUpdatePlayerLocationState
+	const dispatch = useAppDispatch()
+	const navigate = useNavigate()
+	const location = useLocation() as unknown as Location &
+		IAddAndUpdatePlayerLocationState
 
-	// const [createData, setCreateData] = useState<
-	// 	IAddAndUpdatePlayerFormFields | undefined
-	// >(undefined)
-	// const [updateData, setUpdateData] = useState<IUpdatePlayer | undefined>(
-	// 	undefined
-	// )
-	// const [createPlayer, setCreatePlayer] = useState<boolean>(false)
-	// const [updatePlayer, setUpdatePlayer] = useState<boolean>(false)
-	// const [updateFormValues, setUpdateFormValues] = useState<
-	// 	IUpdatePlayer | undefined
-	// >(undefined)
+	const { token } = useAppSelector((state: RootState) => state.user)
+	const { status, error, lastCreatedPlayer, lastUpdatedPlayer, teamOptions } =
+		useAppSelector((state: RootState) => state.player)
 
-	// const [teamOption, setTeamOption] = useState<IOption[] | undefined | null>()
-	// const [isOptionsLoading, setIsOptionsLoading] = useState<boolean>(false)
-	// const [teams, setTeams] = useState<ITeams[] | []>([])
+	const { isLoading } = useAppSelector((state: RootState) => state.loader)
 
-	// const [previewImage, setPreviewImage] = useState<string | undefined>()
+	const [previewImage, setPreviewImage] = useState<string | undefined>()
 
-	// const {
-	// 	register,
-	// 	handleSubmit,
-	// 	reset,
-	// 	trigger,
-	// 	control,
-	// 	getValues,
-	// 	setValue,
-	// 	resetField,
-	// 	formState: { errors },
-	// } = useForm<IAddAndUpdatePlayerFormFields>({
-	// 	resolver: yupResolver<IAddAndUpdatePlayerFormFields>(
-	// 		schemaCreateAndUpdatePlayer
-	// 	),
-	// 	defaultValues: {
-	// 		playerImage: null,
-	// 	},
-	// 	mode: 'onTouched',
-	// })
+	const {
+		register,
+		handleSubmit,
+		reset,
+		trigger,
+		control,
+		getValues,
+		setValue,
+		formState: { errors },
+	} = useForm<IAddAndUpdatePlayerFormFields>({
+		resolver: yupResolver<IAddAndUpdatePlayerFormFields>(
+			schemaCreateAndUpdatePlayer
+		),
+		defaultValues: {
+			playerImage: null,
+		},
+		mode: 'onTouched',
+	})
 
-	// // get all teams for playerTeams
-	// // useEffect(() => {
-	// // 	setIsOptionsLoading(true)
+	// create or update player
+	useEffect(() => {
+		if (status === 'success' && lastCreatedPlayer) {
+			navigate('/players')
+			showToast({
+				type: 'success',
+				message: `Player: ${lastCreatedPlayer} successful created!`,
+			})
+		}
 
-	// // 	getTeams()
-	// // 		.then(result => {
-	// // 			console.log('get all teams', result)
-	// // 			if (result.success) {
-	// // 				if (result.message instanceof Object) {
-	// // 					const teamsCopy = JSON.parse(
-	// // 						JSON.stringify(result.message.teams)
-	// // 					) as IPlayers[]
-	// // 					const teamOptions = teamsCopy.map(team => ({
-	// // 						value: team.name,
-	// // 						label: team.name,
-	// // 					}))
-	// // 					setTeamOption(teamOptions)
-	// // 					setTeams(result.message.teams)
-	// // 				}
-	// // 			}
-	// // 			if (!result.success) {
-	// // 				if (typeof result.message === 'string') {
-	// // 					showToast({
-	// // 						type: 'error',
-	// // 						message: `${result.message}`,
-	// // 					})
-	// // 				}
-	// // 			}
-	// // 		})
-	// // 		.catch(error => {
-	// // 			console.log('error get teams', error)
-	// // 		})
-	// // 		.finally(() => setIsOptionsLoading(false))
-	// // }, [])
+		if (status === 'success' && lastUpdatedPlayer) {
+			navigate('/players')
+			showToast({
+				type: 'success',
+				message: `Player: ${lastUpdatedPlayer} successful updated!`,
+			})
+		}
 
-	// // create player
-	// useEffect(() => {
-	// 	if (!createPlayer && !createData) return
+		if (status === 'error' && error) {
+			showToast({
+				type: 'error',
+				message: `${error}`,
+			})
+		}
 
-	// 	if (createPlayer && createData) {
-	// 		const createPlayerFormData = new FormData()
-	// 		createPlayerFormData.append('playerName', createData.playerName)
-	// 		if (typeof createData.playerPosition === 'string') {
-	// 			createPlayerFormData.append('playerPosition', createData.playerPosition)
-	// 		}
-	// 		if (teams.length > 0) {
-	// 			const team = teams.filter(team => team.name === createData.playerTeam)
-	// 			createPlayerFormData.append('teamId', team[0]._id)
-	// 		}
-	// 		createPlayerFormData.append('playerHeight', createData.playerHeight)
-	// 		createPlayerFormData.append('playerWeight', createData.playerWeight)
-	// 		createPlayerFormData.append(
-	// 			'playerBirthday',
-	// 			createData.playerBirthday.toISOString()
-	// 		)
-	// 		if (createData.playerNumber) {
-	// 			createPlayerFormData.append('playerNumber', createData.playerNumber)
-	// 		}
-	// 		if (createData.playerImage && createData.playerImage.length > 0) {
-	// 			createPlayerFormData.append('playerImage', createData.playerImage[0])
-	// 		}
+		return () => {
+			dispatch(resetPlayerState())
+		}
+	}, [dispatch, error, lastCreatedPlayer, lastUpdatedPlayer, navigate, status])
 
-	// 		createPlayers(createPlayerFormData, token)
-	// 			.then(result => {
-	// 				console.log('player create res', result)
-	// 				if (result.success) {
-	// 					if (result.message instanceof Object) {
-	// 						navigate('/players')
-	// 						showToast({
-	// 							type: 'success',
-	// 							message: `Player with name: ${result.message.player.name} successful created!`,
-	// 						})
-	// 					}
-	// 				}
+	//  catch update player data from player detail for update player
+	useEffect(() => {
+		if (!location.state?.player) return
 
-	// 				if (!result.success) {
-	// 					if (typeof result.message === 'string') {
-	// 						showToast({
-	// 							type: 'error',
-	// 							message: `${result.message}`,
-	// 						})
-	// 					}
-	// 				}
-	// 			})
-	// 			.catch(error => {
-	// 				console.log('player create res error', error)
-	// 			})
-	// 	}
+		const {
+			name: playerName,
+			position,
+			height,
+			weight,
+			number,
+			birthday,
+			playerImg,
+			team: { name: teamName },
+		} = location.state?.player
 
-	// 	return () => {
-	// 		setCreatePlayer(false)
-	// 	}
-	// }, [createData, createPlayer, navigate, teams, token])
+		const loadImage = async () => {
+			const imageData = await loadImageData(playerImg)
 
-	// // catch one player data for update player
-	// useEffect(() => {
-	// 	if (!location.state?.player) return
+			setPreviewImage(imageData.previewImage)
 
-	// 	const locationState = location.state?.player
+			if (imageData.fileList) {
+				setValue('playerImage', imageData.fileList, { shouldValidate: true })
+			}
 
-	// 	// const file = convertBufferToFile(locationState)
-	// 	// const fileList = file ? convertFileToList([file]) : undefined
+			reset({
+				playerName,
+				playerPosition: position,
+				playerTeam: teamName,
+				playerHeight: height,
+				playerWeight: weight,
+				playerBirthday: birthday,
+				playerNumber: number,
+				playerImage: imageData.fileList,
+			})
+		}
 
-	// 	// convertFileToBase64(file)
-	// 	// 	.then(result => setPreviewImage(result))
-	// 	// 	.catch(error =>
-	// 	// 		showToast({
-	// 	// 			type: 'error',
-	// 	// 			message: `${error.message}`,
-	// 	// 		})
-	// 	// 	)
+		loadImage()
+	}, [location, reset, setValue])
 
-	// 	const data = {
-	// 		playerName: locationState.name,
-	// 		playerPosition: locationState.position,
-	// 		// playerTeam: locationState.team.name,
-	// 		playerHeight: locationState.height,
-	// 		playerWeight: locationState.weight,
-	// 		playerBirthday: locationState.birthday,
-	// 		playerNumber: locationState?.number,
-	// 		// playerImage: fileList,
-	// 		playerId: locationState._id,
-	// 		// oldTeamId: locationState.team._id,
-	// 	}
+	// submit form
+	const onSubmit: SubmitHandler<IAddAndUpdatePlayerFormFields> = (
+		body: IAddAndUpdatePlayerFormFields
+	): void => {
+		console.log('add player or update', body)
+		console.log('form value', getValues())
 
-	// 	setUpdateFormValues(data)
-	// }, [location])
+		const formData = new FormData()
+		//playerName
+		formData.append('playerName', body.playerName)
+		//playerPosition
+		if (typeof body.playerPosition === 'string') {
+			formData.append('playerPosition', body.playerPosition)
+		}
+		//playerHeight
+		formData.append('playerHeight', body.playerHeight)
+		//playerWeight
+		formData.append('playerWeight', body.playerWeight)
+		//playerBirthday
+		formData.append('playerBirthday', body.playerBirthday.toISOString())
 
-	// // set update data in form values
-	// useEffect(() => {
-	// 	if (!updateFormValues) return
-	// 	console.log(updateFormValues)
-	// 	if (updateFormValues) {
-	// 		reset(updateFormValues)
-	// 		setValue('playerImage', updateFormValues.playerImage || undefined)
-	// 	}
-	// }, [updateFormValues, reset, setValue])
+		if (location.state?.player) {
+			//playerId
+			if (location.state.player._id) {
+				formData.append('playerId', location.state.player._id)
+			}
+			// oldTeamId
+			if (location.state.player.team._id) {
+				formData.append('oldTeamId', location.state.player.team._id)
+				// newTeamId
+				const newTeam = teamOptions.find(team => team.value === body.playerTeam)
 
-	// // update player by updateData
-	// useEffect(() => {
-	// 	if (!updateData && !updatePlayer) return
+				if (
+					newTeam?.teamId &&
+					newTeam.teamId !== location.state.player.team._id
+				) {
+					formData.append('newTeamId', newTeam.teamId)
+				}
+			}
 
-	// 	if (updateData && updatePlayer) {
-	// 		const updatePlayerFormData = new FormData()
-	// 		//playerName
-	// 		updatePlayerFormData.append('playerName', updateData.playerName)
-	// 		//playerPosition
-	// 		if (typeof updateData.playerPosition === 'string') {
-	// 			updatePlayerFormData.append('playerPosition', updateData.playerPosition)
-	// 		}
-	// 		// oldTeamId
-	// 		if (updateFormValues?.oldTeamId) {
-	// 			updatePlayerFormData.append('oldTeamId', updateFormValues.oldTeamId)
-	// 		}
-	// 		// newTeamId
-	// 		if (teams.length > 0) {
-	// 			const team = teams.filter(team => team.name === updateData.playerTeam)
+			//playerNumber
+			if (body.playerNumber !== undefined) {
+				if (
+					body.playerNumber &&
+					location.state.player.number !== body.playerNumber
+				) {
+					formData.append('playerNumber', body.playerNumber)
+				} else if (!body.playerNumber && location.state.player.number) {
+					formData.append('removeNumber', 'true')
+				}
+			}
 
-	// 			if (updateFormValues?.oldTeamId !== team[0]._id)
-	// 				updatePlayerFormData.append('newTeamId', team[0]._id)
-	// 		}
+			//playerImage
+			if (body.playerImage && body.playerImage.length > 0) {
+				formData.append('playerImage', body.playerImage[0])
+			} else if (location.state.player.playerImg && !body.playerImage) {
+				formData.append('removeImage', 'true')
+			}
 
-	// 		//playerHeight
-
-	// 		updatePlayerFormData.append('playerHeight', updateData.playerHeight)
-	// 		//playerWeight
-	// 		updatePlayerFormData.append('playerWeight', updateData.playerWeight)
-
-	// 		//playerBirthday
-	// 		updatePlayerFormData.append(
-	// 			'playerBirthday',
-	// 			updateData.playerBirthday.toISOString()
-	// 		)
-	// 		//playerNumber
-
-	// 		if (updateData.playerNumber && updateFormValues?.playerNumber) {
-	// 			updatePlayerFormData.append('playerNumber', updateData.playerNumber)
-	// 		}
-
-	// 		if (updateFormValues?.playerNumber && !updateData.playerNumber) {
-	// 			updatePlayerFormData.append('removeNumber', 'true')
-	// 		}
-
-	// 		if (!updateFormValues?.playerNumber && updateData.playerNumber) {
-	// 			updatePlayerFormData.append('playerNumber', updateData.playerNumber)
-	// 		}
-
-	// 		//playerImage
-	// 		if (updateData.playerImage && updateFormValues?.playerImage) {
-	// 			if (updateData.playerImage && updateData.playerImage.length > 0) {
-	// 				updatePlayerFormData.append('playerImage', updateData.playerImage[0])
-	// 			}
-	// 		}
-
-	// 		if (updateFormValues?.playerImage && !updateData.playerImage) {
-	// 			updatePlayerFormData.append('removeImage', 'true')
-	// 		}
-
-	// 		if (!updateFormValues?.playerImage && updateData.playerImage) {
-	// 			if (updateData.playerImage && updateData.playerImage.length > 0) {
-	// 				updatePlayerFormData.append('playerImage', updateData.playerImage[0])
-	// 			}
-	// 		}
-
-	// 		//playerId
-	// 		if (updateFormValues?.playerId) {
-	// 			updatePlayerFormData.append('playerId', updateFormValues.playerId)
-	// 		}
-
-	// 		patchPlayer(updatePlayerFormData, token)
-	// 			.then(result => {
-	// 				console.log('res update player', result)
-	// 				if (result.success) {
-	// 					if (result.message instanceof Object) {
-	// 						navigate('/players')
-	// 						showToast({
-	// 							type: 'success',
-	// 							message: `Player with name: ${result.message.name} successful updated!`,
-	// 						})
-	// 					}
-	// 				}
-	// 				if (!result.success) {
-	// 					if (typeof result.message === 'string') {
-	// 						showToast({
-	// 							type: 'error',
-	// 							message: `${result.message}`,
-	// 						})
-	// 					}
-	// 				}
-	// 			})
-	// 			.catch(error => {
-	// 				console.log('error update player', error)
-	// 			})
-	// 	}
-	// 	return () => {
-	// 		setUpdatePlayer(false)
-	// 	}
-	// }, [
-	// 	updatePlayer,
-	// 	updateData,
-	// 	navigate,
-	// 	teams,
-	// 	token,
-	// 	updateFormValues?.oldTeamId,
-	// 	updateFormValues?.playerImage,
-	// 	updateFormValues?.playerId,
-	// 	updateFormValues?.playerNumber,
-	// ])
-
-	// const onSubmit: SubmitHandler<IAddAndUpdatePlayerFormFields> = (
-	// 	data: IAddAndUpdatePlayerFormFields
-	// ): void => {
-	// 	console.log('add player or update', data)
-	// 	console.log('form value', getValues())
-
-	// 	if (location.state?.player) {
-	// 		setUpdateData(data)
-	// 		setUpdatePlayer(true)
-	// 	} else {
-	// 		setCreateData(data)
-	// 		setCreatePlayer(true)
-	// 	}
-	// }
+			dispatch(updatePlayerThunk({ body: formData, token }))
+		} else {
+			// teamId
+			if (teamOptions.length > 0) {
+				const team = teamOptions.filter(team => team.value === body.playerTeam)
+				formData.append('teamId', team[0].teamId!)
+			}
+			//playerNumber
+			if (body.playerNumber) {
+				formData.append('playerNumber', body.playerNumber)
+			}
+			//playerImage
+			if (body.playerImage && body.playerImage.length > 0) {
+				formData.append('playerImage', body.playerImage[0])
+			}
+			dispatch(createPlayerThunk({ body: formData, token }))
+		}
+	}
 
 	return (
 		<Section>
-			{/* <Header>
+			<Header>
 				<LinkComponent text={'Players'} route={'/players'} /> <Slash>/</Slash>{' '}
 				{location.state?.player ? 'Update player' : 'Add new player'}
 			</Header>
@@ -413,7 +285,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 						name={'playerImage'}
 						id={'playerImage'}
 						defaultImage={previewImage}
-						resetFieldPlayerImage={resetField}
+						setPlayerImage={setValue}
 						triggerPlayerImage={trigger}
 						error={errors.playerImage?.message}
 					/>
@@ -466,9 +338,9 @@ export const PlayerCreateAndUpdate: FC = () => {
 									label={'Team'}
 									error={errors.playerTeam?.message}
 									variant={'player'}
-									options={teamOption ?? []}
+									options={teamOptions ?? []}
 									selected={
-										teamOption?.find(
+										teamOptions?.find(
 											(option: IOption) => option.value === value
 										) ?? null
 									}
@@ -476,7 +348,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 										onChange(val?.value ?? null)
 										trigger('playerTeam')
 									}}
-									isLoading={isOptionsLoading}
+									isLoading={isLoading}
 								/>
 							)}
 						/>
@@ -541,7 +413,7 @@ export const PlayerCreateAndUpdate: FC = () => {
 						</Buttons>
 					</InputsBlock>
 				</Right>
-			</MainForm> */}
+			</MainForm>
 		</Section>
 	)
 }
