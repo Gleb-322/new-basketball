@@ -25,18 +25,23 @@ import { resetPlayerState } from '../playerSlice'
 import { loadImageData } from '../../../common/helpers/transformImageData'
 import {
 	createPlayerThunk,
+	getMultiSelectOptionsThunk,
 	updatePlayerThunk,
 } from '../../../api/players/playerThunks'
+import { device } from '../../../common/helpers/breakpoint'
 
 const schemaCreateAndUpdatePlayer = yup.object().shape(
 	{
-		playerName: yup.string().required('Player Name is required!'),
+		playerName: yup
+			.string()
+			.required('Name is required!')
+			.matches(/^[A-Za-zА-Яа-яЁё\s-]+$/, 'Invalid Name!'),
 		playerPosition: yup
 			.string()
 			.nullable()
 			.test(
 				'required',
-				'Player Position is required!',
+				'Position is required!',
 				(option: string | undefined | null) => {
 					if (!option) return false
 					return true
@@ -47,7 +52,7 @@ const schemaCreateAndUpdatePlayer = yup.object().shape(
 			.nullable()
 			.test(
 				'required',
-				'Player Team is required!',
+				'Team is required!',
 				(option: string | undefined | null) => {
 					if (!option) return false
 					return true
@@ -55,19 +60,19 @@ const schemaCreateAndUpdatePlayer = yup.object().shape(
 			),
 		playerHeight: yup
 			.string()
-			.required('Player Height is required!')
-			.matches(/^\d{3}$/, 'Three digits required!'),
+			.required('Height is required!')
+			.matches(/^\d{3}$/, 'Three digits!'),
 		playerWeight: yup
 			.string()
-			.required('Player Weight is required!')
-			.matches(/^\d{2,3}$/, 'Two or Three digits required!'),
-		playerBirthday: yup.date().required('Player Birthday is required!'),
+			.required('Weight is required!')
+			.matches(/^\d{2,3}$/, 'Two or Three digits!'),
+		playerBirthday: yup.date().required('Birthday is required!'),
 		playerNumber: yup
 			.string()
 			.notRequired()
 			.when('playerNumber', {
 				is: (value: string) => value,
-				then: rule => rule.matches(/^\d{2}$/, 'Two digits required!'),
+				then: rule => rule.matches(/^\d{2}$/, 'Two digits!'),
 			}),
 		playerImage: yup
 			.mixed<FileList>()
@@ -123,6 +128,14 @@ export const PlayerCreateAndUpdate: FC = () => {
 		},
 		mode: 'onTouched',
 	})
+
+	// get multi select options
+	useEffect(() => {
+		if (status !== 'loading') {
+			dispatch(getMultiSelectOptionsThunk())
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
 
 	// create or update player
 	useEffect(() => {
@@ -419,10 +432,16 @@ export const PlayerCreateAndUpdate: FC = () => {
 }
 
 const Section = styled.section`
-	width: 100%;
 	background-color: ${({ theme }) => theme.colors.white};
 	border-radius: 10px;
 	padding: 24px 32px;
+	@media ${device.custom1140} {
+		padding: 24px 20px;
+	}
+	@media ${device.tablet} {
+		padding: 16px;
+		border-radius: 0px;
+	}
 `
 const Header = styled.header`
 	font-family: 'Avenir Medium';
@@ -430,27 +449,69 @@ const Header = styled.header`
 	font-size: 14px;
 	line-height: 24px;
 	color: ${({ theme }) => theme.colors.red};
+	@media ${device.tablet} {
+		font-size: 13px;
+		line-height: 18px;
+	}
 `
 const Slash = styled.span`
 	color: ${({ theme }) => theme.colors.lightGrey};
 `
 
 const MainForm = styled.form`
+	width: 70%;
 	display: flex;
+	justify-content: space-around;
 	margin: 48px 0;
+	@media ${device.desktop} {
+		width: 100%;
+	}
+	@media ${device.tablet} {
+		flex-direction: column;
+		align-items: center;
+		justify-content: space-between;
+	}
 `
 const Left = styled.div`
-	width: 50%;
 	display: flex;
 	justify-content: center;
-	align-items: start;
+	align-items: flex-start;
+	@media ${device.custom1140} {
+		width: 45%;
+	}
+	@media ${device.tablet} {
+		align-items: center;
+	}
+	@media ${device.mobileL} {
+		width: 100%;
+	}
 `
 
 const Right = styled.div`
-	width: 50%;
+	@media ${device.custom1140} {
+		width: 45%;
+	}
+	@media ${device.tablet} {
+		width: 75%;
+	}
+	@media ${device.custom620} {
+		width: 85%;
+	}
+	@media ${device.custom620} {
+		width: 95%;
+	}
+	@media ${device.mobileL} {
+		width: 100%;
+	}
 `
 const InputsBlock = styled.div`
 	width: 365px;
+	@media ${device.custom1140} {
+		width: 100%;
+	}
+	@media ${device.tablet} {
+		margin-top: 48px;
+	}
 `
 const FourInputs = styled.div`
 	width: 100%;

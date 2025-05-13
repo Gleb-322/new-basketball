@@ -3,11 +3,10 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
+import { ReactComponent as NoImageSVG } from '../../../assets/images/noImage.svg'
 import { FC, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { LinkComponent } from '../../../ui/Link'
-import { ReactComponent as NoImageSVG } from '../../../assets/images/noImage.svg'
-
 import { showToast } from '../../../ui/ToastrNotification'
 import { useAppSelector } from '../../../common/hooks/useAppSelector'
 import { RootState } from '../../../core/redux/store'
@@ -17,6 +16,7 @@ import {
 	removePlayerThunk,
 } from '../../../api/players/playerThunks'
 import { selectPlayerById } from '../playerSlice'
+import { device } from '../../../common/helpers/breakpoint'
 
 dayjs.extend(utc)
 
@@ -40,16 +40,6 @@ export const PlayerDetail: FC = () => {
 			dispatch(getPlayerThunk(params._id))
 		}
 	}, [dispatch, params._id])
-
-	// show error
-	useEffect(() => {
-		if (status === 'error' && error) {
-			showToast({
-				type: 'error',
-				message: error,
-			})
-		}
-	}, [status, error])
 
 	// delete player
 	useEffect(() => {
@@ -167,12 +157,13 @@ const DetailBlock = styled.div`
 	border-radius: 10px;
 	background-image: ${({ theme }) => theme.colors.gradientTeamDetail};
 	width: 100%;
-	height: 600px;
+	@media ${device.tablet} {
+		border-radius: 0px;
+	}
 `
 
 const HeaderDetail = styled.header`
 	padding: 18px 24px;
-	height: 12%;
 	width: 100%;
 	border-top-right-radius: 10px;
 	border-top-left-radius: 10px;
@@ -181,6 +172,13 @@ const HeaderDetail = styled.header`
 	align-items: center;
 	background-color: ${({ theme }) => theme.colors.white};
 	border: solid 0.5px ${({ theme }) => theme.colors.lightGrey};
+	@media ${device.tablet} {
+		border-top-right-radius: 0px;
+		border-top-left-radius: 0px;
+		border-left: none;
+		border-right: none;
+		padding: 16px;
+	}
 `
 const HeaderText = styled.span`
 	font-family: 'Avenir Medium';
@@ -188,6 +186,10 @@ const HeaderText = styled.span`
 	font-size: 14px;
 	line-height: 24px;
 	color: ${({ theme }) => theme.colors.red};
+	@media ${device.tablet} {
+		font-size: 13px;
+		line-height: 18px;
+	}
 `
 const Slash = styled.span`
 	color: ${({ theme }) => theme.colors.lightGrey};
@@ -207,29 +209,46 @@ const ButtonDelete = styled.button`
 
 const MainDetail = styled.div`
 	display: flex;
-	height: 88%;
+	justify-content: space-between;
 	width: 100%;
+	@media ${device.tablet} {
+		flex-direction: column;
+	}
 `
 
 const Left = styled.div`
-	width: 50%;
-	height: 100%;
+	width: 40%;
 	display: flex;
 	justify-content: center;
 	align-items: flex-end;
+	@media ${device.laptop} {
+		width: 35%;
+	}
+	@media ${device.tablet} {
+		margin-top: 48px;
+		width: 100%;
+	}
 `
 const Img = styled.img`
-	width: 530px;
+	width: 100%;
 	height: 460px;
+	border-bottom-left-radius: 10px;
 `
 const StyledNoImageSVG = styled(NoImageSVG)`
-	width: 530px;
+	width: 100%;
 	height: 460px;
 `
 
 const Right = styled.div`
-	width: 50%;
+	width: 55%;
 	padding: 65px 0;
+	@media ${device.laptop} {
+		width: 60%;
+	}
+	@media ${device.tablet} {
+		padding: 48px 0;
+		width: 100%;
+	}
 `
 
 const Name = styled.span`
@@ -237,6 +256,12 @@ const Name = styled.span`
 	font-size: 36px;
 	font-weight: 900;
 	color: ${({ theme }) => theme.colors.white};
+	@media ${device.tablet} {
+		display: block;
+		text-align: center;
+		font-size: 17px;
+		line-height: 25px;
+	}
 `
 const Number = styled.span`
 	color: ${({ theme }) => theme.colors.lightRed};
@@ -248,6 +273,12 @@ const TextBlock = styled.div`
 	grid-template-rows: repeat(2, 1fr);
 	grid-auto-rows: 1fr;
 	row-gap: 54px;
+	@media ${device.tablet} {
+		margin-top: 48px;
+		grid-template-columns: 1fr;
+		justify-items: center;
+		row-gap: 32px;
+	}
 `
 const TextColumn = styled.div`
 	display: flex;
@@ -258,6 +289,10 @@ const Key = styled.span`
 	font-size: 24px;
 	font-weight: 900;
 	color: ${({ theme }) => theme.colors.white};
+	@media ${device.tablet} {
+		font-size: 17px;
+		line-height: 25px;
+	}
 `
 
 const Value = styled.span`
@@ -265,4 +300,8 @@ const Value = styled.span`
 	font-size: 18px;
 	font-weight: 500;
 	color: ${({ theme }) => theme.colors.white};
+	@media ${device.tablet} {
+		font-size: 15px;
+		line-height: 24px;
+	}
 `

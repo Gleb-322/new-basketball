@@ -7,13 +7,14 @@ import Select, {
 } from 'react-select'
 import { IMultiSelect, IOption } from '../common/interfaces/types'
 import styled from 'styled-components'
+import { device } from '../common/helpers/breakpoint'
+import { ReactComponent as ClearSVG } from '../assets/icons/clear-multivalue.svg'
 
 // Кастомный ValueContainer
 const CustomValueContainer = (props: ValueContainerProps<IOption, true>) => {
 	const { getValue, children, selectProps } = props
 	const selected = getValue() || []
 	const maxToShow = 1
-
 	const displayValues = selected.slice(0, maxToShow)
 
 	const extraValues =
@@ -36,9 +37,22 @@ const CustomValueContainer = (props: ValueContainerProps<IOption, true>) => {
 		return (
 			<TagContainer key={option.value}>
 				<DisplayValues>{option.value}</DisplayValues>
-				<RemoveButton type={'button'} onClick={handleRemove}>
-					×
-				</RemoveButton>
+				{/* <RemoveButton type={'button'} onClick={handleRemove}>
+					<StyledClearSVG />
+				</RemoveButton> */}
+
+				<RemoveButtonWrapper>
+					<RemoveButton
+						type={'button'}
+						onClick={handleRemove}
+						onTouchEnd={e => {
+							e.preventDefault()
+							handleRemove()
+						}}
+					>
+						<StyledClearSVG />
+					</RemoveButton>
+				</RemoveButtonWrapper>
 			</TagContainer>
 		)
 	}
@@ -103,6 +117,13 @@ const StyledSelect = styled(Select<IOption, true>)`
 		width: 365px;
 		margin-left: 24px;
 		cursor: pointer;
+		@media ${device.custom1190} {
+			margin-left: 0px;
+			margin-top: 16px;
+		}
+		@media ${device.custom510} {
+			width: 100%;
+		}
 	}
 
 	.react-multiselect__control:hover {
@@ -188,11 +209,14 @@ const StyledSelect = styled(Select<IOption, true>)`
 const TagContainer = styled.div`
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	background-color: ${({ theme }) => theme.colors.red};
 	border-radius: 4px;
 	height: 24px;
 	padding: 0px 4px;
 	margin: 0;
+	max-width: 150px;
+	position: relative;
 `
 
 const DisplayValues = styled.div`
@@ -200,24 +224,42 @@ const DisplayValues = styled.div`
 	font-family: 'Avenir Book';
 	font-weight: 500;
 	font-size: 14px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: calc(100% - 20px);
 `
+
+const RemoveButtonWrapper = styled.div`
+	margin-left: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 24px;
+	position: relative;
+	z-index: 2;
+`
+
 const RemoveButton = styled.button`
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	color: ${({ theme }) => theme.colors.white};
-	font-family: 'Avenir Book';
-	font-weight: 500;
-	font-size: 14px;
-	cursor: pointer;
-	margin-left: 8px;
 	background-color: inherit;
 	outline: none;
 	border: none;
-	width: 13px;
-	height: 13px;
+	cursor: pointer;
+	width: 100%;
+	height: 100%;
+	touch-action: manipulation;
 `
-
+const StyledClearSVG = styled(ClearSVG)`
+	width: 16px;
+	height: 16px;
+	z-index: 2;
+	pointer-events: none;
+`
 const ExtraValues = styled.div`
 	border-radius: 4px;
 	height: 24px;

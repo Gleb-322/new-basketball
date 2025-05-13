@@ -111,7 +111,6 @@ const Footer = styled.footer`
 	@media ${device.laptop} {
 		margin-top: 20px;
 	}
-
 	@media ${device.tablet} {
 		margin-top: 0px;
 	}

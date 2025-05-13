@@ -82,7 +82,6 @@ export const PlayerDashboard: FC = () => {
 	}
 	// dispatch multi select value and set first page in paginate component
 	const handleMultiSelect = (option: OnChangeValue<IOption, true>) => {
-		console.log('handleMultiSelect', option)
 		dispatch(setTeamsFilter(option))
 		dispatch(setCurrentPage(0))
 	}
@@ -137,9 +136,12 @@ const Footer = styled.footer`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background-color: inherit;
+	background-color: ${({ theme }) => theme.colors.mostLightGrey};
 	color: ${({ theme }) => theme.colors.white};
 	margin-top: 32px;
+	@media ${device.laptop} {
+		margin-top: 20px;
+	}
 	@media ${device.tablet} {
 		margin-top: 0px;
 	}

@@ -35,11 +35,9 @@ const Header = styled.header`
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 32px;
-
 	@media ${device.tablet} {
 		margin-bottom: 16px;
 	}
-
 	@media ${device.custom510} {
 		display: grid;
 		grid-template-columns: 1fr;

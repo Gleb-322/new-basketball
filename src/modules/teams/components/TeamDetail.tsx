@@ -4,7 +4,6 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icons/delete.svg'
 import { ReactComponent as EditSVG } from '../../../assets/icons/create.svg'
 import { FC, useEffect } from 'react'
 import { LinkComponent } from '../../../ui/Link'
-
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { showToast } from '../../../ui/ToastrNotification'
@@ -37,16 +36,6 @@ export const TeamDetail: FC = () => {
 			dispatch(getTeamThunk(params._id))
 		}
 	}, [dispatch, params._id])
-
-	// show error
-	useEffect(() => {
-		if (status === 'error' && error) {
-			showToast({
-				type: 'error',
-				message: error,
-			})
-		}
-	}, [status, error])
 
 	// delete team
 	useEffect(() => {

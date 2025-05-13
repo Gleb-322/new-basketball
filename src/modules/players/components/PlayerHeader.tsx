@@ -10,6 +10,7 @@ import { RootState } from '../../../core/redux/store'
 import { showToast } from '../../../ui/ToastrNotification'
 import { useAppDispatch } from '../../../common/hooks/useAppDispatch'
 import { getMultiSelectOptionsThunk } from '../../../api/players/playerThunks'
+import { device } from '../../../common/helpers/breakpoint'
 
 export const PlayerHeader: FC<IPlayerHeader> = ({
 	search,
@@ -70,12 +71,25 @@ export const PlayerHeader: FC<IPlayerHeader> = ({
 
 const Header = styled.header`
 	width: 100%;
-	height: 40px;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	margin-bottom: 32px;
+	@media ${device.custom1190} {
+		margin-bottom: 16px;
+		align-items: flex-start;
+	}
+	@media ${device.custom510} {
+		display: grid;
+		grid-template-columns: 1fr;
+		grid-template-rows: 1fr;
+		gap: 16px;
+	}
 `
 
 const FilterBlock = styled.div`
 	display: flex;
+	@media ${device.custom1190} {
+		flex-direction: column;
+	}
 `

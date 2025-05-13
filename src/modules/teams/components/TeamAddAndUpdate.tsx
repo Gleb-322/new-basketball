@@ -11,7 +11,6 @@ import {
 import { FC, useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { ImgUpload } from '../../../ui/ImageUpload'
-
 import { showToast } from '../../../ui/ToastrNotification'
 import { useAppSelector } from '../../../common/hooks/useAppSelector'
 import { RootState } from '../../../core/redux/store'
@@ -23,16 +22,25 @@ import { loadImageData } from '../../../common/helpers/transformImageData'
 import { device } from '../../../common/helpers/breakpoint'
 
 const schemaCreateAndUpdateTeam = yup.object().shape({
-	teamName: yup.string().required('Team Name is required!'),
-	teamDivision: yup.string().required('Team Division is required!'),
-	teamConference: yup.string().required('Team Conference is required!'),
+	teamName: yup
+		.string()
+		.required('Name is required!')
+		.matches(/^[A-Za-zА-Яа-яЁё\s-]+$/, 'Invalid Name!'),
+	teamDivision: yup
+		.string()
+		.required('Division is required!')
+		.matches(/^[A-Za-zА-Яа-яЁё\s-]+$/, 'Invalid Division!'),
+	teamConference: yup
+		.string()
+		.required('Conference is required!')
+		.matches(/^[A-Za-zА-Яа-яЁё\s-]+$/, 'Invalid Conference!'),
 	teamYear: yup
 		.string()
 		.required('Team Year of foundation is required!')
-		.matches(/^\d{4}$/, 'Four digits required!'),
+		.matches(/^\d{4}$/, 'Four digits!'),
 	teamImage: yup
 		.mixed<FileList>()
-		.test('required', 'Team Logo is required!', value => {
+		.test('required', 'Logo is required!', value => {
 			// Если файла нет — ошибка
 			return value instanceof FileList && value.length > 0
 		})
@@ -287,8 +295,8 @@ const Slash = styled.span`
 `
 
 const MainForm = styled.form`
-	display: flex;
 	width: 70%;
+	display: flex;
 	justify-content: space-around;
 	margin: 48px 0;
 	@media ${device.desktop} {
@@ -303,12 +311,11 @@ const MainForm = styled.form`
 const Left = styled.div`
 	display: flex;
 	justify-content: center;
-	align-items: start;
+	align-items: flex-start;
 	@media ${device.custom1140} {
 		width: 45%;
 	}
 	@media ${device.tablet} {
-		/* width: 35%; */
 		align-items: center;
 	}
 	@media ${device.mobileL} {

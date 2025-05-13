@@ -57,7 +57,6 @@ export const getTeamsThunk = createAsyncThunk(
 			if (response.success && response.message instanceof Object) {
 				return {
 					teams: response.message.teams,
-					// teams: [],
 					countTeams: response.message.countTeams,
 				}
 			} else {

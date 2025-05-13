@@ -194,8 +194,6 @@ exports.getPlayer = async (req, res) => {
 
 // update player by id
 exports.updatePlayer = async (req, res) => {
-	console.log('file', req.file)
-	console.log('body', req.body)
 	try {
 		const player = await Player.findById(req.body.playerId)
 		if (!player) {
@@ -274,8 +272,6 @@ exports.updatePlayer = async (req, res) => {
 		if (!req.body.newTeamId) {
 			updateBody.team = req.body.oldTeamId
 
-			console.log('dont change team', updateBody)
-
 			const updatePlayer = await Player.findOneAndUpdate(
 				{
 					_id: req.body.playerId,
@@ -283,8 +279,6 @@ exports.updatePlayer = async (req, res) => {
 				updateBody,
 				{ upsert: true, returnDocument: 'after' }
 			).populate('team')
-
-			console.log('updatePlayer', updatePlayer)
 
 			if (!updatePlayer) {
 				return res.status(200).send({
@@ -309,8 +303,6 @@ exports.updatePlayer = async (req, res) => {
 
 			updateBody.team = req.body.newTeamId
 
-			console.log('change team', updateBody)
-
 			const updatePlayer = await Player.findOneAndUpdate(
 				{
 					_id: req.body.playerId,
@@ -319,7 +311,6 @@ exports.updatePlayer = async (req, res) => {
 				{ upsert: true, returnDocument: 'after' }
 			).populate('team')
 
-			console.log('updatePlayer', updatePlayer)
 			if (!updatePlayer) {
 				return res.status(200).send({
 					errorCode: '200',

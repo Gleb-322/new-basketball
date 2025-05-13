@@ -21,8 +21,6 @@ const EmptyTeams = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	@media ${device.tablet} {
-	}
 `
 const EmptyBlock = styled.div`
 	width: 550px;

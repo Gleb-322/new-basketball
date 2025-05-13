@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import Select, { SingleValue } from 'react-select'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { IOption, ISelect } from '../common/interfaces/types'
 import { device } from '../common/helpers/breakpoint'
 
@@ -76,6 +76,13 @@ const Label = styled.label`
 	color: ${({ theme }) => theme.colors.grey};
 `
 
+const paginationMobileStyles = css`
+	min-height: 28px;
+	height: 28px;
+	align-items: flex-start;
+	width: 60px;
+`
+
 const StyledSelect = styled(Select<IOption>)<{
 	$variant: 'pagination' | 'player'
 }>`
@@ -98,11 +105,14 @@ const StyledSelect = styled(Select<IOption>)<{
 		width: ${({ $variant }) => ($variant === 'player' ? '100%' : '88px')};
 		cursor: pointer;
 		@media ${device.custom510} {
-			min-height: 28px;
-			height: 28px;
-			align-items: flex-start;
-			width: 60px;
+			${({ $variant }) => $variant === 'pagination' && paginationMobileStyles}
 		}
+	}
+
+	.react-select__loading-indicator {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.react-select__control:hover {

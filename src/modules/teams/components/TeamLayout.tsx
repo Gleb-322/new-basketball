@@ -23,7 +23,6 @@ const Section = styled.section<{
 	flex-direction: column;
 	justify-content: space-between;
 	background-color: ${({ theme }) => theme.colors.mostLightGrey};
-
 	@media ${device.laptop} {
 		width: 100vw;
 		min-height: calc(100vh - 80px);
