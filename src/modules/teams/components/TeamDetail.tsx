@@ -11,7 +11,7 @@ import { useAppSelector } from '../../../common/hooks/useAppSelector'
 import { RootState } from '../../../core/redux/store'
 import { useAppDispatch } from '../../../common/hooks/useAppDispatch'
 import { getTeamThunk, removeTeamThunk } from '../../../api/teams/teamThunks'
-import { selectTeamById } from '../teamSlice'
+import { resetTeamState, selectTeamById } from '../teamSlice'
 import { device } from '../../../common/helpers/breakpoint'
 
 dayjs.extend(utc)
@@ -53,7 +53,11 @@ export const TeamDetail: FC = () => {
 				message: `${error}`,
 			})
 		}
-	}, [status, error, navigate, lastRemovedTeam])
+
+		return () => {
+			dispatch(resetTeamState())
+		}
+	}, [status, error, navigate, lastRemovedTeam, dispatch])
 
 	return (
 		<Container>
@@ -66,7 +70,7 @@ export const TeamDetail: FC = () => {
 								<Slash>/</Slash> {team.name}
 							</HeaderText>
 
-							<div>
+							<HeaderBtns>
 								<ButtonEdit
 									type="button"
 									onClick={() => navigate('/teams/add', { state: { team } })}
@@ -86,7 +90,7 @@ export const TeamDetail: FC = () => {
 								>
 									<DeleteSVG />
 								</ButtonDelete>
-							</div>
+							</HeaderBtns>
 						</HeaderDetail>
 
 						<MainDetail>
@@ -197,11 +201,13 @@ const DetailBlock = styled.div`
 	width: 100%;
 	@media ${device.tablet} {
 		border-radius: 0px;
+		background: ${({ theme }) => theme.colors.gradientTeamDetailTablet};
 	}
 `
 
 const HeaderDetail = styled.header`
 	padding: 18px 24px;
+	height: 64px;
 	width: 100%;
 	border-top-right-radius: 10px;
 	border-top-left-radius: 10px;
@@ -224,13 +230,24 @@ const HeaderText = styled.span`
 	font-size: 14px;
 	line-height: 24px;
 	color: ${({ theme }) => theme.colors.red};
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: calc(100% - 90px);
 	@media ${device.tablet} {
 		font-size: 13px;
 		line-height: 18px;
+		max-width: calc(100% - 70px);
 	}
 `
 const Slash = styled.span`
 	color: ${({ theme }) => theme.colors.lightGrey};
+`
+
+const HeaderBtns = styled.div`
+	display: flex;
+	min-width: 70px;
+	justify-content: flex-end;
 `
 
 const ButtonEdit = styled.button`
@@ -271,6 +288,8 @@ const Left = styled.div`
 const Img = styled.img`
 	width: 210px;
 	height: 210px;
+	object-fit: cover;
+	object-position: center center;
 	@media ${device.tablet} {
 		width: 90px;
 		height: 90px;
@@ -477,11 +496,13 @@ const PlayerLeft = styled.div`
 `
 const PlayerInfo = styled.div`
 	display: flex;
+	align-items: center;
 `
 const PlayerNameAndPosition = styled.div`
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+	margin-left: 16px;
 	@media ${device.mobileL} {
 		max-width: 150px;
 	}
@@ -505,14 +526,21 @@ const PlayerNumber = styled.div`
 const PlayerImg = styled.img`
 	width: 40px;
 	height: 40px;
+	min-width: 40px;
+	min-height: 40px;
 	border-radius: 100%;
-	margin-right: 16px;
+	object-fit: contain;
+	object-position: top center;
 `
 const NoImage = styled.div`
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	width: 40px;
 	height: 40px;
+	min-width: 40px;
+	min-height: 40px;
 	border-radius: 100%;
-	margin-right: 16px;
 	background-color: ${({ theme }) => theme.colors.mostLightGrey};
 `
 

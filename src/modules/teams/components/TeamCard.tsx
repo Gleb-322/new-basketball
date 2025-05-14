@@ -64,6 +64,8 @@ const TextBlock = styled.div`
 const Img = styled.img`
 	width: 200px;
 	height: 200px;
+	object-fit: contain;
+	object-position: center center;
 	@media ${device.desktop} {
 		width: 150px;
 		height: 150px;
@@ -119,5 +121,8 @@ const NoImg = styled.div`
 	color: ${({ theme }) => theme.colors.white};
 	@media ${device.desktop} {
 		font-size: 18px;
+	}
+	@media ${device.tablet} {
+		font-size: 15px;
 	}
 `

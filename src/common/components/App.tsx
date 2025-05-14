@@ -27,8 +27,13 @@ const theme = {
 		darkGrey: '#303030',
 		grey: '#707070',
 		gradientCard: 'linear-gradient(118deg, #303030 2%, #707070 82%)',
-		gradientCardTablet: 'linear-gradient(121deg, #303030 2%, #707070 79%)',
+		gradientTeamCardTablet: 'linear-gradient(121deg, #303030 2%, #707070 79%)',
 		gradientTeamDetail: ' linear-gradient(109deg, #707070 0%, #393939 100%);',
+		gradientTeamDetailTablet:
+			' linear-gradient(325deg, #393939 100%, #707070 2%);',
+		gradientPlayerDetail: ' linear-gradient(115deg, #707070 0%, #393939 100%);',
+		gradientPlayerDetailTablet:
+			' linear-gradient(333deg, #393939 100%, #707070 2%);',
 		lightGrey: '#9c9c9c',
 		lightestGrey: '#d1d1d1',
 		mostLightGrey: '#f6f6f6',

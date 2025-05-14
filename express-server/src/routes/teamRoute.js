@@ -11,7 +11,6 @@ const upload = multer({
 		fileSize,
 	},
 	fileFilter(req, file, cb) {
-		console.log(file.originalname)
 		if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
 			cb(undefined, false)
 			req.errorImage = 'The file is not an image!'

@@ -28,7 +28,7 @@ export const SelectComponent: FC<ISelect> = ({
 		<>
 			{variant === 'player' ? (
 				<Container>
-					<Label htmlFor={id}>{label}</Label>
+					<Label htmlFor={`react-select-${id}`}>{label}</Label>
 					<StyledSelect
 						ref={inputRef}
 						name={name}
@@ -37,6 +37,7 @@ export const SelectComponent: FC<ISelect> = ({
 						isClearable={true}
 						isSearchable={false}
 						value={selected}
+						inputId={`react-select-${id}`}
 						onChange={handleChangeSelect}
 						menuPlacement={'bottom'}
 						classNamePrefix="react-select"

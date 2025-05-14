@@ -31,7 +31,7 @@ const EmptyBlock = styled.div`
 	align-items: center;
 	background-color: ${({ theme }) => theme.colors.white};
 	border-radius: 15px;
-	@media ${device.laptop} {
+	@media ${device.custom1190} {
 		height: 450px;
 	}
 	@media ${device.tablet} {
@@ -44,8 +44,8 @@ const StyledEmptySearchPlayerSVG = styled(EmptySearchPlayerSVG)`
 	width: 320px;
 	height: 320px;
 	@media ${device.tablet} {
-		/* width: 340px;
-		height: 225px; */
+		width: 225px;
+		height: 225px;
 	}
 `
 const EmptyText = styled.div`

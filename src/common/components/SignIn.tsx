@@ -58,7 +58,6 @@ export const SignIn: FC = () => {
 	const onSubmit: SubmitHandler<ISigninFormFields> = (
 		payload: ISigninFormFields
 	): void => {
-		console.log('Sign in', payload)
 		dispatch(loginUserThunk(payload))
 	}
 

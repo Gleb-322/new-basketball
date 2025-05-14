@@ -55,7 +55,6 @@ const playerSlice = createSlice({
 			state.selectedOption = action.payload
 		},
 		setTeamsFilter: (state, action: PayloadAction<readonly IOption[]>) => {
-			console.log('setTeamsFilter', action)
 			state.teamsFilter = [...action.payload]
 		},
 	},

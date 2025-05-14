@@ -70,7 +70,6 @@ const teamSlice = createSlice({
 			state.status = 'loading'
 		})
 		builder.addCase(getTeamsThunk.fulfilled, (state, action) => {
-			console.log('getTeamsThunk.fulfilled', action)
 			teamsAdapter.setAll(state, action.payload.teams)
 			state.pageCount = Math.ceil(
 				action.payload.countTeams / parseInt(state.selectedOption.value)

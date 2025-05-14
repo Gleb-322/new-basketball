@@ -21,9 +21,6 @@ export const baseRequest = async <T>(
 			  }
 			: {}
 
-	console.log('baseData', data)
-	console.log('token', token)
-
 	try {
 		const response = await fetch(url, {
 			...data,

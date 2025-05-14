@@ -15,7 +15,7 @@ import {
 	getPlayerThunk,
 	removePlayerThunk,
 } from '../../../api/players/playerThunks'
-import { selectPlayerById } from '../playerSlice'
+import { resetPlayerState, selectPlayerById } from '../playerSlice'
 import { device } from '../../../common/helpers/breakpoint'
 
 dayjs.extend(utc)
@@ -57,7 +57,11 @@ export const PlayerDetail: FC = () => {
 				message: `${error}`,
 			})
 		}
-	}, [status, error, navigate, lastRemovedPlayer])
+
+		return () => {
+			dispatch(resetPlayerState())
+		}
+	}, [status, error, navigate, lastRemovedPlayer, dispatch])
 
 	const removePlayer = () => {
 		if (player?._id && player?.team._id) {
@@ -85,7 +89,7 @@ export const PlayerDetail: FC = () => {
 							<Slash>/</Slash> {player.name}
 						</HeaderText>
 
-						<div>
+						<HeaderBtns>
 							<ButtonEdit
 								type="button"
 								onClick={() => navigate('/players/add', { state: { player } })}
@@ -95,7 +99,7 @@ export const PlayerDetail: FC = () => {
 							<ButtonDelete type="button" onClick={removePlayer}>
 								<DeleteSVG />
 							</ButtonDelete>
-						</div>
+						</HeaderBtns>
 					</HeaderDetail>
 
 					<MainDetail>
@@ -155,15 +159,17 @@ const Container = styled.div`
 `
 const DetailBlock = styled.div`
 	border-radius: 10px;
-	background-image: ${({ theme }) => theme.colors.gradientTeamDetail};
+	background: ${({ theme }) => theme.colors.gradientPlayerDetail};
 	width: 100%;
 	@media ${device.tablet} {
 		border-radius: 0px;
+		background: ${({ theme }) => theme.colors.gradientPlayerDetailTablet};
 	}
 `
 
 const HeaderDetail = styled.header`
 	padding: 18px 24px;
+	height: 64px;
 	width: 100%;
 	border-top-right-radius: 10px;
 	border-top-left-radius: 10px;
@@ -180,19 +186,30 @@ const HeaderDetail = styled.header`
 		padding: 16px;
 	}
 `
-const HeaderText = styled.span`
+const HeaderText = styled.div`
 	font-family: 'Avenir Medium';
 	font-weight: 500;
 	font-size: 14px;
 	line-height: 24px;
 	color: ${({ theme }) => theme.colors.red};
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: calc(100% - 90px);
 	@media ${device.tablet} {
 		font-size: 13px;
 		line-height: 18px;
+		max-width: calc(100% - 70px);
 	}
 `
 const Slash = styled.span`
 	color: ${({ theme }) => theme.colors.lightGrey};
+`
+
+const HeaderBtns = styled.div`
+	display: flex;
+	min-width: 70px;
+	justify-content: flex-end;
 `
 
 const ButtonEdit = styled.button`
@@ -227,16 +244,35 @@ const Left = styled.div`
 	@media ${device.tablet} {
 		margin-top: 48px;
 		width: 100%;
+		height: 112px;
+		overflow: hidden;
 	}
 `
 const Img = styled.img`
 	width: 100%;
 	height: 460px;
 	border-bottom-left-radius: 10px;
+	object-fit: contain;
+	object-position: center center;
+	@media ${device.custom1640} {
+		object-fit: cover;
+	}
+	@media ${device.tablet} {
+		width: 143px;
+		height: 100%;
+		border-radius: 0;
+		object-position: top center;
+	}
 `
 const StyledNoImageSVG = styled(NoImageSVG)`
 	width: 100%;
-	height: 460px;
+	height: 100%;
+	border-bottom-left-radius: 10px;
+	@media ${device.tablet} {
+		width: 143px;
+		height: 100%;
+		border-radius: 0;
+	}
 `
 
 const Right = styled.div`
@@ -264,6 +300,7 @@ const Name = styled.span`
 	}
 `
 const Number = styled.span`
+	margin-left: 5px;
 	color: ${({ theme }) => theme.colors.lightRed};
 `
 const TextBlock = styled.div`
@@ -283,6 +320,9 @@ const TextBlock = styled.div`
 const TextColumn = styled.div`
 	display: flex;
 	flex-direction: column;
+	@media ${device.tablet} {
+		align-items: center;
+	}
 `
 const Key = styled.span`
 	font-family: 'Avenir Black';

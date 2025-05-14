@@ -17,7 +17,6 @@ export const loginUserThunk = createAsyncThunk(
 		try {
 			dispatch(showLoader())
 			const response = await loginUser(JSON.stringify(payload))
-			console.log('loginUserThunk', response)
 			if (response.success && response.message instanceof Object) {
 				setAuthCookie(response.message.token)
 				return response.message

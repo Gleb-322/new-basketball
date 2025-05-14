@@ -155,8 +155,6 @@ export const TeamCreateAndUpdate: FC = () => {
 	const onSubmit: SubmitHandler<IAddAndUpdateTeamFormFields> = (
 		body: IAddAndUpdateTeamFormFields
 	): void => {
-		console.log('add team or update', body)
-
 		const formData = new FormData()
 		// teamName
 		formData.append('teamName', body.teamName)

@@ -9,6 +9,7 @@ const screenSize = {
 	custom1140: '1140px',
 	custom1190: '1190px',
 	laptopL: '1440px',
+	custom1640: '1640px',
 	desktop: '2560px',
 }
 
@@ -23,5 +24,6 @@ export const device = {
 	tablet: `(max-width: ${screenSize.tablet})`,
 	laptop: `(max-width: ${screenSize.laptop})`,
 	laptopL: `(max-width: ${screenSize.laptopL})`,
+	custom1640: `(max-width: ${screenSize.custom1640})`,
 	desktop: `(max-width: ${screenSize.desktop})`,
 }

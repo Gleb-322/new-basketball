@@ -72,7 +72,6 @@ export const SignUp: FC = () => {
 	const onSubmit: SubmitHandler<ISignupFormFields> = (
 		payload: ISignupFormFields
 	) => {
-		console.log('Sign up', payload)
 		dispatch(createUserThunk(payload))
 	}
 

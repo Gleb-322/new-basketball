@@ -116,7 +116,6 @@ export const PlayerCreateAndUpdate: FC = () => {
 		reset,
 		trigger,
 		control,
-		getValues,
 		setValue,
 		formState: { errors },
 	} = useForm<IAddAndUpdatePlayerFormFields>({
@@ -210,9 +209,6 @@ export const PlayerCreateAndUpdate: FC = () => {
 	const onSubmit: SubmitHandler<IAddAndUpdatePlayerFormFields> = (
 		body: IAddAndUpdatePlayerFormFields
 	): void => {
-		console.log('add player or update', body)
-		console.log('form value', getValues())
-
 		const formData = new FormData()
 		//playerName
 		formData.append('playerName', body.playerName)
