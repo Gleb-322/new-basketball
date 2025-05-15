@@ -37,10 +37,6 @@ const CustomValueContainer = (props: ValueContainerProps<IOption, true>) => {
 		return (
 			<TagContainer key={option.value}>
 				<DisplayValues>{option.value}</DisplayValues>
-				{/* <RemoveButton type={'button'} onClick={handleRemove}>
-					<StyledClearSVG />
-				</RemoveButton> */}
-
 				<RemoveButtonWrapper>
 					<RemoveButton
 						type={'button'}

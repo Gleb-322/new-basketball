@@ -61,7 +61,7 @@ export const baseRequest = async <T>(
 			} as CustomError
 		}
 
-		return (await response.json()) as T
+		return await response.json()
 	} catch (error: any) {
 		// Проверяем, если это наша кастомная ошибка - просто пробрасываем
 		if (error.isCustomError) {

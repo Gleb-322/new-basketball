@@ -165,7 +165,6 @@ export interface ILogoutUserResponse {
 	message: string
 }
 
-// Пользовательский тип ошибки для удобной передачи в компоненты
 export type CustomError = {
 	isCustomError: true
 	status: number
